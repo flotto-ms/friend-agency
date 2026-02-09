@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+  "name": "Minesweeper - Friend Quest Agent",
+  "version": "1.0.0",
+  "description": "Provides an agent for managing friend quests",
+  "content_scripts": [
+    {
+      "matches": ["https://minesweeper.online/*"],
+      "css": ["style.css"],
+      "js": ["background.js"]
+    }
+  ]
+}
