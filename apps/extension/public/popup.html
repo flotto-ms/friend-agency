@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FQA Client Info</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 10px 0 30px;
+      width: 200px;
+      text-align: center;
+      position: relative;
+      box-sizing: border-box;
+      display: flex;
+      flex-wrap: wrap;
+      background-color: white;
+      color: black;
+    }
+
+    #header, #list, #footer {
+      width: 100%;
+    }
+
+    .aa {
+      overflow-y: auto;
+      max-height: 340px;
+      scrollbar-gutter: stable;
+      font-size: 12px;
+    }
+
+    .links, .bottom-links {
+      margin: 0;
+      font-size: 12px;
+      position: absolute;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      padding: 5px 0;
+      border-color: #ccc;
+      border-style: solid;
+    }
+
+    .links {
+      top: 0;
+      border-width: 0 0 1px 0;
+    }
+
+    .bottom-links {
+      bottom: 0;
+      border-width: 1px 0 0 0;
+    }
+
+    .links a, .bottom-links a,
+    #clients-list a, #contractors-list a {
+      text-decoration: none;
+      color: blue;
+      margin: 0 5px;
+      transition: color 0.2s ease;
+    }
+
+    .links a:hover, .bottom-links a:hover,
+    #clients-list a:hover, #contractors-list a:hover {
+      text-decoration: underline;
+    }
+
+    h3 {
+      margin: 25px 0 5px;
+      font-size: 14px;
+      text-align: left;
+      padding: 0px 0px 0px 10px;
+    }
+
+    p {
+      margin: 5px 0 15px;
+      font-size: 12px;
+      text-align: left;
+      padding: 0px 0px 0px 10px;
+    }
+
+    #clients-list, #contractors-list {
+      display: none;
+      margin-top: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    #contractors-list li, #clients-list li {
+      margin: 5px 0;
+    }
+
+    /* Spinner styles */
+    #loading-spinner {
+      display: none;
+      margin: 30px auto 0;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #181A1B;
+        color: #e0b654;
+      }
+
+      h3 {
+        color: #e0b654;
+      }
+
+      #notices {
+        color: #d3c4a1;
+      }
+
+      .links, .bottom-links {
+        background-color: #171717;
+        border-color: #333;
+      }
+
+      .links a, .bottom-links a,
+      #clients-list a, #contractors-list a {
+        color: #3399ff;
+      }
+
+      button {
+        background-color: #333;
+        color: #e0b654;
+      }
+
+      button:hover {
+        background-color: #444;
+      }
+    }
+
+    @media (prefers-color-scheme: light) {
+      body {
+        background-color: white;
+        color: black;
+      }
+
+      .links, .bottom-links {
+        background-color: #f2f1f1;
+        border-color: #ccc;
+      }
+
+      .links a, .bottom-links a,
+      #clients-list a, #contractors-list a {
+        color: blue;
+      }
+
+      button {
+        background-color: #e0e0e0;
+        color: #000;
+      }
+
+      button:hover {
+        background-color: #d0d0d0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <div class="links">
+      <a href="https://docs.google.com/spreadsheets/d/1zWiaS_mP5DaCSkKlT6xAPQdXSX5rTJypVHw81sNdYnM" target="_blank">QSL</a>|<a href="https://forms.gle/sYfFgreBMMiojj4F8" target="_blank">L20E+</a>|<a href="https://docs.google.com/spreadsheets/d/1ye8tt1IHbJK-0PoYvsPamJnIJeJi4GPDs5vmntx1aUM/edit?gid=413217764#gid=413217764" target="_blank">LB</a>|<a href="https://docs.google.com/spreadsheets/d/1YrRf8ZRu4tYpuYD2Eogte-iztjkXCtyRck7zvmCkcDE/edit?gid=316441242#gid=316441242" target="_blank">VIPA</a>|<a href="https://docs.google.com/spreadsheets/d/137Ynbk_cIsUTRq142LCf1fIO6vAE6bHiS_0aCvin5uI/edit?gid=0#gid=0&range=F6" target="_blank">CNF</a>
+    </div>
+    <div id="a">
+      <h3>Loading...</h3>
+
+      <p id="notices" style="white-space: pre-line;">
+        Loading notice...<br>
+      </p>
+
+    </div>
+  </div>
+
+  <div id="list">
+    <button id="toggleListBtn">Toggle List</button>
+
+    <!-- 🔄 Spinner appears while loading -->
+    <img id="loading-spinner" src="icon.png" alt="Loading...">
+
+    <div id="contractors-list" class="aa">
+      <ol id="contractors"></ol>
+    </div>
+
+    <div id="clients-list" class="aa">
+      <ol id="clients"></ol>
+    </div>
+  </div>
+
+  <div id="footer">
+    <div class="bottom-links">
+      <a href="https://docs.google.com/spreadsheets/d/1ye8tt1IHbJK-0PoYvsPamJnIJeJi4GPDs5vmntx1aUM/" target="_blank">results</a>|<a href="https://forms.gle/WKpns2hNHkNxi93G7" target="_blank">review</a>|<a href="https://discord.com/invite/Knt2RM2Pum" target="_blank">discord</a>|<a id="applyLink" href="#" target="_blank">apply</a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

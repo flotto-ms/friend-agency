@@ -1,0 +1,16 @@
+{
+  "name": "platform",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "stacks/*"
+  ],
+  "version": "4.9.1",
+  "packageManager": "yarn@4.9.1",
+  "dependencies": {
+    "esbuild": "^0.25.4",
+    "eslint": "^9.26.0"
+  }
+}

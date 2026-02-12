@@ -1,10 +1,14 @@
 {
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client"],
+    "types": ["vite/client", "chrome"],
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -20,7 +24,12 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    "paths": {
+      "@flotto/types": ["../../packages/types/src/main"],
+      "@flotto/utils": ["../../packages/utils/src/index"]
+    }
   },
   "include": ["src"]
 }

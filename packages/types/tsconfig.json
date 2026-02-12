@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "nodenext",
+    "lib": ["es2022"],
+    "allowJs": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "moduleResolution": "nodenext"
+  },
+  "exclude": [
+    "node_modules/**",
+    "coverage/**",
+    "build/**",
+    "babel.config.js",
+    "**/__tests__/**",
+    "**/__mocks__/**",
+    "**.test.*",
+    "eslint.config.mjs",
+    "vitest.config.ts"
+  ]
+}
