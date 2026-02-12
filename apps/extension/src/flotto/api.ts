@@ -12,7 +12,6 @@ export const FlottoApi = {
     const changes = await getChanges(quests);
 
     if (changes.received!.length == 0 && changes.sent!.length == 0) {
-      console.log("no changes");
       return;
     }
 
@@ -29,7 +28,6 @@ export const FlottoApi = {
 
     lastValue = slots;
     timeout = Date.now() + MINS_30;
-    console.log("send data to flotto", slots);
     const url = `${base}/users/${userId}/slots`;
 
     return fetch(url, { method: "POST", body: JSON.stringify({ slots }) })

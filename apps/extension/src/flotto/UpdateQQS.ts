@@ -15,7 +15,6 @@ export const updateQqs = (payload: Payload) => {
 
   lastValue = payload.QQS;
   timeout = Date.now() + MINS_30;
-  console.log("send data to flotto", payload);
 
   fetch(
     "https://script.google.com/macros/s/AKfycbxtrIVNsiKrttYjvTpn5QhULI1cDiEkof8maaLCr1X_Wn4OwaFc5vg7W2sjM0l-tHcN/exec",
@@ -24,5 +23,5 @@ export const updateQqs = (payload: Payload) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     },
-  ).catch(() => {});
+  ).catch(console.error);
 };

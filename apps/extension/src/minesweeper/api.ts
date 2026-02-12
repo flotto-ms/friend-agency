@@ -8,7 +8,10 @@ let socket: WebSocket | undefined = undefined;
 let auth: any;
 let currentSession: string;
 
-const callbacks: Record<number, { accept: (data: any) => void; reject: (reason: any) => void }> = {};
+const callbacks: Record<
+  number,
+  { accept: (data: any) => void; reject: (reason: any) => void }
+> = {};
 
 const processResponse = (data: Response<any>) => {
   if (data.length < 2 || !Array.isArray(data[1])) {
@@ -31,10 +34,7 @@ const processResponse = (data: Response<any>) => {
 
 const reconnect = () => {
   socket = undefined;
-  console.log("Socket Closed");
-  setTimeout(() => {
-    openSocket();
-  }, 1_000);
+  setTimeout(openSocket, 1_000);
 };
 
 const openSocket = async () => {
@@ -120,6 +120,8 @@ export const getQuests = async () => {
       accept: (data: QuestResponse) => accept(parseQuests(data)),
       reject,
     };
-    socket.send(`42["request",["QuestsController.getQuestsWsAction",[],${id},903]]`);
+    socket.send(
+      `42["request",["QuestsController.getQuestsWsAction",[],${id},903]]`,
+    );
   });
 };
