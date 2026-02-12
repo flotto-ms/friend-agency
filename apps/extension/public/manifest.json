@@ -1,13 +1,23 @@
 {
-  "manifest_version": 2,
-  "name": "Minesweeper - Friend Quest Agent",
-  "version": "1.0.0",
-  "description": "Provides an agent for managing friend quests",
-  "content_scripts": [
-    {
-      "matches": ["https://minesweeper.online/*"],
-      "css": ["style.css"],
-      "js": ["background.js"]
+  "manifest_version": 3,
+  "name": "Flotto FQA",
+  "version": "2.0",
+  "description": "A Flotto extension that updates your QQS for you whenever you open your friend-quests tab (https://minesweeper.online/friend-quests). It also includes member lists (clients/contractors), real time dev logs/notices, and important links.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "https://minesweeper.online/*",
+    "https://script.google.com/macros/s/*",
+    "https://hls6ldikcd.execute-api.us-east-1.amazonaws.com/prod/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
     }
-  ]
+  }
 }

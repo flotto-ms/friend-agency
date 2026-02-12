@@ -1,0 +1,15 @@
+{
+  "name": "@flotto/utils",
+  "version": "1.0.0",
+  "description": "Common types for Flotto",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "build": "echo \"Error: project cannot be built\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
