@@ -40,4 +40,4 @@ export const FlottoQuestType = {
   GemJade: 39,
 } as const;
 
-export type FlottoQuestId = keyof typeof FlottoQuestType;
+export type FlottoQuestId = (typeof FlottoQuestType)[keyof typeof FlottoQuestType];

@@ -5,11 +5,12 @@ export type UserTableItem = {
   username: string;
   contractor: boolean;
   slots?: number;
-  paused?: boolean;
-  rates?: Record<FlottoQuestId, Rate>;
+  available?: boolean;
+  rates?: Record<string, Rate>;
 };
 
 export type Rate = {
-  price: number;
+  type: FlottoQuestId;
+  amount: number;
   enabled: boolean;
 };
