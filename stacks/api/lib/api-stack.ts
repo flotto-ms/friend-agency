@@ -1,6 +1,6 @@
 import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { Cors, LambdaIntegration, RestApi } from "aws-cdk-lib/aws-apigateway";
-import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
+import { AttributeType, BillingMode, ProjectionType, Table } from "aws-cdk-lib/aws-dynamodb";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
@@ -34,6 +34,32 @@ export class ApiStack extends Stack {
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
 
+    const contractsTable = new Table(this, "ContractsTable", {
+      tableName: "Contracts",
+      partitionKey: { name: "type", type: AttributeType.NUMBER },
+      sortKey: { name: "startedAt", type: AttributeType.STRING },
+      removalPolicy: RemovalPolicy.DESTROY,
+      billingMode: BillingMode.PAY_PER_REQUEST,
+    });
+
+    /**
+     * Secondary Indexes
+     */
+
+    contractsTable.addGlobalSecondaryIndex({
+      indexName: "UserIdEndedAtIndex",
+      partitionKey: { name: "userId", type: AttributeType.NUMBER },
+      sortKey: { name: "endedAt", type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
+    });
+
+    contractsTable.addGlobalSecondaryIndex({
+      indexName: "TypeEndedAtIndex",
+      partitionKey: { name: "type", type: AttributeType.NUMBER },
+      sortKey: { name: "endedAt", type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
+    });
+
     /**
      * Lambda Functions
      */
@@ -44,6 +70,28 @@ export class ApiStack extends Stack {
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
       environment: {
+        USER_TABLE: userTable.tableName,
+      },
+    });
+
+    const postUserAvailabilityLambda = new NodejsFunction(this, "PostUserAvailabilityLambda", {
+      entry: "src/handlers/postUserAvailability.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_22_X,
+      timeout: Duration.minutes(1),
+      environment: {
+        CONTRACT_TABLE: contractsTable.tableName,
+        USER_TABLE: userTable.tableName,
+      },
+    });
+
+    const postUserRatesLambda = new NodejsFunction(this, "PostUserRatesLambda", {
+      entry: "src/handlers/postUserRates.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_22_X,
+      timeout: Duration.minutes(1),
+      environment: {
+        CONTRACT_TABLE: contractsTable.tableName,
         USER_TABLE: userTable.tableName,
       },
     });
@@ -88,6 +136,11 @@ export class ApiStack extends Stack {
     userTable.grantReadData(getUsersLambda);
     userTable.grantReadData(getUserQuestsLambda);
     userTable.grantReadWriteData(postUserSlotsLambda);
+    userTable.grantReadWriteData(postUserRatesLambda);
+    userTable.grantReadWriteData(postUserAvailabilityLambda);
+
+    contractsTable.grantReadWriteData(postUserAvailabilityLambda);
+    contractsTable.grantReadWriteData(postUserRatesLambda);
 
     receivedQuestsTable.grantReadData(getUserQuestsLambda);
     receivedQuestsTable.grantReadWriteData(postUserQuestsLambda);
@@ -96,7 +149,7 @@ export class ApiStack extends Stack {
     sentQuestsTable.grantReadWriteData(postUserQuestsLambda);
 
     /**
-     * API GAteway
+     * API Gayteway
      */
 
     const api = new RestApi(this, "RestAPI", {
@@ -112,11 +165,15 @@ export class ApiStack extends Stack {
     const pathUser = pathUsers.addResource("{id}");
     const pathQuests = pathUser.addResource("quests");
     const pathSlots = pathUser.addResource("slots");
+    const pathRates = pathUser.addResource("rates");
+    const pathAvailable = pathUser.addResource("available");
     const getQuests = pathQuests.addResource("{type}");
 
     //Integrations
     const getUsersIntegration = new LambdaIntegration(getUsersLambda);
     const postSlotsIntegration = new LambdaIntegration(postUserSlotsLambda);
+    const postRatesIntegration = new LambdaIntegration(postUserRatesLambda);
+    const postAvaiabilityIntegration = new LambdaIntegration(postUserAvailabilityLambda);
     const postQuestsIntegration = new LambdaIntegration(postUserQuestsLambda);
     const getQuestsIntegration = new LambdaIntegration(getUserQuestsLambda);
 
@@ -125,6 +182,8 @@ export class ApiStack extends Stack {
     getQuests.addMethod("GET", getQuestsIntegration);
     pathQuests.addMethod("POST", postQuestsIntegration);
     pathSlots.addMethod("POST", postSlotsIntegration);
+    pathRates.addMethod("POST", postRatesIntegration);
+    pathAvailable.addMethod("POST", postAvaiabilityIntegration);
 
     /**
      * Outputs

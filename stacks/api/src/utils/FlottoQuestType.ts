@@ -1,0 +1,47 @@
+import { FlottoQuestId, FlottoQuestType } from "@flotto/types";
+
+const lookup = {
+  "arena coins": FlottoQuestType.ArenaCoins,
+  "custom L1-10": FlottoQuestType.Custom,
+  "custom L💀": FlottoQuestType.CustomHD,
+  "eff beg": FlottoQuestType.EffBeg,
+  "eff int": FlottoQuestType.EffInt,
+  "eff exp": FlottoQuestType.EffExp,
+  gems: FlottoQuestType.Gems,
+  xp: FlottoQuestType.Experience,
+  mc: FlottoQuestType.MineCoin,
+  "nf beg": FlottoQuestType.NfBeg,
+  "nf int": FlottoQuestType.NfInt,
+  "nf exp": FlottoQuestType.NfExp,
+  "nf hard": FlottoQuestType.NfHard,
+  "nf evil": FlottoQuestType.NfEvil,
+  pvp: FlottoQuestType.PvP,
+  "ws beg": FlottoQuestType.WinStreakBeg,
+  "ws int": FlottoQuestType.WinStreakInt,
+  "ws exp": FlottoQuestType.WinStreakExp,
+  "wins beg": FlottoQuestType.WinsBeg,
+  "wins int": FlottoQuestType.WinsInt,
+  "wins exp": FlottoQuestType.WinsExp,
+  "wins med": FlottoQuestType.WinsMed,
+  "wins hard": FlottoQuestType.WinsHard,
+  "wins evil": FlottoQuestType.WinsEvil,
+  speed: FlottoQuestType.ArenaSpeed,
+  "speed ng": FlottoQuestType.ArenaSpeedNG,
+  "no flags": FlottoQuestType.ArenaNoFlags,
+  efficiency: FlottoQuestType.ArenaEfficiency,
+  "high difficulty": FlottoQuestType.ArenaHighDifficulty,
+  "random difficulty": FlottoQuestType.ArenaRandomDifficulty,
+  hardcore: FlottoQuestType.ArenaHardcore,
+  "hardcore ng": FlottoQuestType.ArenaHardcoreNG,
+  ruby: FlottoQuestType.GemRuby,
+  sapphire: FlottoQuestType.GemSapphire,
+  topaz: FlottoQuestType.GemTopaz,
+  onyx: FlottoQuestType.GemOnyx,
+  aquamarine: FlottoQuestType.GemAquamarine,
+  emerald: FlottoQuestType.GemEmerald,
+  jade: FlottoQuestType.GemJade,
+} as Record<string, FlottoQuestId>;
+
+export const getRateQuestId = (key: string): FlottoQuestId | undefined => {
+  return lookup[key];
+};
