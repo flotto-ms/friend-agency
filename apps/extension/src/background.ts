@@ -23,7 +23,9 @@ function extractData() {
 }
 
 const inject = (tabId: number) => {
-  chrome.scripting.executeScript({ target: { tabId }, func: extractData }).catch(() => {});
+  chrome.scripting
+    .executeScript({ target: { tabId }, func: extractData })
+    .catch(() => {});
 };
 
 chrome.tabs.onActivated.addListener(({ tabId }) => inject(tabId));
@@ -42,13 +44,19 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
               return;
             }
             const qqs = quests.recevied.filter(
-              (quest) => quest.completed === 0 && !quest.expired && quest.required !== quest.progress,
+              (quest) =>
+                quest.completed === 0 &&
+                !quest.expired &&
+                quest.required !== quest.progress,
             ).length;
             const userId = getUserId();
             updateQqs({ pID: userId, QQS: qqs });
 
             FlottoApi.postSlots(userId, qqs);
-            FlottoApi.postQuests(userId, { sent: quests.sent, received: quests.recevied });
+            FlottoApi.postQuests(userId, {
+              sent: quests.sent,
+              received: quests.recevied,
+            });
           })
           .catch((_) => {
             console.log("conneection closed");
