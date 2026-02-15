@@ -1,17 +1,16 @@
 import { parseQuests, type QuestResponse } from "./questParser";
 
 type Response<D> = [string, [number, number, D]];
+type Callback = { accept: (data: any) => void; reject: (reason: any) => void };
 
 let userId: number;
 let requestId = 1000;
 let socket: WebSocket | undefined = undefined;
 let auth: any;
 let currentSession: string;
+let currentBuild: number;
 
-const callbacks: Record<
-  number,
-  { accept: (data: any) => void; reject: (reason: any) => void }
-> = {};
+const callbacks: Record<number, Callback> = {};
 
 const processResponse = (data: Response<any>) => {
   if (data.length < 2 || !Array.isArray(data[1])) {
@@ -73,7 +72,11 @@ const openSocket = async () => {
           break;
         default:
           const data: Response<any> = JSON.parse(m.data.substring(2));
-          if (data[0] === "authorized") {
+          if (data[0] == "server_error" && (data as any)[1] === "Wrong AuthKey") {
+            auth = null;
+            socket?.close();
+            connect(currentSession, currentBuild);
+          } else if (data[0] === "authorized") {
             accept();
           } else {
             processResponse(data);
@@ -84,10 +87,32 @@ const openSocket = async () => {
   });
 };
 
-export const connect = async (session: string) => {
+const sendRequest = ({ action, cb, args }: { action: string; cb?: Callback; args?: any[] }) => {
+  if (!socket || socket.readyState !== socket.OPEN) {
+    cb?.reject(new Error("Socket not Open"));
+    return;
+  }
+  const id = ++requestId;
+  if (cb) {
+    callbacks[id] = cb;
+  }
+  const request = ["request", [action, args ?? [], id, currentBuild]];
+  socket.send(`42${JSON.stringify(request)}`);
+};
+
+export const connect = async (session: string, build: number) => {
+  if (socket && currentBuild !== build) {
+    socket.close();
+    currentBuild = build;
+    return false;
+  }
+
   if (socket || !session) {
     return false;
   }
+
+  currentSession = session;
+  currentBuild = build;
 
   return new Promise<boolean>((accept, reject) => {
     fetch("https://minesweeper.online/authorize?session=" + session)
@@ -95,7 +120,6 @@ export const connect = async (session: string) => {
       .then((r) => {
         userId = r.userId;
         auth = r;
-        currentSession = session;
         return openSocket().then(() => accept(true));
       })
       .catch(reject);
@@ -110,18 +134,12 @@ export const getQuests = async () => {
   }
 
   return new Promise<ReturnType<typeof parseQuests>>((accept, reject) => {
-    if (!socket || socket.readyState !== socket.OPEN) {
-      reject(new Error("Socket not Open"));
-      return;
-    }
-
-    const id = ++requestId;
-    callbacks[id] = {
-      accept: (data: QuestResponse) => accept(parseQuests(data)),
-      reject,
-    };
-    socket.send(
-      `42["request",["QuestsController.getQuestsWsAction",[],${id},903]]`,
-    );
+    sendRequest({
+      action: "QuestsController.getQuestsWsAction",
+      cb: {
+        accept: (data: QuestResponse) => accept(parseQuests(data)),
+        reject,
+      },
+    });
   });
 };

@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
-import { updateItem } from "../utils/DynamoDbUtils";
+import { getItem, updateItem } from "../utils/DynamoDbUtils";
 import { SaveAvailabilityRequest, UserTableItem } from "@flotto/types";
 import ContractsTable from "../utils/ContractsTable";
 
@@ -9,6 +9,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   if (!id) {
     return {
       statusCode: 400,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: "Missing path parameter: id" }),
     };
   }
@@ -16,7 +17,28 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const data = JSON.parse(event.body ?? "{}") as SaveAvailabilityRequest;
   const userId = parseInt(id);
 
-  const user = await updateItem<UserTableItem>({
+  const user = await getItem<UserTableItem>({
+    Key: { id: userId },
+    TableName: process.env.USER_TABLE!,
+  });
+
+  if (!user) {
+    return {
+      statusCode: 400,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "User not found" }),
+    };
+  }
+
+  if (user.available === data.available) {
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "Success" }),
+    };
+  }
+
+  await updateItem<UserTableItem>({
     Key: { id: userId },
     TableName: process.env.USER_TABLE!,
     Attrs: {
