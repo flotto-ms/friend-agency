@@ -19,20 +19,28 @@ chrome.scripting
 
 function extractData() {
   const session = localStorage.getItem("_session");
-  chrome.runtime.sendMessage({ action: "startServer", payload: { session } });
+  const scripts = document.getElementsByTagName("script");
+  let build = 0;
+  for (let script of scripts) {
+    const r = /\/index-(\d+)\.js/i.exec(script.src);
+    if (r) {
+      build = parseInt(r[1]);
+      break;
+    }
+  }
+
+  chrome.runtime.sendMessage({ action: "startServer", payload: { session, build } });
 }
 
 const inject = (tabId: number) => {
-  chrome.scripting
-    .executeScript({ target: { tabId }, func: extractData })
-    .catch(() => {});
+  chrome.scripting.executeScript({ target: { tabId }, func: extractData }).catch(() => {});
 };
 
 chrome.tabs.onActivated.addListener(({ tabId }) => inject(tabId));
 
 chrome.runtime.onMessage.addListener(({ action, payload }) => {
   if (action === "startServer") {
-    connect(payload.session).then((started) => {
+    connect(payload.session, payload.build).then((started) => {
       if (!started) {
         return;
       }
@@ -44,10 +52,7 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
               return;
             }
             const qqs = quests.recevied.filter(
-              (quest) =>
-                quest.completed === 0 &&
-                !quest.expired &&
-                quest.required !== quest.progress,
+              (quest) => quest.completed === 0 && !quest.expired && quest.required !== quest.progress,
             ).length;
             const userId = getUserId();
             updateQqs({ pID: userId, QQS: qqs });
@@ -56,6 +61,16 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
             FlottoApi.postQuests(userId, {
               sent: quests.sent,
               received: quests.recevied,
+            });
+
+            console.log("send quest data");
+            chrome.tabs.query({}, (tabs) => {
+              tabs.forEach(({ id, url }) => {
+                if (!id || !url) {
+                  return;
+                }
+                chrome.tabs.sendMessage(id, { action: "quests", payload: { quests } });
+              });
             });
           })
           .catch((_) => {
@@ -69,16 +84,5 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
       pollInterval = setInterval(pollServer, 30_000);
       pollServer();
     });
-  }
-
-  if (action === "sendData") {
-    fetch(
-      "https://script.google.com/macros/s/AKfycbxtrIVNsiKrttYjvTpn5QhULI1cDiEkof8maaLCr1X_Wn4OwaFc5vg7W2sjM0l-tHcN/exec",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      },
-    ).catch(() => {});
   }
 });

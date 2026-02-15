@@ -10,7 +10,8 @@
     "https://hls6ldikcd.execute-api.us-east-1.amazonaws.com/prod/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
   },
   "action": {
     "default_popup": "popup.html",
@@ -18,6 +19,15 @@
       "16": "icon.png",
       "48": "icon.png",
       "128": "icon.png"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "extension@flotto-ms.com",
+      "data_collection_permissions": {
+        "required": ["locationInfo"],
+        "optional": ["technicalAndInteraction"]
+      }
     }
   }
 }

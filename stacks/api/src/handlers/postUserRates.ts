@@ -26,8 +26,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       (rate) =>
         ({
           type: getRateQuestId(rate.name),
-          amount: rate.amount,
-          enabled: rate.enabled,
+          amount: rate.amount <= 0 || rate.amount > 1000 ? 0 : rate.amount,
+          enabled: rate.amount <= 0 || rate.amount > 1000 ? false : rate.enabled,
         }) as Rate,
     )
     .filter((rate) => Boolean(rate.type));
