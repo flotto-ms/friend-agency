@@ -57,7 +57,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     const enabledRates = Object.values(user.rates).filter((rate) => rate.enabled);
     await Promise.all(
       enabledRates.map((rate) => {
-        ContractsTable.startContract({
+        return ContractsTable.startContract({
           userId,
           type: rate.type,
           price: rate.amount,

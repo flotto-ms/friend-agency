@@ -5,12 +5,12 @@ export type QuestResponse = Array<QuestData>;
 
 export const parseQuests = (data: QuestResponse) => {
   const unsent = data[7] as any[] as MsoQuest[];
-  const recevied = arrayToObj(data[8]) as MsoQuest[];
+  const received = arrayToObj(data[8]) as MsoQuest[];
   const sent = arrayToObj(data[9]) as MsoQuest[];
 
   return {
     unsent,
-    recevied,
+    received,
     sent,
   };
 };

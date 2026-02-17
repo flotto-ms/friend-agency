@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent } from "aws-lambda";
 import { getItem, queryItems } from "../utils/DynamoDbUtils";
 import { MsoQuest, UserTableItem } from "@flotto/types";
 import { createCSV } from "@flotto/utils";
+import { getUserQuestPrices } from "./getUserQuests/getPrices";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const id = event.pathParameters?.id;
@@ -11,6 +12,15 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: "Missing path parameter: id" }),
+    };
+  }
+
+  if (type === "prices") {
+    const prices = await getUserQuestPrices(parseInt(id));
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(prices),
     };
   }
 

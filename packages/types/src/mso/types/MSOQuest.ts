@@ -10,10 +10,10 @@ type MsoQuestBase = {
   progress: number;
   level: number;
   duration?: number;
-  isElite: boolean;
+  isElite: 0 | 1;
   sentTo?: number;
   initiatorId?: number;
-  completedByInitiator?: boolean;
+  completedByInitiator?: 0 | 1;
   userId: number;
   username: string;
   createdAt?: string;

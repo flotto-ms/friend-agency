@@ -1,5 +1,6 @@
 import { ContractTableItem, FlottoQuestId } from "@flotto/types";
-import { putItem, queryItems, updateItem } from "./DynamoDbUtils";
+import { createClient, putItem, queryItems, updateItem } from "./DynamoDbUtils";
+import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 const removeEndedAt = (items: ContractTableItem[]) => {
   return items.map((item) => {
@@ -37,10 +38,10 @@ export const getActiveUserContracts = async (userId: number, type?: FlottoQuestI
   return items;
 };
 
-export const startContract = async (item: ContractTableItem) => {
+export const startContract = async (item: Omit<ContractTableItem, "userId_type">) => {
   await putItem({
     TableName: process.env.CONTRACT_TABLE!,
-    Item: { ...item, endedAt: "Active" },
+    Item: { ...item, endedAt: "Active", userId_type: getUserTypeKey(item.userId, item.type) },
   });
 };
 
@@ -61,6 +62,34 @@ export const endContract = async (item: ContractTableItem) => {
   });
 };
 
+export const getContract = async (type: FlottoQuestId, userId: number, dateStart: Date) => {
+  const command = new QueryCommand({
+    TableName: process.env.CONTRACT_TABLE!,
+    IndexName: "UserIdTypeEndedAtIndex",
+    KeyConditions: {
+      userId_type: {
+        AttributeValueList: [getUserTypeKey(userId, type)],
+        ComparisonOperator: "EQ",
+      },
+      endedAt: {
+        AttributeValueList: [dateStart.toISOString()],
+        ComparisonOperator: "GT",
+      },
+    },
+    Limit: 1,
+  });
+  console.log(command.input);
+
+  const result = await createClient().send(command);
+  if (!result.Items) {
+    return undefined;
+  }
+  return (result.Items as ContractTableItem[]).find((item) => new Date(item.startedAt) < dateStart);
+};
+
+const getUserTypeKey = (userId: number, type: number) => {
+  return `${userId}_${type}`;
+};
 export default {
   getActiveContracts,
   getActiveUserContracts,

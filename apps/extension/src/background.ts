@@ -1,6 +1,7 @@
 import { FlottoApi } from "./flotto/api";
 import { updateQqs } from "./flotto/UpdateQQS";
 import { connect, getQuests, getUserId } from "./minesweeper/api";
+import { syncPrices } from "./utils/PriceData";
 
 let pollInterval: ReturnType<typeof setInterval>;
 
@@ -36,7 +37,12 @@ const inject = (tabId: number) => {
   chrome.scripting.executeScript({ target: { tabId }, func: extractData }).catch(() => {});
 };
 
-chrome.tabs.onActivated.addListener(({ tabId }) => inject(tabId));
+chrome.tabs.onActivated.addListener(({ tabId }) => {
+  chrome.tabs.get(tabId).then((e) => {
+    console.log(e.url);
+  });
+  inject(tabId);
+});
 
 chrome.runtime.onMessage.addListener(({ action, payload }) => {
   if (action === "startServer") {
@@ -51,7 +57,7 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
             if (!quests) {
               return;
             }
-            const qqs = quests.recevied.filter(
+            const qqs = quests.received.filter(
               (quest) => quest.completed === 0 && !quest.expired && quest.required !== quest.progress,
             ).length;
             const userId = getUserId();
@@ -60,10 +66,9 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
             FlottoApi.postSlots(userId, qqs);
             FlottoApi.postQuests(userId, {
               sent: quests.sent,
-              received: quests.recevied,
+              received: quests.received,
             });
 
-            console.log("send quest data");
             chrome.tabs.query({}, (tabs) => {
               tabs.forEach(({ id, url }) => {
                 if (!id || !url) {
@@ -86,3 +91,5 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
     });
   }
 });
+
+syncPrices();

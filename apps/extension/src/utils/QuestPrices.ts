@@ -65,10 +65,10 @@ export const c = (userId: number, quests: ReturnType<typeof parseQuests>) => {
 
   if (printQuests) {
     console.log(" ");
-    console.log("--------- Recevied --------");
+    console.log("--------- received --------");
   }
 
-  quests.recevied
+  quests.received
     .filter((item) => clients.has(item.initiatorId!))
     .sort((a, b) => {
       if (a.type === b.type) {
