@@ -1,4 +1,5 @@
 export const FlottoQuestType = {
+  Unknown: 0,
   ArenaCoins: 1,
   Custom: 2,
   CustomHD: 3,

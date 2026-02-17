@@ -74,7 +74,7 @@ export const sampleQuests = {
       country: null,
     },
   ],
-  recevied: [
+  received: [
     {
       id: 153762839,
       createdAt: "2026-02-11T00:51:27.000Z",

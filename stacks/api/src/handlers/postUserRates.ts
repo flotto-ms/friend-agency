@@ -26,8 +26,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       (rate) =>
         ({
           type: getRateQuestId(rate.name),
-          amount: rate.amount <= 0 || rate.amount > 1000 ? 0 : rate.amount,
-          enabled: rate.amount <= 0 || rate.amount > 1000 ? false : rate.enabled,
+          amount: validateAmount(rate.amount) ? rate.amount : 0,
+          enabled: validateAmount(rate.amount) ? (rate.enabled ?? false) : false,
         }) as Rate,
     )
     .filter((rate) => Boolean(rate.type));
@@ -122,4 +122,11 @@ const endContracts = async (userId: number, rate: Rate) => {
   await ContractsTable.endContract(contract);
 
   return false;
+};
+
+const validateAmount = (amount?: number) => {
+  if (!amount) {
+    return false;
+  }
+  return 0 < amount && amount < 1000;
 };

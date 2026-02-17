@@ -60,6 +60,13 @@ export class ApiStack extends Stack {
       projectionType: ProjectionType.ALL,
     });
 
+    contractsTable.addGlobalSecondaryIndex({
+      indexName: "UserIdTypeEndedAtIndex",
+      partitionKey: { name: "userId_type", type: AttributeType.STRING },
+      sortKey: { name: "endedAt", type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
+    });
+
     /**
      * Lambda Functions
      */

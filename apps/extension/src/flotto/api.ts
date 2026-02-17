@@ -6,6 +6,7 @@ let lastValue = 100;
 let timeout = Date.now();
 
 const MINS_30 = 1_800_000;
+const MAX_QUESTS = 100;
 
 export const FlottoApi = {
   postQuests: async (userId: number, quests: SaveQuestsRequest) => {
@@ -41,28 +42,39 @@ const getChanges = async (quests: SaveQuestsRequest) => {
 
   const store = await chrome.storage.local
     .get(["quests"])
-    .then((result) => result.quests as SaveQuestsRequest | undefined);
+    .then((result) => (result.quests ?? { received: [], sent: [] }) as SaveQuestsRequest);
+  let changeCount = 0;
 
-  if (store) {
-    quests.received?.forEach((quest) => {
-      const prev = store.received?.find((item) => item.id === quest.id);
-      if (!prev || JSON.stringify(prev) !== JSON.stringify(quest)) {
+  quests.received?.forEach((quest) => {
+    const prev = store.received?.find((item) => item.id === quest.id);
+    if (!prev || JSON.stringify(prev) !== JSON.stringify(quest)) {
+      if (changeCount < MAX_QUESTS) {
+        changeCount++;
         changes.received?.push(quest);
       }
-    });
+    }
+  });
 
-    quests.sent?.forEach((quest) => {
-      const prev = store.sent?.find((item) => item.id === quest.id);
-      if (!prev || JSON.stringify(prev) !== JSON.stringify(quest)) {
+  quests.sent?.forEach((quest) => {
+    const prev = store.sent?.find((item) => item.id === quest.id);
+    if (!prev || JSON.stringify(prev) !== JSON.stringify(quest)) {
+      if (changeCount < MAX_QUESTS) {
+        changeCount++;
         changes.sent?.push(quest);
       }
-    });
-  } else {
-    changes.received = quests.received;
-    changes.sent = quests.sent;
-  }
+    }
+  });
 
-  await chrome.storage.local.set({ quests });
+  const newStore = structuredClone(store);
+  newStore.received = newStore.received?.filter((item) => !changes.received?.find((change) => change.id === item.id));
+  newStore.sent = newStore.sent?.filter((item) => !changes.sent?.find((change) => change.id === item.id));
+
+  changes.received?.forEach((item) => newStore.received?.push(item));
+  changes.sent?.forEach((item) => newStore.sent?.push(item));
+
+  await chrome.storage.local.set({ quests: newStore });
 
   return changes;
 };
+
+//chrome.storage.local.set({ quests: { received: [], sent: [] } });

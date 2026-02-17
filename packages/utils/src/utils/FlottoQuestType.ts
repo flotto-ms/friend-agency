@@ -43,6 +43,8 @@ export const getFlottoQuestType = (quest: MsoQuest) => {
     case MSOQuestType.Arena:
       return getArenaQuestType(quest);
   }
+
+  return FlottoQuestType.Unknown;
 };
 
 const getWinStreakType = (quest: MsoQuestWinStreak) => {
@@ -54,7 +56,7 @@ const getWinStreakType = (quest: MsoQuestWinStreak) => {
     case MSOQuestLevel.Expert:
       return FlottoQuestType.WinStreakExp;
     default:
-      return;
+      return FlottoQuestType.Unknown;
   }
 };
 
@@ -67,7 +69,7 @@ const getEfficiencyType = (quest: MsoQuestEfficiency) => {
     case MSOQuestLevel.Expert:
       return FlottoQuestType.EffExp;
     default:
-      return;
+      return FlottoQuestType.Unknown;
   }
 };
 const getNoFlagType = (quest: MsoQuestNoFlag) => {
@@ -83,7 +85,7 @@ const getNoFlagType = (quest: MsoQuestNoFlag) => {
     case MSOQuestLevel.Hard:
       return FlottoQuestType.NfHard;
     default:
-      return;
+      return FlottoQuestType.Unknown;
   }
 };
 
@@ -104,7 +106,7 @@ const getGemType = (quest: MsoQuestGem) => {
     case MSOGemType.Jade:
       return FlottoQuestType.GemJade;
     default:
-      return;
+      return FlottoQuestType.Unknown;
   }
 };
 
@@ -117,7 +119,7 @@ const getNoGuessType = (quest: MsoQuestNG) => {
     case MSOQuestLevel.Evil:
       return FlottoQuestType.WinsEvil;
     default:
-      return;
+      return FlottoQuestType.Unknown;
   }
 };
 
@@ -140,6 +142,6 @@ const getArenaQuestType = (quest: MsoQuestArena) => {
     case MSOArenaType.HardcoreNG:
       return FlottoQuestType.ArenaHardcoreNG;
     default:
-      return;
+      return FlottoQuestType.Unknown;
   }
 };

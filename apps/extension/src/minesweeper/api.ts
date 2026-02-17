@@ -9,6 +9,7 @@ let socket: WebSocket | undefined = undefined;
 let auth: any;
 let currentSession: string;
 let currentBuild: number;
+let connectTimeout: ReturnType<typeof setTimeout>;
 
 const callbacks: Record<number, Callback> = {};
 
@@ -33,7 +34,10 @@ const processResponse = (data: Response<any>) => {
 
 const reconnect = () => {
   socket = undefined;
-  setTimeout(openSocket, 1_000);
+  if (connectTimeout) {
+    clearTimeout(connectTimeout);
+  }
+  connectTimeout = setTimeout(openSocket, 1_000);
 };
 
 const openSocket = async () => {
@@ -109,6 +113,10 @@ export const connect = async (session: string, build: number) => {
 
   if (socket || !session) {
     return false;
+  }
+
+  if (connectTimeout) {
+    clearTimeout(connectTimeout);
   }
 
   currentSession = session;
