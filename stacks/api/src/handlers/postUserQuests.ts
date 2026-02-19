@@ -62,6 +62,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         TableName: process.env.SENT_QUESTS_TABLE!,
         Key: { userId: parseInt(userParam), id },
         Attrs: attrs,
+        Upsert: true,
       })
         .then((item) => {
           if (item.flotto) {
@@ -82,7 +83,6 @@ export const handler = async (event: APIGatewayProxyEvent) => {
               TableName: process.env.SENT_QUESTS_TABLE!,
               Key: { userId: parseInt(userParam), id },
               Attrs: { flotto: details },
-              Upsert: true,
             });
           });
         })
