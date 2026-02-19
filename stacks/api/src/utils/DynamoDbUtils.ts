@@ -282,3 +282,10 @@ export const createClient = () => {
 
   return doc;
 };
+export default {
+  putItem,
+  createClient,
+  queryItems,
+  updateItem,
+  deleteItem,
+};

@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent } from "aws-lambda";
 import { getItem, updateItem } from "../utils/DynamoDbUtils";
 import { SaveAvailabilityRequest, UserTableItem } from "@flotto/types";
 import ContractsTable from "../utils/ContractsTable";
+import ContractActionTable from "../utils/ContractActionTable";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const id = event.pathParameters?.id;
@@ -44,8 +45,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     Attrs: {
       available: data.available,
     },
-    Upsert: true,
   });
+
+  await ContractActionTable.logPause(userId, !data.available);
 
   if (!data.available) {
     //End Current Contracts

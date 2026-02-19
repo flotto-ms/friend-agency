@@ -1,6 +1,7 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
-import type { ContractTableItem, Rate, SaveRatesRequest } from "@flotto/types";
+import type { ContractTableItem, Rate, SaveRatesRequest, UserTableItem } from "@flotto/types";
 import { createClient } from "../utils/DynamoDbUtils";
+import RateUtils from "../utils/RateUtils";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { getRateQuestId } from "../utils/FlottoQuestType";
 import ContractsTable from "../utils/ContractsTable";
@@ -73,16 +74,22 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     ConditionExpression: "attribute_exists(id)",
     ExpressionAttributeNames: attributeKeys,
     ExpressionAttributeValues: attributeValues,
-    ReturnValues: "ALL_NEW",
+    ReturnValues: "ALL_OLD",
   });
 
   console.debug(command.input);
 
   const result = await createClient().send(command);
 
+  const tasks: Promise<any>[] = [];
+
+  tasks.push(...rates.map((rate) => RateUtils.logRateAction(result.Attributes as UserTableItem, rate)));
+
   if (result.Attributes?.available) {
-    await Promise.all(rates.map((rate) => verifyContracts(userId, rate)));
+    tasks.push(...rates.map((rate) => verifyContracts(userId, rate)));
   }
+
+  await Promise.all(tasks);
 
   return {
     statusCode: 200,

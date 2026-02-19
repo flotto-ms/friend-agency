@@ -33,7 +33,9 @@ const getQuestStartedAt = (quest: ReceivedQuestTableItem | SentQuestTableItem) =
 };
 
 const getFlottoDetails = async (quest: ReceivedQuestTableItem | SentQuestTableItem) => {
-  const user = await UserTable.getUser(quest.userId);
+  const userId = quest.initiatorId ?? quest.sentTo;
+  const user = userId ? await UserTable.getUser(userId) : undefined;
+
   const details: FlottoQuestDetails = {
     type: getFlottoQuestType(quest),
     status: "Ignored",

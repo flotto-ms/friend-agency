@@ -42,6 +42,14 @@ export class ApiStack extends Stack {
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
 
+    const contractActionsTable = new Table(this, "ContractActionsTable", {
+      tableName: "ContractAction",
+      partitionKey: { name: "key", type: AttributeType.STRING },
+      sortKey: { name: "timestamp", type: AttributeType.STRING },
+      removalPolicy: RemovalPolicy.DESTROY,
+      billingMode: BillingMode.PAY_PER_REQUEST,
+    });
+
     /**
      * Secondary Indexes
      */
@@ -88,6 +96,7 @@ export class ApiStack extends Stack {
       timeout: Duration.minutes(1),
       environment: {
         CONTRACT_TABLE: contractsTable.tableName,
+        CONTRACT_ACTION_TABLE: contractActionsTable.tableName,
         USER_TABLE: userTable.tableName,
       },
     });
@@ -99,6 +108,7 @@ export class ApiStack extends Stack {
       timeout: Duration.minutes(1),
       environment: {
         CONTRACT_TABLE: contractsTable.tableName,
+        CONTRACT_ACTION_TABLE: contractActionsTable.tableName,
         USER_TABLE: userTable.tableName,
       },
     });
@@ -109,6 +119,8 @@ export class ApiStack extends Stack {
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
       environment: {
+        USER_TABLE: userTable.tableName,
+        CONTRACT_TABLE: contractsTable.tableName,
         RECEIVED_QUESTS_TABLE: receivedQuestsTable.tableName,
         SENT_QUESTS_TABLE: sentQuestsTable.tableName,
       },
@@ -142,12 +154,17 @@ export class ApiStack extends Stack {
 
     userTable.grantReadData(getUsersLambda);
     userTable.grantReadData(getUserQuestsLambda);
+    userTable.grantReadData(postUserQuestsLambda);
     userTable.grantReadWriteData(postUserSlotsLambda);
     userTable.grantReadWriteData(postUserRatesLambda);
     userTable.grantReadWriteData(postUserAvailabilityLambda);
 
+    contractsTable.grantReadData(postUserQuestsLambda);
     contractsTable.grantReadWriteData(postUserAvailabilityLambda);
     contractsTable.grantReadWriteData(postUserRatesLambda);
+
+    contractActionsTable.grantReadWriteData(postUserRatesLambda);
+    contractActionsTable.grantReadWriteData(postUserAvailabilityLambda);
 
     receivedQuestsTable.grantReadData(getUserQuestsLambda);
     receivedQuestsTable.grantReadWriteData(postUserQuestsLambda);
