@@ -1,10 +1,10 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
-import type { ContractTableItem, Rate, SaveRatesRequest, UserTableItem } from "@flotto/types";
-import { createClient } from "../utils/DynamoDbUtils";
+import type { ContractsTableItem, Rate, SaveRatesRequest, UserTableItem } from "@flotto/types";
 import RateUtils from "../utils/RateUtils";
-import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { getRateQuestId } from "../utils/FlottoQuestType";
 import ContractsTable from "../utils/ContractsTable";
+import UserTable from "../utils/UserTable";
+import { MinContractRates } from "../data/MinContractRates";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const userParam = event.pathParameters?.id;
@@ -19,16 +19,13 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const userId = parseInt(userParam);
   const data: SaveRatesRequest = JSON.parse(event.body ?? "{}");
 
-  const attributeKeys: Record<string, string> = {};
-  const attributeValues: Record<string, any> = {};
-
   const rates = data.rates
     .map(
       (rate) =>
         ({
           type: getRateQuestId(rate.name),
-          amount: validateAmount(rate.amount) ? rate.amount : 0,
-          enabled: validateAmount(rate.amount) ? (rate.enabled ?? false) : false,
+          amount: rate.amount,
+          enabled: rate.enabled,
         }) as Rate,
     )
     .filter((rate) => Boolean(rate.type));
@@ -40,46 +37,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
   }
 
-  const rateExpression = rates
-    .map((rate, i) => {
-      const key = `#key${i}`;
-      const val = `:val${i}`;
-      attributeKeys[key] = `quest_${rate.type}`;
-      attributeValues[val] = rate;
-      return `, #rate.${key} = ${val}`;
-    })
-    .join("");
-
-  attributeKeys["#rate"] = "rates";
-  attributeKeys["#contractor"] = "contractor";
-  attributeValues[":contractor"] = true;
-
-  await createClient()
-    .send(
-      new UpdateCommand({
-        TableName: process.env.USER_TABLE!,
-        Key: { id: userId },
-        UpdateExpression: "SET #rate = :rate",
-        ConditionExpression: "attribute_exists(id) AND attribute_not_exists(#rate)",
-        ExpressionAttributeNames: { "#rate": "rates" },
-        ExpressionAttributeValues: { ":rate": {} },
-      }),
-    )
-    .catch(() => console.debug("Rates alread exists"));
-
-  const command = new UpdateCommand({
-    TableName: process.env.USER_TABLE!,
-    Key: { id: userId },
-    UpdateExpression: "SET #contractor = :contractor" + rateExpression,
-    ConditionExpression: "attribute_exists(id)",
-    ExpressionAttributeNames: attributeKeys,
-    ExpressionAttributeValues: attributeValues,
-    ReturnValues: "ALL_OLD",
-  });
-
-  console.debug(command.input);
-
-  const result = await createClient().send(command);
+  const result = await UserTable.updateRates(userId, rates);
 
   const tasks: Promise<any>[] = [];
 
@@ -104,10 +62,10 @@ const verifyContracts = async (userId: number, rate: Rate) => {
       return;
     }
 
-    const contract: ContractTableItem = {
+    const contract: ContractsTableItem = {
       userId,
       type: rate.type,
-      price: rate.amount,
+      price: getRateAmount(rate),
       startedAt: new Date().toISOString(),
     };
 
@@ -122,7 +80,7 @@ const endContracts = async (userId: number, rate: Rate) => {
   }
   const contract = activeContracts[0];
 
-  if (contract.price === rate.amount && rate.enabled) {
+  if (contract.price === getRateAmount(rate) && rate.enabled) {
     return true;
   }
 
@@ -131,9 +89,7 @@ const endContracts = async (userId: number, rate: Rate) => {
   return false;
 };
 
-const validateAmount = (amount?: number) => {
-  if (!amount) {
-    return false;
-  }
-  return 0 < amount && amount < 1000;
+const getRateAmount = (rate: Rate) => {
+  const minAmount = MinContractRates[rate.type];
+  return rate.amount < minAmount ? minAmount : rate.amount;
 };

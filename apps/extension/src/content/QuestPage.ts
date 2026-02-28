@@ -80,6 +80,8 @@ const injectPricesIntoTable = (
 
     if ((price?.flotto.price ?? 0) > 0) {
       td.appendChild(createMcElement(price!.flotto.price!, pricePrefix));
+    } else if (price?.flotto.status === "Inactive") {
+      td.innerText = "No Contract";
     } else {
       td.innerText = "—";
     }

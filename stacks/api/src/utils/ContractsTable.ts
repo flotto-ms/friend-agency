@@ -1,28 +1,17 @@
-import { ContractTableItem, FlottoQuestId } from "@flotto/types";
+import { ContractsTableItem, FlottoQuestId } from "@flotto/types";
 import { createClient, putItem, queryItems, updateItem } from "./DynamoDbUtils";
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 
-const removeEndedAt = (items: ContractTableItem[]) => {
+const removeEndedAt = (items: ContractsTableItem[]) => {
   return items.map((item) => {
     const { endedAt, ...rest } = item;
-    return rest as ContractTableItem;
+    return rest as ContractsTableItem;
   });
 };
 
-export const getActiveContracts = async (type: FlottoQuestId) => {
-  return queryItems<ContractTableItem>({
-    TableName: process.env.CONTRACT_TABLE!,
-    IndexName: "UserIdEndedAtIndex",
-    KeyCondition: {
-      type,
-      endedAt: "Active",
-    },
-  }).then(removeEndedAt);
-};
-
 export const getActiveUserContracts = async (userId: number, type?: FlottoQuestId) => {
-  const items = await queryItems<ContractTableItem>({
-    TableName: process.env.CONTRACT_TABLE!,
+  const items = await queryItems<ContractsTableItem>({
+    TableName: process.env.CONTRACTS_TABLE!,
     IndexName: "UserIdEndedAtIndex",
     KeyCondition: {
       userId,
@@ -38,20 +27,20 @@ export const getActiveUserContracts = async (userId: number, type?: FlottoQuestI
   return items;
 };
 
-export const startContract = async (item: Omit<ContractTableItem, "userId_type">) => {
+export const startContract = async (item: Omit<ContractsTableItem, "userId_type">) => {
   await putItem({
-    TableName: process.env.CONTRACT_TABLE!,
+    TableName: process.env.CONTRACTS_TABLE!,
     Item: { ...item, endedAt: "Active", userId_type: getUserTypeKey(item.userId, item.type) },
   });
 };
 
-export const endContract = async (item: ContractTableItem) => {
+export const endContract = async (item: ContractsTableItem) => {
   if (item.endedAt) {
     return;
   }
 
   await updateItem({
-    TableName: process.env.CONTRACT_TABLE!,
+    TableName: process.env.CONTRACTS_TABLE!,
     Key: {
       type: item.type,
       startedAt: item.startedAt,
@@ -64,7 +53,7 @@ export const endContract = async (item: ContractTableItem) => {
 
 export const getContract = async (type: FlottoQuestId, userId: number, dateStart: Date) => {
   const command = new QueryCommand({
-    TableName: process.env.CONTRACT_TABLE!,
+    TableName: process.env.CONTRACTS_TABLE!,
     IndexName: "UserIdTypeEndedAtIndex",
     KeyConditions: {
       userId_type: {
@@ -84,15 +73,15 @@ export const getContract = async (type: FlottoQuestId, userId: number, dateStart
   if (!result.Items) {
     return undefined;
   }
-  return (result.Items as ContractTableItem[]).find((item) => new Date(item.startedAt) < dateStart);
+  return (result.Items as ContractsTableItem[]).find((item) => new Date(item.startedAt) < dateStart);
 };
 
 const getUserTypeKey = (userId: number, type: number) => {
   return `${userId}_${type}`;
 };
 export default {
-  getActiveContracts,
   getActiveUserContracts,
   startContract,
   endContract,
+  getContract,
 };
