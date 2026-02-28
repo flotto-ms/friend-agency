@@ -30,19 +30,19 @@ function extractData() {
     }
   }
 
-  chrome.runtime.sendMessage({ action: "startServer", payload: { session, build } });
+  chrome.runtime.sendMessage({
+    action: "startServer",
+    payload: { session, build },
+  });
 }
 
 const inject = (tabId: number) => {
-  chrome.scripting.executeScript({ target: { tabId }, func: extractData }).catch(() => {});
+  chrome.scripting
+    .executeScript({ target: { tabId }, func: extractData })
+    .catch(() => {});
 };
 
-chrome.tabs.onActivated.addListener(({ tabId }) => {
-  chrome.tabs.get(tabId).then((e) => {
-    console.log(e.url);
-  });
-  inject(tabId);
-});
+chrome.tabs.onActivated.addListener(({ tabId }) => inject(tabId));
 
 chrome.runtime.onMessage.addListener(({ action, payload }) => {
   if (action === "startServer") {
@@ -51,6 +51,8 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
         return;
       }
 
+      syncPrices(getUserId());
+
       const pollServer = () => {
         getQuests()
           .then((quests) => {
@@ -58,7 +60,10 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
               return;
             }
             const qqs = quests.received.filter(
-              (quest) => quest.completed === 0 && !quest.expired && quest.required !== quest.progress,
+              (quest) =>
+                quest.completed === 0 &&
+                !quest.expired &&
+                quest.required !== quest.progress,
             ).length;
             const userId = getUserId();
             updateQqs({ pID: userId, QQS: qqs });
@@ -67,15 +72,6 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
             FlottoApi.postQuests(userId, {
               sent: quests.sent,
               received: quests.received,
-            });
-
-            chrome.tabs.query({}, (tabs) => {
-              tabs.forEach(({ id, url }) => {
-                if (!id || !url) {
-                  return;
-                }
-                chrome.tabs.sendMessage(id, { action: "quests", payload: { quests } });
-              });
             });
           })
           .catch((_) => {
@@ -91,5 +87,3 @@ chrome.runtime.onMessage.addListener(({ action, payload }) => {
     });
   }
 });
-
-syncPrices();

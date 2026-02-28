@@ -1,4 +1,5 @@
-import type { SaveQuestsRequest } from "@flotto/types";
+import type { SaveQuestsRequest, SaveQuestsResponse } from "@flotto/types";
+import { updatePrices } from "../utils/PriceData";
 
 const base = "https://hls6ldikcd.execute-api.us-east-1.amazonaws.com/prod";
 
@@ -20,6 +21,7 @@ export const FlottoApi = {
 
     return fetch(url, { method: "POST", body: JSON.stringify(changes) })
       .then((r) => r.json())
+      .then((data: SaveQuestsResponse) => updatePrices(data))
       .catch((ex) => console.error(ex));
   },
   postSlots: async (userId: number, slots: number) => {
@@ -42,7 +44,10 @@ const getChanges = async (quests: SaveQuestsRequest) => {
 
   const store = await chrome.storage.local
     .get(["quests"])
-    .then((result) => (result.quests ?? { received: [], sent: [] }) as SaveQuestsRequest);
+    .then(
+      (result) =>
+        (result.quests ?? { received: [], sent: [] }) as SaveQuestsRequest,
+    );
   let changeCount = 0;
 
   quests.received?.forEach((quest) => {
@@ -66,8 +71,12 @@ const getChanges = async (quests: SaveQuestsRequest) => {
   });
 
   const newStore = structuredClone(store);
-  newStore.received = newStore.received?.filter((item) => !changes.received?.find((change) => change.id === item.id));
-  newStore.sent = newStore.sent?.filter((item) => !changes.sent?.find((change) => change.id === item.id));
+  newStore.received = newStore.received?.filter(
+    (item) => !changes.received?.find((change) => change.id === item.id),
+  );
+  newStore.sent = newStore.sent?.filter(
+    (item) => !changes.sent?.find((change) => change.id === item.id),
+  );
 
   changes.received?.forEach((item) => newStore.received?.push(item));
   changes.sent?.forEach((item) => newStore.sent?.push(item));
