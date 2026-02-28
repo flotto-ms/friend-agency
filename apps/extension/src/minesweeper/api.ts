@@ -47,7 +47,9 @@ const openSocket = async () => {
       return;
     }
 
-    const url = `wss://main7.minesweeper.online/mine-websocket/?authKey=${auth.authKey}&session=${currentSession}&userId=${auth.userId}&EIO=4&transport=websocket`;
+    const server = "main" + (1 + (auth.userId % 10));
+
+    const url = `wss://${server}.minesweeper.online/mine-websocket/?authKey=${auth.authKey}&session=${currentSession}&userId=${auth.userId}&EIO=4&transport=websocket`;
     try {
       socket = new WebSocket(url);
     } catch (ex) {
@@ -76,7 +78,10 @@ const openSocket = async () => {
           break;
         default:
           const data: Response<any> = JSON.parse(m.data.substring(2));
-          if (data[0] == "server_error" && (data as any)[1] === "Wrong AuthKey") {
+          if (
+            data[0] == "server_error" &&
+            (data as any)[1] === "Wrong AuthKey"
+          ) {
             auth = null;
             socket?.close();
             connect(currentSession, currentBuild);
@@ -91,7 +96,15 @@ const openSocket = async () => {
   });
 };
 
-const sendRequest = ({ action, cb, args }: { action: string; cb?: Callback; args?: any[] }) => {
+const sendRequest = ({
+  action,
+  cb,
+  args,
+}: {
+  action: string;
+  cb?: Callback;
+  args?: any[];
+}) => {
   if (!socket || socket.readyState !== socket.OPEN) {
     cb?.reject(new Error("Socket not Open"));
     return;
