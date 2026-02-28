@@ -1,4 +1,4 @@
-import { ContractAction, ContractActionTableItem, ContractTableItem, FlottoQuestId } from "@flotto/types";
+import { ContractAction, ContractActionTableItem, ContractsTableItem, FlottoQuestId } from "@flotto/types";
 import DynamoDbUtils from "./DynamoDbUtils";
 
 const logPause = async (userId: number, paused: boolean, timestamp?: string) => {
@@ -51,4 +51,6 @@ export default {
   logPause,
   logSubscription,
   logPrice,
+  createKey,
+  createTimestamp,
 };

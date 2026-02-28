@@ -42,6 +42,14 @@ export class ApiStack extends Stack {
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
 
+    const contractTable = new Table(this, "ContractTable", {
+      tableName: "Contract",
+      partitionKey: { name: "key", type: AttributeType.STRING },
+      sortKey: { name: "startedAt", type: AttributeType.STRING },
+      removalPolicy: RemovalPolicy.DESTROY,
+      billingMode: BillingMode.PAY_PER_REQUEST,
+    });
+
     const contractActionsTable = new Table(this, "ContractActionsTable", {
       tableName: "ContractAction",
       partitionKey: { name: "key", type: AttributeType.STRING },
@@ -53,6 +61,12 @@ export class ApiStack extends Stack {
     /**
      * Secondary Indexes
      */
+    contractTable.addGlobalSecondaryIndex({
+      indexName: "EndedAtUserIdIndex",
+      partitionKey: { name: "endedAt", type: AttributeType.STRING },
+      sortKey: { name: "userId", type: AttributeType.NUMBER },
+      projectionType: ProjectionType.ALL,
+    });
 
     contractsTable.addGlobalSecondaryIndex({
       indexName: "UserIdEndedAtIndex",
@@ -95,7 +109,7 @@ export class ApiStack extends Stack {
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
       environment: {
-        CONTRACT_TABLE: contractsTable.tableName,
+        CONTRACTS_TABLE: contractsTable.tableName,
         CONTRACT_ACTION_TABLE: contractActionsTable.tableName,
         USER_TABLE: userTable.tableName,
       },
@@ -107,7 +121,7 @@ export class ApiStack extends Stack {
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
       environment: {
-        CONTRACT_TABLE: contractsTable.tableName,
+        CONTRACTS_TABLE: contractsTable.tableName,
         CONTRACT_ACTION_TABLE: contractActionsTable.tableName,
         USER_TABLE: userTable.tableName,
       },
@@ -120,7 +134,7 @@ export class ApiStack extends Stack {
       timeout: Duration.minutes(1),
       environment: {
         USER_TABLE: userTable.tableName,
-        CONTRACT_TABLE: contractsTable.tableName,
+        CONTRACTS_TABLE: contractsTable.tableName,
         RECEIVED_QUESTS_TABLE: receivedQuestsTable.tableName,
         SENT_QUESTS_TABLE: sentQuestsTable.tableName,
       },

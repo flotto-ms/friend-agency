@@ -1,8 +1,8 @@
 import { ReceivedQuestTableItem, SentQuestTableItem } from "@flotto/types";
-import { getContract } from "./ContractsTable";
 import UserTable from "./UserTable";
 import { getFlottoQuestType } from "@flotto/utils";
 import { FlottoQuestDetails } from "../../../../packages/types/src/flotto/FlottoQuestDetails";
+import ContractsTable from "./ContractsTable";
 
 const getContractPrice = async (quest: ReceivedQuestTableItem | SentQuestTableItem) => {
   const start = getQuestStartedAt(quest);
@@ -10,7 +10,7 @@ const getContractPrice = async (quest: ReceivedQuestTableItem | SentQuestTableIt
     return undefined;
   }
 
-  const contract = await getContract(getFlottoQuestType(quest)!, quest.sentTo ?? quest.userId, start);
+  const contract = await ContractsTable.getContract(getFlottoQuestType(quest)!, quest.sentTo ?? quest.userId, start);
   if (!contract) {
     return undefined;
   }

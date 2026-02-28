@@ -1,3 +1,4 @@
+import CustomLinks from "./content/CustomLinks";
 import QuestPage from "./content/QuestPage";
 
 let path: string = "";
@@ -13,6 +14,8 @@ setInterval(() => {
   }
   path = window.location.pathname;
 }, 500);
+
+CustomLinks.mount();
 
 chrome.runtime.onMessage.addListener((request, sender, callback) => {
   console.log("Message received");
