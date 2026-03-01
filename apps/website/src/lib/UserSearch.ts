@@ -1,6 +1,9 @@
 type Response<D> = [string, [number, number, D] | string];
 type CallbackArgs = Array<object | string | number>;
-type Callback = { accept: (data: CallbackArgs) => void; reject: (reason: object) => void };
+type Callback = {
+  accept: (data: CallbackArgs) => void;
+  reject: (reason: object) => void;
+};
 type Auth = { authKey: string; session: string; userId: number };
 
 export type SearchResult = { id: number; username: string; country: string }[];
@@ -92,7 +95,15 @@ const openSocket = async () => {
   });
 };
 
-const sendRequest = ({ action, cb, args }: { action: string; cb?: Callback; args?: (object | string | number)[] }) => {
+const sendRequest = ({
+  action,
+  cb,
+  args,
+}: {
+  action: string;
+  cb?: Callback;
+  args?: (object | string | number)[];
+}) => {
   if (!socket || socket.readyState !== socket.OPEN) {
     cb?.reject(new Error("Socket not Open"));
     return;
@@ -138,7 +149,17 @@ export const searchUsername = (val: string): Promise<SearchResult> => {
     connect().then(() => {
       sendRequest({
         action: "SearchController.searchWsAction",
-        cb: { accept: (r) => accept(r[0] as SearchResult), reject },
+        cb: {
+          accept: (r) => {
+            if (r.length === 0) {
+              currentBuild++;
+              searchUsername(val).then((r) => accept(r));
+              return;
+            }
+            accept(r[0] as SearchResult);
+          },
+          reject,
+        },
         args: [val],
       });
     });

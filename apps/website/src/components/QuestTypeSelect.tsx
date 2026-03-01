@@ -1,3 +1,4 @@
+"use client";
 import { Fragment } from "react/jsx-runtime";
 import {
   Select,
@@ -10,6 +11,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Field, FieldLabel } from "./ui/field";
+import { useMemo } from "react";
 
 const passives = [
   { label: "Experience", value: "8" },
@@ -76,13 +78,42 @@ const groups = [
   { label: "Arena", items: arena },
 ];
 
-const QuestTypeSelect: React.FC = () => {
+const allItems = [
+  ...passives,
+  ...wins,
+  ...winStreak,
+  ...noFlag,
+  ...efficiency,
+  ...arena,
+  ...multiplayer,
+  ...gems,
+];
+
+export const getQuestDescription = (id: string) => {
+  return allItems.find((item) => item.value === id)!.label;
+};
+
+export type QuestTypeSelectProps = {
+  value: number;
+  disabled?: boolean;
+  onChange: (val: number) => void;
+};
+
+const QuestTypeSelect: React.FC<QuestTypeSelectProps> = ({
+  value,
+  disabled = false,
+  onChange,
+}) => {
   return (
-    <Field className="w-full">
+    <Field>
       <FieldLabel>Quest Type</FieldLabel>
-      <Select>
-        <SelectTrigger className="w-full  max-w-[300px]">
-          <SelectValue />
+      <Select
+        disabled={disabled}
+        value={value === 0 ? undefined : value.toString()}
+        onValueChange={(v) => onChange(parseInt(v))}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="No Quest Selected" />
         </SelectTrigger>
         <SelectContent>
           {groups.map((g, i) => (

@@ -7,10 +7,10 @@ import { Field, FieldLabel } from "./ui/field";
 const MinMaxSlider: React.FC = () => {
   const [value, setValue] = useState([0, 50_000]);
   return (
-    <Field className="w-full">
+    <Field className="w-full pb-2">
       <FieldLabel>
         <div className="flex flex-1 items-center justify-between gap-2">
-          <div>Filter Amount</div>
+          <div>Amount</div>
           <span className="text-muted-foreground text-sm">
             {value[0]} to {value[1]}
           </span>

@@ -6,11 +6,13 @@ import {
   BookOpen,
   Bot,
   Command,
+  Cookie,
   Frame,
   GalleryVerticalEnd,
   Map,
   Moon,
   PieChart,
+  Plug2Icon,
   Settings2,
   SquareTerminal,
   Sun,
@@ -21,10 +23,8 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenuButton,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { TeamSwitcher } from "./TeamSwitcher";
 import { NavMain } from "./NavMain";
 import { NavProjects } from "./NavProjects";
 import { NavUser } from "./NavUser";
@@ -33,48 +33,58 @@ import { ModeToggle } from "./ModeToggle";
 // This is sample data.
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Flotto Bot",
+    email: "bot@flotto.vercel.app",
+    avatar: "/icon.png",
   },
   navMain: [
     {
       title: "About",
-      url: "#",
+      url: "/about",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "Home",
-          url: "#",
+          url: "/about",
         },
         {
           title: "Support",
-          url: "#",
+          url: "/about/support",
         },
         {
-          title: "Discord",
-          url: "#",
+          title: "Discord Server",
+          icon: Bot,
+          url: "/about/discord",
+        },
+        {
+          title: "Browser Extension",
+          icon: Plug2Icon,
+          url: "/about/extension",
         },
       ],
     },
     {
-      title: "Friend Quest",
+      title: "Friend Quest Agency",
       url: "#",
       icon: Bot,
       isActive: true,
       items: [
         {
           title: "Quest Search",
-          url: "#",
+          url: "/fqa/search",
+        },
+        {
+          title: "Auction House",
+          url: "/fqa/auctions",
         },
         {
           title: "Your Rates",
-          url: "#",
+          url: "/fqa/rates",
         },
         {
           title: "Wallet",
-          url: "#",
+          url: "/account/wallet",
         },
       ],
     },
@@ -127,19 +137,9 @@ const data = {
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      name: "Privacy Policy",
+      url: "/legal/privacy-policy",
+      icon: Cookie,
     },
   ],
 };
