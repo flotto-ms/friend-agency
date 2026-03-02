@@ -78,8 +78,25 @@ export const fetchRates = async (userId: number) => {
   });
 };
 
-export const saveRate = async (rate: RateItem) => {
+export const postSaveRate = async (rate: RateItem) => {
   return new Promise<RateItem>((resolve) => {
     setTimeout(() => resolve(rate), 750);
+  });
+};
+
+export const postAddGroup = async (data: {
+  label: string;
+  rates?: string[];
+}) => {
+  return new Promise<{ id: string; label: string; rates?: string[] }>(
+    (resolve) => {
+      setTimeout(() => resolve({ id: crypto.randomUUID(), ...data }), 750);
+    },
+  );
+};
+
+export const postDeleteGroup = async (id: string) => {
+  return new Promise<string>((resolve) => {
+    setTimeout(() => resolve(id), 750);
   });
 };

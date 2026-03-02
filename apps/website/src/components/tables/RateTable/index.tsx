@@ -5,6 +5,8 @@ import type { RateItem } from "./types";
 import {
   flexRender,
   getCoreRowModel,
+  OnChangeFn,
+  RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -19,15 +21,43 @@ import {
 
 import { columns } from "./columns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 
-const RateTable: React.FC<{ data: RateItem[]; loading?: boolean }> = ({
-  data,
-  loading = false,
-}) => {
+const RateTable: React.FC<{
+  data: RateItem[];
+  loading?: boolean;
+  onRowSelectionChange?: (state: RowSelectionState) => void;
+}> = ({ data, loading = false, onRowSelectionChange }) => {
+  const [selection, setSelection] = useState({});
+
+  useEffect(() => {
+    setSelection({});
+    if (onRowSelectionChange) onRowSelectionChange({});
+  }, [data]);
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    onRowSelectionChange: (updateFunction) => {
+      let changes: RowSelectionState | undefined = undefined;
+
+      setSelection((old) => {
+        if (typeof updateFunction === "object") {
+          changes = updateFunction;
+          return updateFunction;
+        } else {
+          const state = updateFunction(old);
+          changes = state;
+          return state;
+        }
+      });
+
+      if (onRowSelectionChange && changes) onRowSelectionChange(changes);
+    },
+    state: {
+      rowSelection: selection,
+    },
   });
 
   return (
@@ -74,7 +104,7 @@ const RateTable: React.FC<{ data: RateItem[]; loading?: boolean }> = ({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                There are no rates in this group.
               </TableCell>
             </TableRow>
           )}

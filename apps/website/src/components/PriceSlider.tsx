@@ -30,7 +30,7 @@ const PriceSlider: React.FC<PriceSliderProps> = ({
         onValueChange={(value) => onChange(value[0])}
         min={min}
         max={500}
-        step={10}
+        step={5}
       />
     </Field>
   );

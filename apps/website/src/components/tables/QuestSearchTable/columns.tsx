@@ -73,8 +73,8 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
     header: "Rate",
     cell: ({ getValue }) => (
       <HoverCard openDelay={50} closeDelay={10}>
-        <HoverCardTrigger>{`${getValue()} / ❤️`}</HoverCardTrigger>
-        <HoverCardContent className="p-2" side="top">
+        <HoverCardTrigger>{`${getValue()}`}</HoverCardTrigger>
+        <HoverCardContent className="p-2 pointer-events-none" side="top">
           <RateStatsTable data={rateStats} />
         </HoverCardContent>
       </HoverCard>

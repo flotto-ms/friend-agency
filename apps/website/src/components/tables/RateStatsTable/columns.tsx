@@ -25,7 +25,6 @@ export const columns: ColumnDef<RateStatsItem>[] = [
   {
     accessorKey: "rate",
     header: "Rate",
-    cell: ({ getValue }) => `${getValue()} / ❤️`,
   },
   {
     accessorKey: "amount",

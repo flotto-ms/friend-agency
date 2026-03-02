@@ -1,11 +1,5 @@
 "use client";
-import {
-  PropsWithChildren,
-  ReactElement,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { PropsWithChildren, useMemo, useState } from "react";
 import MinMaxSlider from "../MinMaxSlider";
 import PriceSlider from "../PriceSlider";
 import QuestTypeSelect, { getQuestDescription } from "../QuestTypeSelect";
@@ -41,17 +35,19 @@ import { RateItem } from "../tables/RateTable/types";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
 import { resetStopped, selectRates, updateRate } from "@/data/rateSlice";
 import { Spinner } from "../ui/spinner";
-import { Toggle } from "../ui/toggle";
-import { CircleCheck } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
 import { Card } from "../ui/card";
 
 export type RateDrawProps = {
   rate?: RateItem;
+  selectedGroup?: string;
 } & PropsWithChildren;
 
-const RateDraw: React.FC<RateDrawProps> = ({ rate, children }) => {
+const RateDraw: React.FC<RateDrawProps> = ({
+  rate,
+  selectedGroup,
+  children,
+}) => {
   const [open, setOpen] = useState(false);
   const onClose = () => setOpen(false);
   return (
@@ -60,7 +56,7 @@ const RateDraw: React.FC<RateDrawProps> = ({ rate, children }) => {
         {children}
       </DrawerTrigger>
       <DrawerContent className="data-[vaul-drawer-direction=bottom]:max-h-[50vh] data-[vaul-drawer-direction=top]:max-h-[50vh]">
-        <Contents rate={rate} onClose={onClose} />
+        <Contents rate={rate} selectedGroup={selectedGroup} onClose={onClose} />
       </DrawerContent>
     </Drawer>
   );
@@ -68,6 +64,7 @@ const RateDraw: React.FC<RateDrawProps> = ({ rate, children }) => {
 
 const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({
   rate,
+  selectedGroup,
   onClose,
 }) => {
   const slice = useAppSelector(selectRates);
@@ -76,7 +73,9 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({
   const [type, setType] = useState(rate?.type ?? 0);
   const [amount, setAmount] = useState(rate?.rate ?? 150);
   const [enabled, setEnabled] = useState(rate?.enabled ?? false);
-  const [groups, setGroups] = useState(rate?.groups ?? []);
+  const [groups, setGroups] = useState(
+    rate?.groups ?? (selectedGroup ? [selectedGroup] : []),
+  );
 
   const dispatch = useAppDispatch();
 
@@ -180,9 +179,8 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({
                 <FieldGroup>
                   <div className="flex flex-wrap gap-2">
                     {toggles.map((t) => (
-                      <Field orientation="horizontal">
+                      <Field key={t.id} orientation="horizontal">
                         <Checkbox
-                          key={t.id}
                           id={t.id}
                           checked={groups.includes(t.id)}
                           onClick={() => toggleGroup(t.id)}
