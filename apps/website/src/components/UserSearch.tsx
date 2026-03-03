@@ -136,7 +136,6 @@ export const UserSearch: React.FC = () => {
           Send Password
         </Button>
       )}
-      <QuestTypeSelect />
     </div>
   );
 };
