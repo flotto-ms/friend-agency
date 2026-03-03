@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Flotto FQA",
-  "version": "2.0",
-  "description": "A Flotto extension that updates your QQS for you whenever you open your friend-quests tab (https://minesweeper.online/friend-quests). It also includes member lists (clients/contractors), real time dev logs/notices, and important links.",
+  "version": "2.1",
+  "description": "An extension that updates your quest list to flotto.",
   "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": [
     "https://minesweeper.online/*",
-    "https://script.google.com/macros/s/*",
     "https://hls6ldikcd.execute-api.us-east-1.amazonaws.com/prod/*"
   ],
   "background": {

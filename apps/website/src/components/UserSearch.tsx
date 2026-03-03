@@ -7,8 +7,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Input } from "./ui/input";
 import { SidebarMenuButton } from "./ui/sidebar";
 import { Button } from "./ui/button";
-import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "./ui/input-otp";
-import QuestTypeSelect from "./QuestTypeSelect";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "./ui/input-otp";
 
 import auth from "../data/auth.json";
 
@@ -22,12 +26,18 @@ export const UserSearch: React.FC = () => {
 
   useEffect(() => {
     setAuth(auth, auth.build);
-  });
+  }, []);
 
   const onChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const val = e.currentTarget.value;
       setTerm(val);
+
+      if (val.length === 0) {
+        setOpen(false);
+        return;
+      }
+
       if (!user || user.username !== val) {
         if (user && user.username !== val) {
           setUser(undefined);
@@ -35,6 +45,10 @@ export const UserSearch: React.FC = () => {
 
         searchUsername(val).then((r) => {
           setResult(r);
+          if (!r) {
+            setOpen(false);
+            return;
+          }
           if (r.length === 1 && r[0].username === val) {
             setUser(r[0]);
           } else if (r.length > 0) {
@@ -58,7 +72,6 @@ export const UserSearch: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-2">
-      This is an example login, please type your username.
       <Field>
         <FieldLabel htmlFor="input-field-username">Username</FieldLabel>
         <Popover open={open && result.length > 0}>
@@ -79,10 +92,15 @@ export const UserSearch: React.FC = () => {
             onCloseAutoFocus={preventDefault}
             className="flex flex-col gap-1 p-2"
           >
-            {result.map((item) => (
+            {result?.map((item) => (
               <SidebarMenuButton variant="outline" asChild key={item.id}>
-                <div className="flex felx-col gap-2 p-6" onClick={() => onSelect(item)}>
-                  <img src={`https://minesweeper.online/img/flags/${item.country.toLowerCase()}.png`} />
+                <div
+                  className="flex felx-col gap-4 p-4"
+                  onClick={() => onSelect(item)}
+                >
+                  <img
+                    src={`https://minesweeper.online/img/flags/${item.country.toLowerCase()}.png`}
+                  />
                   <span>{item.username}</span>
                 </div>
               </SidebarMenuButton>
@@ -94,7 +112,12 @@ export const UserSearch: React.FC = () => {
         <>
           <Field>
             <FieldLabel htmlFor="input-field-username">Password</FieldLabel>
-            <InputOTP maxLength={6} value={password} onChange={setPassword}>
+            <InputOTP
+              autoFocus
+              maxLength={6}
+              value={password}
+              onChange={setPassword}
+            >
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
@@ -108,13 +131,20 @@ export const UserSearch: React.FC = () => {
               </InputOTPGroup>
             </InputOTP>
             <FieldDescription>
-              Please check your DMs for a password from{" "}
-              <a href="https://minesweeper.online/player/50609406" target="_blank">
-                FlottoBot
+              Please check your in game messages for a password from{" "}
+              <a
+                href="https://minesweeper.online/player/50609406"
+                target="_blank"
+              >
+                Flotto Bot
               </a>
             </FieldDescription>
           </Field>
-          <Button className="mt-6" disabled={password.length < 6} onClick={() => setPasswordSent(false)}>
+          <Button
+            className="mt-6"
+            disabled={password.length < 6}
+            onClick={() => setPasswordSent(false)}
+          >
             Sign In
           </Button>
         </>
@@ -123,7 +153,6 @@ export const UserSearch: React.FC = () => {
           Send Password
         </Button>
       )}
-      <QuestTypeSelect />
     </div>
   );
 };
