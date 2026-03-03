@@ -1,6 +1,9 @@
 type Response<D> = [string, [number, number, D] | string];
 type CallbackArgs = Array<object | string | number>;
-type Callback = { accept: (data: CallbackArgs, build: number) => void; reject: (reason: object) => void };
+type Callback = {
+  accept: (data: CallbackArgs, build: number) => void;
+  reject: (reason: object) => void;
+};
 type Auth = { authKey: string; session: string; userId: number };
 
 export type SearchResult = { id: number; username: string; country: string }[];
@@ -48,7 +51,7 @@ const openSocket = async () => {
       return;
     }
 
-    const server = "main" + (1 + (auth.userId % 10));
+    const server = "chat1";
     const url = `wss://${server}.minesweeper.online/mine-websocket/?authKey=${auth.authKey}&session=${auth.session}&userId=${auth.userId}&EIO=4&transport=websocket`;
     try {
       socket = new WebSocket(url);
@@ -121,7 +124,7 @@ const connect = async () => {
     fetch("https://minesweeper.online/authorize?session=")
       .then((r) => r.json())
       .then((r) => {
-        auth = r;
+        auth = r as Auth;
         return openSocket().then(() => accept(true));
       })
       .catch(reject);

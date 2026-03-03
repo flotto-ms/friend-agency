@@ -1,14 +1,13 @@
 "use client";
 
 import { SearchResult, searchUsername, setAuth } from "@/lib/UserSearch";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Field, FieldDescription, FieldLabel } from "./ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Input } from "./ui/input";
 import { SidebarMenuButton } from "./ui/sidebar";
 import { Button } from "./ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "./ui/input-otp";
-import QuestTypeSelect from "./QuestTypeSelect";
 
 import auth from "../data/auth.json";
 
@@ -20,6 +19,8 @@ export const UserSearch: React.FC = () => {
   const [result, setResult] = useState<SearchResult>([]);
   const [user, setUser] = useState<SearchResult[number] | undefined>(undefined);
 
+  const ref = useRef(term);
+
   useEffect(() => {
     setAuth(auth, auth.build);
   });
@@ -27,22 +28,34 @@ export const UserSearch: React.FC = () => {
   const onChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const val = e.currentTarget.value;
+      ref.current = val;
       setTerm(val);
       if (!user || user.username !== val) {
         if (user && user.username !== val) {
           setUser(undefined);
         }
 
-        searchUsername(val).then((r) => {
-          setResult(r);
-          if (r.length === 1 && r[0].username === val) {
-            setUser(r[0]);
-          } else if (r.length > 0) {
-            setOpen(true);
-            return;
-          }
-          setOpen(false);
-        });
+        searchUsername(val)
+          .then((r) => {
+            if (val !== ref.current) {
+              return;
+            }
+            setResult(r);
+            if (!r) {
+              setOpen(false);
+              return;
+            }
+            if (r.length === 1 && r[0].username === val) {
+              setUser(r[0]);
+            } else if (r.length > 0) {
+              setOpen(true);
+              return;
+            }
+            setOpen(false);
+          })
+          .catch(() => {
+            //Do Nothing
+          });
       }
     },
     [user],
@@ -81,7 +94,7 @@ export const UserSearch: React.FC = () => {
           >
             {result.map((item) => (
               <SidebarMenuButton variant="outline" asChild key={item.id}>
-                <div className="flex felx-col gap-2 p-6" onClick={() => onSelect(item)}>
+                <div className="flex felx-col gap-4 p-4" onClick={() => onSelect(item)}>
                   <img src={`https://minesweeper.online/img/flags/${item.country.toLowerCase()}.png`} />
                   <span>{item.username}</span>
                 </div>
@@ -94,7 +107,7 @@ export const UserSearch: React.FC = () => {
         <>
           <Field>
             <FieldLabel htmlFor="input-field-username">Password</FieldLabel>
-            <InputOTP maxLength={6} value={password} onChange={setPassword}>
+            <InputOTP autoFocus maxLength={6} value={password} onChange={setPassword}>
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
@@ -108,9 +121,9 @@ export const UserSearch: React.FC = () => {
               </InputOTPGroup>
             </InputOTP>
             <FieldDescription>
-              Please check your DMs for a password from{" "}
+              Please check your in game messages for a password from{" "}
               <a href="https://minesweeper.online/player/50609406" target="_blank">
-                FlottoBot
+                Flotto Bot
               </a>
             </FieldDescription>
           </Field>
