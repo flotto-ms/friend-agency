@@ -1,6 +1,9 @@
 type Response<D> = [string, [number, number, D] | string];
 type CallbackArgs = Array<object | string | number>;
-type Callback = { accept: (data: CallbackArgs, build: number) => void; reject: (reason: object) => void };
+type Callback = {
+  accept: (data: CallbackArgs, build: number) => void;
+  reject: (reason: object) => void;
+};
 type Auth = { authKey: string; session: string; userId: number };
 
 export type SearchResult = { id: number; username: string; country: string }[];

@@ -23,13 +23,19 @@ export const UserSearch: React.FC = () => {
 
   useEffect(() => {
     setAuth(auth, auth.build);
-  });
+  }, []);
 
   const onChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const val = e.currentTarget.value;
       ref.current = val;
       setTerm(val);
+
+      if (val.length === 0) {
+        setOpen(false);
+        return;
+      }
+
       if (!user || user.username !== val) {
         if (user && user.username !== val) {
           setUser(undefined);
@@ -41,6 +47,10 @@ export const UserSearch: React.FC = () => {
               return;
             }
             setResult(r);
+            if (!r) {
+              setOpen(false);
+              return;
+            }
             if (!r) {
               setOpen(false);
               return;
@@ -71,7 +81,6 @@ export const UserSearch: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-2">
-      This is an example login, please type your username.
       <Field>
         <FieldLabel htmlFor="input-field-username">Username</FieldLabel>
         <Popover open={open && result.length > 0}>
@@ -92,7 +101,7 @@ export const UserSearch: React.FC = () => {
             onCloseAutoFocus={preventDefault}
             className="flex flex-col gap-1 p-2"
           >
-            {result.map((item) => (
+            {result?.map((item) => (
               <SidebarMenuButton variant="outline" asChild key={item.id}>
                 <div className="flex felx-col gap-4 p-4" onClick={() => onSelect(item)}>
                   <img src={`https://minesweeper.online/img/flags/${item.country.toLowerCase()}.png`} />
@@ -107,7 +116,7 @@ export const UserSearch: React.FC = () => {
         <>
           <Field>
             <FieldLabel htmlFor="input-field-username">Password</FieldLabel>
-            <InputOTP autoFocus maxLength={6} value={password} onChange={setPassword}>
+            <InputOTP autoFocus autoFocus maxLength={6} value={password} onChange={setPassword}>
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
