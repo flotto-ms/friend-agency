@@ -116,7 +116,13 @@ export const UserSearch: React.FC = () => {
         <>
           <Field>
             <FieldLabel htmlFor="input-field-username">Password</FieldLabel>
-            <InputOTP autoFocus autoFocus maxLength={6} value={password} onChange={setPassword}>
+            <InputOTP
+              autoFocus
+              maxLength={6}
+              value={password}
+              onChange={setPassword}
+              pasteTransformer={(pasted) => pasted.replaceAll("-", "")}
+            >
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
