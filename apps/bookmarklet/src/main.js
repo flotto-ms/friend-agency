@@ -28,7 +28,7 @@
             const quests = obj[1][2];
             const exp = { sent: quests[8], recevied: quests[9] };
             if (confirm("Submit to Flotto?")) {
-              fetch(`https://${c[5]}/quests`, {
+              fetch(`https://${c[5]}/api/quests`, {
                 method: "POST",
                 body: JSON.stringify(exp),
               });
