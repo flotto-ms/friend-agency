@@ -1,7 +1,7 @@
 import type { SaveQuestsRequest, SaveQuestsResponse } from "@flotto/types";
 import { updatePrices } from "../utils/PriceData";
 
-const base = "https://hls6ldikcd.execute-api.us-east-1.amazonaws.com/prod";
+const base = "https://flotto.vercel.app/api";
 
 let lastValue = 100;
 let timeout = Date.now();
@@ -44,10 +44,7 @@ const getChanges = async (quests: SaveQuestsRequest) => {
 
   const store = await chrome.storage.local
     .get(["quests"])
-    .then(
-      (result) =>
-        (result.quests ?? { received: [], sent: [] }) as SaveQuestsRequest,
-    );
+    .then((result) => (result.quests ?? { received: [], sent: [] }) as SaveQuestsRequest);
   let changeCount = 0;
 
   quests.received?.forEach((quest) => {
@@ -71,12 +68,8 @@ const getChanges = async (quests: SaveQuestsRequest) => {
   });
 
   const newStore = structuredClone(store);
-  newStore.received = newStore.received?.filter(
-    (item) => !changes.received?.find((change) => change.id === item.id),
-  );
-  newStore.sent = newStore.sent?.filter(
-    (item) => !changes.sent?.find((change) => change.id === item.id),
-  );
+  newStore.received = newStore.received?.filter((item) => !changes.received?.find((change) => change.id === item.id));
+  newStore.sent = newStore.sent?.filter((item) => !changes.sent?.find((change) => change.id === item.id));
 
   changes.received?.forEach((item) => newStore.received?.push(item));
   changes.sent?.forEach((item) => newStore.sent?.push(item));

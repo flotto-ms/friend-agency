@@ -1,7 +1,4 @@
-const sendQuestRequest = [
-  "request",
-  ["FriendQuestsController.getSendQuestDataWsAction", [2656515], 1013, 916],
-];
+const sendQuestRequest = ["request", ["FriendQuestsController.getSendQuestDataWsAction", [2656515], 1013, 916]];
 
 const sendQuestResponseFull = [
   "response",
@@ -41,7 +38,11 @@ const sendQuestResponseAvailable = [
   ],
 ];
 
-const closeChannelRequest = [
+const closeChannelRequest = ["request", ["ChatController.closeChannelWsAction", ["31002034"], 0, 916]];
+
+const sendMessage = [
   "request",
-  ["ChatController.closeChannelWsAction", ["31002034"], 0, 916],
+  ["ChatController.sendMessageWsAction", [31510258, "Your Flotto one time password is: 123-456"], 0, 919],
 ];
+
+const closeChannel = ["request", ["ChatController.closeChannelWsAction", ["31510258"], 0, 919]];

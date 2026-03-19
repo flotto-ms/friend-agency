@@ -51,7 +51,7 @@ const openSocket = async () => {
       return;
     }
 
-    const server = "main" + (1 + (auth.userId % 10));
+    const server = "chat1";
     const url = `wss://${server}.minesweeper.online/mine-websocket/?authKey=${auth.authKey}&session=${auth.session}&userId=${auth.userId}&EIO=4&transport=websocket`;
     try {
       socket = new WebSocket(url);
@@ -124,7 +124,7 @@ const connect = async () => {
     fetch("https://minesweeper.online/authorize?session=")
       .then((r) => r.json())
       .then((r) => {
-        auth = r;
+        auth = r as Auth;
         return openSocket().then(() => accept(true));
       })
       .catch(reject);

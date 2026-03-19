@@ -16,13 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
-import {
-  deleteGroup,
-  loadInitialRates,
-  resetStopped,
-  selectRates,
-  setRateEnabled,
-} from "@/data/rateSlice";
+import { deleteGroup, loadInitialRates, resetStopped, selectRates, setRateEnabled } from "@/data/rateSlice";
 import { Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -50,10 +44,7 @@ export default function Page() {
     }
 
     return Object.entries(slice.rates)
-      .filter(
-        ([_, r]) =>
-          selectedGroup === "all" || Boolean(r.groups?.includes(selectedGroup)),
-      )
+      .filter(([_, r]) => selectedGroup === "all" || Boolean(r.groups?.includes(selectedGroup)))
       .map(([id, data]) => ({ id, ...data }) as RateItem)
       .sort((a, b) => a.description.localeCompare(b.description));
   }, [slice, selectedGroup]);
@@ -64,7 +55,7 @@ export default function Page() {
 
   const onGroupEnable = (enabled: boolean) => {
     rates.forEach((r) => {
-      if (r.stopping || r.enabled == enabled) {
+      if (r.enabled == enabled) {
         return;
       }
       dispatch(setRateEnabled({ id: r.id, enabled }));
@@ -97,26 +88,17 @@ export default function Page() {
           onGroupEnable={onGroupEnable}
         />
 
-        <RateTable
-          data={rates}
-          loading={!loaded}
-          onRowSelectionChange={setSelectedRows}
-        />
+        <RateTable data={rates} loading={!loaded} onRowSelectionChange={setSelectedRows} />
 
         <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Stack Group?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will remove the stack group, but not the rates.
-              </AlertDialogDescription>
+              <AlertDialogDescription>This will remove the stack group, but not the rates.</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                variant="destructive"
-                onClick={onDeleteConfirm}
-              >
+              <AlertDialogAction variant="destructive" onClick={onDeleteConfirm}>
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>

@@ -1,3 +1,4 @@
+export * from "./AuthTableItem";
 export * from "./ContractActionTableItem";
 export * from "./ContractTableItem";
 export * from "./ContractsTableItem";
