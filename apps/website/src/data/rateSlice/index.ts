@@ -1,12 +1,6 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { createAppSlice } from "../createAppSlice";
-import {
-  postAddGroup,
-  postDeleteGroup,
-  fetchRates,
-  type GetRateResponse,
-  postSaveRate,
-} from "./api";
+import { postAddGroup, postDeleteGroup, fetchRates, type GetRateResponse, postSaveRate } from "./api";
 
 export interface RateSliceState {
   status: "init" | "loading" | "failed" | "loaded";
@@ -24,24 +18,27 @@ export const rateSlice = createAppSlice({
   name: "rate",
   initialState,
   reducers: (create) => ({
-    setRateEnabled: create.reducer(
-      (state, action: PayloadAction<{ id: string; enabled: boolean }>) => {
-        const rate = state.rates[action.payload.id];
-        if (rate.enabled === action.payload.enabled) {
-          return;
-        }
-        rate.enabled = action.payload.enabled;
-        if (!rate.enabled) {
-          rate.stopping = true;
-        }
-      },
-    ),
+    setRateEnabled: create.reducer((state, action: PayloadAction<{ id: string; enabled: boolean }>) => {
+      const rate = state.rates[action.payload.id];
+      if (rate.enabled === action.payload.enabled) {
+        return;
+      }
+      rate.enabled = action.payload.enabled;
+      rate.stopping = !rate.enabled;
+      if (rate.stopping) {
+        rate.stopDate = Date.now() + 30_000;
+      }
+    }),
     resetStopped: create.asyncThunk(
-      async (id: string) =>
-        new Promise<string>((resolve) => setTimeout(() => resolve(id), 30_000)),
+      async (id: string) => new Promise<string>((resolve) => setTimeout(() => resolve(id), 30_000)),
       {
         fulfilled: (state, action) => {
-          state.rates[action.payload].stopping = false;
+          const rate = state.rates[action.payload];
+          if (rate.stopDate! > Date.now()) {
+            return;
+          }
+          rate.stopping = false;
+          rate.stopDate = undefined;
         },
       },
     ),
@@ -99,12 +96,6 @@ export const rateSlice = createAppSlice({
   },
 });
 
-export const {
-  loadInitialRates,
-  setRateEnabled,
-  resetStopped,
-  updateRate,
-  createGroup,
-  deleteGroup,
-} = rateSlice.actions;
+export const { loadInitialRates, setRateEnabled, resetStopped, updateRate, createGroup, deleteGroup } =
+  rateSlice.actions;
 export const { selectRates } = rateSlice.selectors;

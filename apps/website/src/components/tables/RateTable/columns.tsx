@@ -16,11 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import RateStatsTable from "../RateStatsTable";
 import { rateStats } from "../RateStatsTable/columns";
 import { useAppDispatch } from "@/data/hooks";
@@ -31,10 +27,7 @@ export const columns: ColumnDef<RateItem>[] = [
     id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
@@ -55,11 +48,7 @@ export const columns: ColumnDef<RateItem>[] = [
     size: 5000,
     cell: ({ getValue, row }) => (
       <RateDraw rate={row.original}>
-        <Button
-          variant="link"
-          className="px-0"
-          id={`rate-${row.original.id}`}
-        >{`${getValue()}`}</Button>
+        <Button variant="link" className="px-0" id={`rate-${row.original.id}`}>{`${getValue()}`}</Button>
       </RateDraw>
     ),
   },
@@ -70,6 +59,15 @@ export const columns: ColumnDef<RateItem>[] = [
   },
   {
     id: "status",
+    header: () => <div className="text-center">Status </div>,
+    cell: ({ row }) => (
+      <div className="flex flex-col items-center">
+        <RateStatus rate={row.original} />
+      </div>
+    ),
+  },
+  {
+    id: "enabled",
     header: () => <div className="text-center">Enabled </div>,
     cell: ({ row }) => <RateSwitcher rate={row.original} />,
   },
@@ -99,11 +97,7 @@ export const columns: ColumnDef<RateItem>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="right">
-            <DropdownMenuItem
-              onClick={(e) =>
-                document.getElementById(`rate-${rate.id}`)?.click()
-              }
-            >
+            <DropdownMenuItem onClick={(e) => document.getElementById(`rate-${rate.id}`)?.click()}>
               Edit
             </DropdownMenuItem>
             <Separator />
@@ -115,18 +109,24 @@ export const columns: ColumnDef<RateItem>[] = [
   },
 ];
 
-const RateSwitcher: React.FC<{ rate: RateItem }> = ({ rate }) => {
-  const dispatch = useAppDispatch();
-
+const RateStatus: React.FC<{ rate: RateItem }> = ({ rate }) => {
   if (rate.stopping) {
     return (
-      <Badge variant="secondary">
+      <Badge className="bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300">
         <Spinner data-icon="inline-start" />
         Stopping
       </Badge>
     );
   }
 
+  if (rate.enabled) {
+    return <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">Subscribed</Badge>;
+  }
+  return <Badge className="bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">Unsubscribed</Badge>;
+};
+
+const RateSwitcher: React.FC<{ rate: RateItem }> = ({ rate }) => {
+  const dispatch = useAppDispatch();
   const onClick = () => {
     dispatch(setRateEnabled({ id: rate.id, enabled: !rate.enabled }));
     if (rate.enabled) {

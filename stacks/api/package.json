@@ -13,6 +13,7 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.160",
     "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "22.7.9",
     "aws-cdk": "2.1023.0",
     "aws-lambda": "^1.0.7",
@@ -25,6 +26,7 @@
     "@aws-sdk/client-dynamodb": "^3.988.0",
     "@aws-sdk/lib-dynamodb": "^3.988.0",
     "aws-cdk-lib": "2.206.0",
-    "constructs": "^10.0.0"
+    "constructs": "^10.0.0",
+    "jsonwebtoken": "^9.0.3"
   }
 }

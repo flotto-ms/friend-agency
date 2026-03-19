@@ -4,7 +4,8 @@ export type RateItem = {
   description: string;
   rate: number;
   enabled: boolean;
-  stopping: boolean;
+  stopping?: boolean;
+  stopDate?: number;
   filter?: string;
   groups?: string[];
 };

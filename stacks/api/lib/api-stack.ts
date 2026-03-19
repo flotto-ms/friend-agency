@@ -20,6 +20,14 @@ export class ApiStack extends Stack {
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
 
+    const authTable = new Table(this, "AuthTable", {
+      tableName: "Auth",
+      partitionKey: { name: "useId", type: AttributeType.NUMBER },
+      timeToLiveAttribute: "ttl",
+      removalPolicy: RemovalPolicy.DESTROY,
+      billingMode: BillingMode.PAY_PER_REQUEST,
+    });
+
     const receivedQuestsTable = new Table(this, "ReceivedQuestsTable", {
       partitionKey: { name: "userId", type: AttributeType.NUMBER },
       sortKey: { name: "id", type: AttributeType.NUMBER },
@@ -93,6 +101,17 @@ export class ApiStack extends Stack {
      * Lambda Functions
      */
 
+    const authLamber = new NodejsFunction(this, "AuthLambda", {
+      entry: "src/handlers/authUser.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_22_X,
+      timeout: Duration.minutes(1),
+      environment: {
+        AUTH_TABLE: authTable.tableName,
+        USER_TABLE: userTable.tableName,
+      },
+    });
+
     const postUserSlotsLambda = new NodejsFunction(this, "PostUserSlotsLambda", {
       entry: "src/handlers/postUserSlots.ts",
       handler: "handler",
@@ -165,10 +184,12 @@ export class ApiStack extends Stack {
     /**
      * Permissions
      */
+    authTable.grantReadWriteData(authLamber);
 
     userTable.grantReadData(getUsersLambda);
     userTable.grantReadData(getUserQuestsLambda);
     userTable.grantReadData(postUserQuestsLambda);
+    userTable.grantReadWriteData(authLamber);
     userTable.grantReadWriteData(postUserSlotsLambda);
     userTable.grantReadWriteData(postUserRatesLambda);
     userTable.grantReadWriteData(postUserAvailabilityLambda);
@@ -199,6 +220,7 @@ export class ApiStack extends Stack {
     });
 
     //Paths
+    const pathAuth = api.root.addResource("auth");
     const pathUsers = api.root.addResource("users");
     const pathUser = pathUsers.addResource("{id}");
     const pathQuests = pathUser.addResource("quests");
@@ -208,6 +230,7 @@ export class ApiStack extends Stack {
     const getQuests = pathQuests.addResource("{type}");
 
     //Integrations
+    const authIntegration = new LambdaIntegration(authLamber);
     const getUsersIntegration = new LambdaIntegration(getUsersLambda);
     const postSlotsIntegration = new LambdaIntegration(postUserSlotsLambda);
     const postRatesIntegration = new LambdaIntegration(postUserRatesLambda);
@@ -216,6 +239,8 @@ export class ApiStack extends Stack {
     const getQuestsIntegration = new LambdaIntegration(getUserQuestsLambda);
 
     //Create HTTP Methods
+    pathAuth.addMethod("GET", authIntegration);
+    pathAuth.addMethod("POST", authIntegration);
     pathUsers.addMethod("GET", getUsersIntegration);
     getQuests.addMethod("GET", getQuestsIntegration);
     pathQuests.addMethod("POST", postQuestsIntegration);
@@ -227,6 +252,10 @@ export class ApiStack extends Stack {
      * Outputs
      */
 
+    new CfnOutput(this, "AuthTableOutput", {
+      exportName: "AuthTableName",
+      value: authTable.tableName,
+    });
     new CfnOutput(this, "UserTableOutput", {
       exportName: "UserTableName",
       value: userTable.tableName,
