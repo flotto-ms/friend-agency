@@ -3,14 +3,11 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { QuestSearchItem } from "./types";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { CopyCheckIcon, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import RateStatsTable from "../RateStatsTable";
+import { toast } from "sonner";
 import { rateStats } from "../RateStatsTable/columns";
 
 export const columns: ColumnDef<QuestSearchItem>[] = [
@@ -18,10 +15,7 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
     id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
@@ -62,9 +56,20 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
     header: "Contractor",
     size: 1000,
     cell: () => (
-      <div className="flex felx-col gap-2 items-center truncate text-ellipsis">
+      <div className="flex felx-col gap-2 items-center justify-center truncate text-ellipsis">
         <img src={`https://minesweeper.online/img/flags/dj.png`} />
         <span>Ady | Flotto</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            navigator.clipboard.writeText("11698196").then(() => {
+              toast.info("User's ID coppied to clipboard, paste this into user search when sending the quest.");
+            });
+          }}
+        >
+          <CopyCheckIcon />
+        </Button>
       </div>
     ),
   },
