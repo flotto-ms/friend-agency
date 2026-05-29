@@ -56,7 +56,7 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
     header: "Contractor",
     size: 1000,
     cell: () => (
-      <div className="flex felx-col gap-2 items-center justify-center truncate text-ellipsis">
+      <div className="flex felx-col gap-2 items-center justify-start truncate text-ellipsis">
         <img src={`https://minesweeper.online/img/flags/dj.png`} />
         <span>Ady | Flotto</span>
         <Button

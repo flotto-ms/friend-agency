@@ -60,6 +60,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       Key: { userId: data.userId },
       TableName: process.env.AUTH_TABLE!,
       Attrs: {
+        ip: event.requestContext.identity.sourceIp,
         ttl: Math.floor(Date.now() / 1_000) + 300,
         code: code,
       },

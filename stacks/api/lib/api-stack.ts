@@ -3,12 +3,19 @@ import { Cors, LambdaIntegration, RestApi } from "aws-cdk-lib/aws-apigateway";
 import { AttributeType, BillingMode, ProjectionType, Table } from "aws-cdk-lib/aws-dynamodb";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import { Bucket } from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class ApiStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
+
+    /**
+     * S3 Storage
+     */
+
+    const configBucket = new Bucket(this, "ConfigBucket");
 
     /**
      * DynamoDB Tables
@@ -22,7 +29,7 @@ export class ApiStack extends Stack {
 
     const authTable = new Table(this, "AuthTable", {
       tableName: "Auth",
-      partitionKey: { name: "useId", type: AttributeType.NUMBER },
+      partitionKey: { name: "userId", type: AttributeType.NUMBER },
       timeToLiveAttribute: "ttl",
       removalPolicy: RemovalPolicy.DESTROY,
       billingMode: BillingMode.PAY_PER_REQUEST,
@@ -38,14 +45,6 @@ export class ApiStack extends Stack {
     const sentQuestsTable = new Table(this, "SentQuestsTable", {
       partitionKey: { name: "userId", type: AttributeType.NUMBER },
       sortKey: { name: "id", type: AttributeType.NUMBER },
-      removalPolicy: RemovalPolicy.DESTROY,
-      billingMode: BillingMode.PAY_PER_REQUEST,
-    });
-
-    const contractsTable = new Table(this, "ContractsTable", {
-      tableName: "Contracts",
-      partitionKey: { name: "type", type: AttributeType.NUMBER },
-      sortKey: { name: "startedAt", type: AttributeType.STRING },
       removalPolicy: RemovalPolicy.DESTROY,
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
@@ -69,31 +68,18 @@ export class ApiStack extends Stack {
     /**
      * Secondary Indexes
      */
-    contractTable.addGlobalSecondaryIndex({
-      indexName: "EndedAtUserIdIndex",
-      partitionKey: { name: "endedAt", type: AttributeType.STRING },
+
+    userTable.addGlobalSecondaryIndex({
+      indexName: "AccessIndex",
+      partitionKey: { name: "access", type: AttributeType.STRING },
       sortKey: { name: "userId", type: AttributeType.NUMBER },
       projectionType: ProjectionType.ALL,
     });
 
-    contractsTable.addGlobalSecondaryIndex({
-      indexName: "UserIdEndedAtIndex",
-      partitionKey: { name: "userId", type: AttributeType.NUMBER },
-      sortKey: { name: "endedAt", type: AttributeType.STRING },
-      projectionType: ProjectionType.ALL,
-    });
-
-    contractsTable.addGlobalSecondaryIndex({
-      indexName: "TypeEndedAtIndex",
-      partitionKey: { name: "type", type: AttributeType.NUMBER },
-      sortKey: { name: "endedAt", type: AttributeType.STRING },
-      projectionType: ProjectionType.ALL,
-    });
-
-    contractsTable.addGlobalSecondaryIndex({
-      indexName: "UserIdTypeEndedAtIndex",
-      partitionKey: { name: "userId_type", type: AttributeType.STRING },
-      sortKey: { name: "endedAt", type: AttributeType.STRING },
+    contractTable.addGlobalSecondaryIndex({
+      indexName: "EndedAtUserIdIndex",
+      partitionKey: { name: "endedAt", type: AttributeType.STRING },
+      sortKey: { name: "userId", type: AttributeType.NUMBER },
       projectionType: ProjectionType.ALL,
     });
 
@@ -109,6 +95,7 @@ export class ApiStack extends Stack {
       environment: {
         AUTH_TABLE: authTable.tableName,
         USER_TABLE: userTable.tableName,
+        CONFIG_BUCKET: configBucket.bucketName,
       },
     });
 
@@ -128,7 +115,7 @@ export class ApiStack extends Stack {
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
       environment: {
-        CONTRACTS_TABLE: contractsTable.tableName,
+        CONTRACT_TABLE: contractTable.tableName,
         CONTRACT_ACTION_TABLE: contractActionsTable.tableName,
         USER_TABLE: userTable.tableName,
       },
@@ -140,7 +127,7 @@ export class ApiStack extends Stack {
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
       environment: {
-        CONTRACTS_TABLE: contractsTable.tableName,
+        CONTRACT_TABLE: contractTable.tableName,
         CONTRACT_ACTION_TABLE: contractActionsTable.tableName,
         USER_TABLE: userTable.tableName,
       },
@@ -153,7 +140,7 @@ export class ApiStack extends Stack {
       timeout: Duration.minutes(1),
       environment: {
         USER_TABLE: userTable.tableName,
-        CONTRACTS_TABLE: contractsTable.tableName,
+        CONTRACT_TABLE: contractTable.tableName,
         RECEIVED_QUESTS_TABLE: receivedQuestsTable.tableName,
         SENT_QUESTS_TABLE: sentQuestsTable.tableName,
       },
@@ -194,9 +181,9 @@ export class ApiStack extends Stack {
     userTable.grantReadWriteData(postUserRatesLambda);
     userTable.grantReadWriteData(postUserAvailabilityLambda);
 
-    contractsTable.grantReadData(postUserQuestsLambda);
-    contractsTable.grantReadWriteData(postUserAvailabilityLambda);
-    contractsTable.grantReadWriteData(postUserRatesLambda);
+    contractTable.grantReadData(postUserQuestsLambda);
+    contractTable.grantReadWriteData(postUserAvailabilityLambda);
+    contractTable.grantReadWriteData(postUserRatesLambda);
 
     contractActionsTable.grantReadWriteData(postUserRatesLambda);
     contractActionsTable.grantReadWriteData(postUserAvailabilityLambda);
@@ -206,6 +193,8 @@ export class ApiStack extends Stack {
 
     sentQuestsTable.grantReadData(getUserQuestsLambda);
     sentQuestsTable.grantReadWriteData(postUserQuestsLambda);
+
+    configBucket.grantReadWrite(authLamber);
 
     /**
      * API Gayteway
