@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
 import { getItem, updateItem } from "../utils/DynamoDbUtils";
 import { SaveAvailabilityRequest, UserTableItem } from "@flotto/types";
-import ContractsTable from "../utils/ContractsTable";
 import ContractActionTable from "../utils/ContractActionTable";
+import ContractTable from "../utils/ContractTable";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const id = event.pathParameters?.id;
@@ -23,15 +23,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     TableName: process.env.USER_TABLE!,
   });
 
-  if (!user) {
-    return {
-      statusCode: 400,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "User not found" }),
-    };
-  }
-
-  if (user.available === data.available) {
+  if (user?.available === data.available) {
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
@@ -45,24 +37,27 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     Attrs: {
       available: data.available,
     },
+    Upsert: true,
   });
 
   await ContractActionTable.logPause(userId, !data.available);
 
   if (!data.available) {
     //End Current Contracts
-    await ContractsTable.getActiveUserContracts(userId).then((contracts) => {
-      return Promise.all(contracts.map((contract) => ContractsTable.endContract(contract)));
+    await ContractTable.getActiveUserContracts(userId).then((contracts) => {
+      return Promise.all(contracts.map((contract) => ContractTable.endContract(contract)));
     });
-  } else if (user.rates) {
+  } else if (user?.rates) {
     //Create Contracts for enabled rates
-    const enabledRates = Object.values(user.rates).filter((rate) => rate.enabled);
+    const enabledRates = Object.entries(user.rates).filter(([id, rate]) => rate.enabled);
     await Promise.all(
-      enabledRates.map((rate) => {
-        return ContractsTable.startContract({
+      enabledRates.map(([id, rate]) => {
+        return ContractTable.startContract({
           userId,
+          rateId: id,
           type: rate.type,
           price: rate.amount,
+          filter: rate.filter,
           startedAt: new Date().toISOString(),
         });
       }),

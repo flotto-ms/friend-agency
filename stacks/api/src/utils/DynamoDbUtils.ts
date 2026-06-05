@@ -264,6 +264,25 @@ export const queryItems = async <T>({ KeyCondition, TableName, IndexName }: Quer
   return items;
 };
 
+export const queryItemsInput = async <T>(input: QueryCommandInput) => {
+  const items: T[] = [];
+  const client = createClient();
+  const cmd = { ...input };
+
+  while (true) {
+    console.debug(JSON.stringify(cmd, null, 2));
+    await client.send(new QueryCommand(cmd)).then((response) => {
+      items.push(...(response.Items as T[]));
+      cmd.ExclusiveStartKey = response.LastEvaluatedKey;
+    });
+
+    if (!cmd.ExclusiveStartKey) {
+      break;
+    }
+  }
+  return items;
+};
+
 /**
  * Creates a signleton for the instance, with reusable connection pools
  * @returns
@@ -288,6 +307,7 @@ export default {
   putItem,
   createClient,
   queryItems,
+  queryItemsInput,
   updateItem,
   deleteItem,
 };

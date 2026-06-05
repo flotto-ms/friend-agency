@@ -9,7 +9,7 @@ const getUser = (id: number) => {
   });
 };
 
-const updateRates = async (userId: number, rates: Rate[]) => {
+const updateRates = async (userId: number, rates: [string, Rate][]) => {
   const attributeKeys: Record<string, string> = {};
   const attributeValues: Record<string, any> = {};
 
@@ -17,8 +17,8 @@ const updateRates = async (userId: number, rates: Rate[]) => {
     .map((rate, i) => {
       const key = `#key${i}`;
       const val = `:val${i}`;
-      attributeKeys[key] = `quest_${rate.type}`;
-      attributeValues[val] = rate;
+      attributeKeys[key] = rate[0];
+      attributeValues[val] = rate[1];
       return `, #rate.${key} = ${val}`;
     })
     .join("");
@@ -33,7 +33,7 @@ const updateRates = async (userId: number, rates: Rate[]) => {
         TableName: process.env.USER_TABLE!,
         Key: { id: userId },
         UpdateExpression: "SET #rate = :rate",
-        ConditionExpression: "attribute_exists(id) AND attribute_not_exists(#rate)",
+        ConditionExpression: "attribute_not_exists(#rate)",
         ExpressionAttributeNames: { "#rate": "rates" },
         ExpressionAttributeValues: { ":rate": {} },
       }),
@@ -44,7 +44,7 @@ const updateRates = async (userId: number, rates: Rate[]) => {
     TableName: process.env.USER_TABLE!,
     Key: { id: userId },
     UpdateExpression: "SET #contractor = :contractor" + rateExpression,
-    ConditionExpression: "attribute_exists(id)",
+    //ConditionExpression: "attribute_exists(id)",
     ExpressionAttributeNames: attributeKeys,
     ExpressionAttributeValues: attributeValues,
     ReturnValues: "ALL_OLD",

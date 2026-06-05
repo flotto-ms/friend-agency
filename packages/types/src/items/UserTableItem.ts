@@ -25,6 +25,7 @@ export type RateFilterRange = {
 };
 
 export type RateFilter = {
+  level?: RateFilterRange;
   required?: RateFilterRange;
   efficiency?: RateFilterRange;
   density?: RateFilterRange;

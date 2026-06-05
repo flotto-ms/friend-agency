@@ -1,7 +1,7 @@
 import type { SaveQuestsRequest, SaveQuestsResponse } from "@flotto/types";
 import { updatePrices } from "../utils/PriceData";
 
-const base = "https://flotto.vercel.app/api";
+const base = "https://hls6ldikcd.execute-api.us-east-1.amazonaws.com/prod"; //https://flotto.vercel.app/api";
 
 let lastValue = 100;
 let timeout = Date.now();

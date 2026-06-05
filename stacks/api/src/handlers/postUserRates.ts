@@ -1,10 +1,9 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
-import type { ContractsTableItem, Rate, SaveRatesRequest, UserTableItem } from "@flotto/types";
-import RateUtils from "../utils/RateUtils";
-import { getRateQuestId } from "../utils/FlottoQuestType";
-import ContractsTable from "../utils/ContractsTable";
+import type { ContractTableItem, Rate, SaveRatesRequest } from "@flotto/types";
+import { getRateFilter, getRateQuestId } from "../utils/FlottoQuestType";
 import UserTable from "../utils/UserTable";
-import { MinContractRates } from "../data/MinContractRates";
+import ContractActionTable from "../utils/ContractActionTable";
+import ContractTable from "../utils/ContractTable";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const userParam = event.pathParameters?.id;
@@ -19,16 +18,30 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const userId = parseInt(userParam);
   const data: SaveRatesRequest = JSON.parse(event.body ?? "{}");
 
+  console.debug(data);
+
+  await Promise.all(data.rates.map((rate) => ContractActionTable.logRate(userId, rate)));
+
   const rates = data.rates
     .map(
       (rate) =>
-        ({
-          type: getRateQuestId(rate.name),
-          amount: rate.amount,
-          enabled: rate.enabled,
-        }) as Rate,
+        [
+          `quest_${rate.name.replaceAll(" ", "_").toLowerCase()}`,
+          {
+            type: getRateQuestId(rate.name),
+            amount: rate.amount,
+            enabled: rate.enabled,
+            filter: getRateFilter(rate.name),
+          },
+        ] as [string, Rate],
     )
-    .filter((rate) => Boolean(rate.type));
+    .filter((rate) => {
+      const valid = Boolean(rate[1].type);
+      if (!valid) {
+        console.log("Invalid Rate:", rate);
+      }
+      return valid;
+    });
 
   if (rates.length === 0) {
     return {
@@ -41,10 +54,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
   const tasks: Promise<any>[] = [];
 
-  tasks.push(...rates.map((rate) => RateUtils.logRateAction(result.Attributes as UserTableItem, rate)));
-
   if (result.Attributes?.available) {
-    tasks.push(...rates.map((rate) => verifyContracts(userId, rate)));
+    tasks.push(...rates.map((rate) => verifyContracts(userId, rate[0], rate[1])));
   }
 
   await Promise.all(tasks);
@@ -56,40 +67,46 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   };
 };
 
-const verifyContracts = async (userId: number, rate: Rate) => {
-  await endContracts(userId, rate).then((contractRunning) => {
+const verifyContracts = async (userId: number, rateId: string, rate: Rate) => {
+  await endContracts(userId, rateId, rate).then((contractRunning) => {
     if (!rate.enabled || contractRunning) {
       return;
     }
 
-    const contract: ContractsTableItem = {
+    const contract: Omit<ContractTableItem, "key" | "endedAt"> = {
       userId,
+      rateId,
       type: rate.type,
-      price: getRateAmount(rate),
+      price: rate.amount,
+      filter: rate.filter,
       startedAt: new Date().toISOString(),
     };
 
-    return ContractsTable.startContract(contract);
+    return ContractTable.startContract(contract);
   });
 };
 
-const endContracts = async (userId: number, rate: Rate) => {
-  const activeContracts = await ContractsTable.getActiveUserContracts(userId, rate.type);
+const endContracts = async (userId: number, rateId: string, rate: Rate) => {
+  const activeContracts = await ContractTable.getActiveUserContracts(userId, rate.type).then((r) => {
+    console.log(r);
+    return r.filter((rate) => rate.rateId == rateId);
+  });
+
+  console.log(activeContracts);
+
   if (activeContracts.length == 0) {
+    console.log("No Active Contract");
     return false;
   }
   const contract = activeContracts[0];
 
-  if (contract.price === getRateAmount(rate) && rate.enabled) {
+  if (contract.price === rate.amount && rate.enabled) {
+    console.log("No change to Contract");
     return true;
   }
 
-  await ContractsTable.endContract(contract);
+  console.log("End Contract");
+  await Promise.all(activeContracts.map((contract) => ContractTable.endContract(contract)));
 
   return false;
-};
-
-const getRateAmount = (rate: Rate) => {
-  const minAmount = MinContractRates[rate.type];
-  return rate.amount < minAmount ? minAmount : rate.amount;
 };

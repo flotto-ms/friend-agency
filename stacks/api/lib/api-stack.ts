@@ -68,6 +68,33 @@ export class ApiStack extends Stack {
     /**
      * Secondary Indexes
      */
+    receivedQuestsTable.addGlobalSecondaryIndex({
+      indexName: "UserIdCreatedAtIndex",
+      partitionKey: { name: "userId", type: AttributeType.NUMBER },
+      sortKey: { name: "createdAt", type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
+    });
+
+    receivedQuestsTable.addGlobalSecondaryIndex({
+      indexName: "InitiatorIdCreatedAtIndex",
+      partitionKey: { name: "initiatorId", type: AttributeType.NUMBER },
+      sortKey: { name: "createdAt", type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
+    });
+
+    sentQuestsTable.addGlobalSecondaryIndex({
+      indexName: "UserIdExpiresAtIndex",
+      partitionKey: { name: "userId", type: AttributeType.NUMBER },
+      sortKey: { name: "expiresAt", type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
+    });
+
+    sentQuestsTable.addGlobalSecondaryIndex({
+      indexName: "SentToExpiresAtIndex",
+      partitionKey: { name: "sentTo", type: AttributeType.NUMBER },
+      sortKey: { name: "expiresAt", type: AttributeType.STRING },
+      projectionType: ProjectionType.ALL,
+    });
 
     userTable.addGlobalSecondaryIndex({
       indexName: "AccessIndex",
@@ -80,6 +107,13 @@ export class ApiStack extends Stack {
       indexName: "EndedAtUserIdIndex",
       partitionKey: { name: "endedAt", type: AttributeType.STRING },
       sortKey: { name: "userId", type: AttributeType.NUMBER },
+      projectionType: ProjectionType.ALL,
+    });
+
+    contractTable.addGlobalSecondaryIndex({
+      indexName: "UserIdTypeIndex",
+      partitionKey: { name: "userId", type: AttributeType.NUMBER },
+      sortKey: { name: "type", type: AttributeType.NUMBER },
       projectionType: ProjectionType.ALL,
     });
 

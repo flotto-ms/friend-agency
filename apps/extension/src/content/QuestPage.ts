@@ -1,30 +1,81 @@
 import { formatNumber } from "@flotto/utils";
 import { getPrices } from "../utils/PriceData";
 import type { FlottoQuestDetails } from "../../../../packages/types/src/flotto/FlottoQuestDetails";
+import type { SaveQuestsResponse } from "@flotto/types";
 
 const _observer = new MutationObserver((_) => injectPrices());
 
+const headerTemplate = `
+  <div data-flotto="header"><table><tbody><tr><td style="width: 100%;"><h2 class="">Flotto Wallet (Estimate)</h2></td><td><h2 class="events-title"><span class="season help gray" title="" data-original-title="Flotto Season S7">[S7]</span></h2></td></tr></tbody></table><hr class="event-hr"></div>
+  <table class="table table-bordered" data-flotto="set"><thead><tr><th class="text-nowrap quest-column">Description</th><th class="text-nowrap">Amount</th></tr></thead><tbody>
+    <tr><td>Quests Sold</td><td class="text-nowrap" id="flotto-sold"></td></tr>
+    <tr><td>Quests Purchased</td><td class="text-nowrap" id="flotto-purchased"></td></tr>
+    <tr><td>Contractor Fees * (5%)</td><td class="text-nowrap" id="flotto-fees"></td></tr>
+    <tr><th>Balance</th><th class="text-nowrap" id="flotto-total"></div></td></tr>
+  </tbody></table>
+  <div><p class="text-nowrap transparent">* Agency fees can be offset by end of <a id="flotto-show">season rewards</a>.</p></div>
+  <table id="flotto-reward" style="display:none" class="table table-bordered" data-flotto="set"><thead><tr><th class="text-nowrap quest-column">Tier</th><th class="text-nowrap">Event Points Sent</th><th class="text-nowrap">Reward</th></tr></thead><tbody>
+    <tr><td>Tier 1</td><td class="text-nowrap">2 000 EP</td><td class="text-nowrap">2 000 <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></td></tr>
+    <tr><td>Tier 2</td><td class="text-nowrap">4 000 EP</td><td class="text-nowrap">5 000 <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></td></tr>
+    <tr><td>Tier 3</td><td class="text-nowrap">7 000 EP</td><td class="text-nowrap">10 000 <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></td></tr>
+    <tr><td>Tier 4</td><td class="text-nowrap">10 000 EP</td><td class="text-nowrap">15 000 <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></td></tr>
+    <tr><td>Tier 5</td><td class="text-nowrap">15 000 EP</td><td class="text-nowrap">30 000 <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></td></tr>
+  </tbody></table>
+`;
+
 const injectPrices = () => {
   const questBlock = document.getElementById("QuestsBlock");
-  const tables = [...questBlock!.querySelectorAll<HTMLTableElement>(".table")];
-  if (tables.length === 3) {
-    tables.shift();
-    //injectPricesIntoTest([230, 180, 215], quests!);
-  }
-
-  if (tables.length < 2) {
-    return;
-  }
+  const tables = [...questBlock!.querySelectorAll<HTMLTableElement>(".table")].filter((tbl) => {
+    const thead = tbl.querySelector<HTMLTableElement>("thead tr")!;
+    return thead.childNodes.length > 5;
+  });
 
   const [received, sent] = tables;
+
+  const header = questBlock?.querySelector('[data-flotto="header"]');
 
   getPrices().then((prices) => {
     if (!prices) {
       return;
     }
 
-    injectPricesIntoTable(prices.received, received);
-    injectPricesIntoTable(prices.sent, sent, "+");
+    if (received) injectPricesIntoTable(prices.received, received);
+    if (sent) injectPricesIntoTable(prices.sent, sent, "+");
+
+    if (!header) {
+      injectSummary(prices);
+    }
+  });
+};
+
+const injectSummary = (prices: SaveQuestsResponse) => {
+  const sold = prices.sent.reduce((a, c) => a + (c?.flotto?.price ?? 0), 0);
+  const purchased = prices.received.reduce((a, c) => a + (c?.flotto?.price ?? 0), 0);
+  const fees = Math.round(purchased * 0.05);
+  const total = sold - purchased - fees;
+
+  if (purchased === 0 && sold === 0) {
+    return;
+  }
+
+  const questBlock = document.getElementById("QuestsBlock");
+  const div = document.createElement("div");
+  div.innerHTML = headerTemplate.trim();
+
+  questBlock?.prepend(...div.childNodes);
+
+  document.getElementById("flotto-sold")?.append(sold === 0 ? "—" : createMcElement(sold, "+"));
+  document.getElementById("flotto-purchased")?.append(purchased === 0 ? "—" : createMcElement(purchased, "-"));
+  document.getElementById("flotto-fees")?.append(fees === 0 ? "—" : createMcElement(fees, "-"));
+  document.getElementById("flotto-total")?.append(total === 0 ? "—" : createMcElement(total));
+
+  document.getElementById("flotto-show")?.addEventListener("click", (e) => {
+    const reward = document.getElementById("flotto-reward")!;
+    if (reward.style.display === "none") {
+      reward.style.removeProperty("display");
+    } else {
+      reward.style.display = "none";
+    }
   });
 };
 

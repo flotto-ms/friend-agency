@@ -1,7 +1,10 @@
 export const formatNumber = (val: number, seporator = " ") => {
-  return val >= 1000
-    ? Math.round(val)
-        .toString()
-        .replace(/\B(?=(\d{3})+(?!\d))/g, seporator)
+  const abs = Math.abs(val);
+
+  return abs >= 1000
+    ? (val < 0 ? "-" : "") +
+        Math.round(abs)
+          .toString()
+          .replace(/\B(?=(\d{3})+(?!\d))/g, seporator)
     : val;
 };

@@ -23,8 +23,7 @@ export const getActiveUserContracts = async (userId: number, type?: FlottoQuestI
   });
 
   if (type) {
-    const item = items.find((item) => item.type === type);
-    return item ? [item] : [];
+    return items.filter((item) => item.type === type);
   }
 
   return items;
@@ -33,12 +32,12 @@ export const getActiveUserContracts = async (userId: number, type?: FlottoQuestI
 export const startContract = async (item: Omit<ContractTableItem, "key" | "endedAt">) => {
   await putItem({
     TableName: process.env.CONTRACT_TABLE!,
-    Item: { ...item, endedAt: "Active", key: getKey(item.userId, item.type) },
+    Item: { ...item, endedAt: "Active", key: getKey(item.userId, item.rateId) },
   });
 };
 
 export const endContract = async (item: ContractTableItem) => {
-  if (item.endedAt === "Active") {
+  if (item.endedAt !== "Active") {
     return;
   }
 
@@ -54,6 +53,31 @@ export const endContract = async (item: ContractTableItem) => {
   });
 };
 
+export const getUserQuestContracts = async (userId: number, type: FlottoQuestId, date: Date) => {
+  const items = await queryItems<ContractTableItem>({
+    TableName: process.env.CONTRACT_TABLE!,
+    IndexName: "UserIdTypeIndex",
+    KeyCondition: {
+      userId,
+      type,
+    },
+  });
+
+  return items.filter((contract) => {
+    const start = new Date(contract.startedAt);
+    if (start > date) {
+      return false;
+    }
+
+    if (contract.endedAt === "Active") {
+      return true;
+    }
+
+    const end = new Date(contract.endedAt);
+    return date <= end;
+  });
+};
+/*
 export const getContract = async (type: FlottoQuestId, userId: number, dateStart: Date) => {
   const command = new QueryCommand({
     TableName: process.env.CONTRACT_TABLE!,
@@ -83,12 +107,13 @@ export const getContract = async (type: FlottoQuestId, userId: number, dateStart
     return new Date(item.endedAt) > dateStart;
   });
 };
-
-const getKey = (userId: number, type: number) => {
-  return `${userId}_${type}`;
+*/
+const getKey = (userId: number, rateId: string) => {
+  return `${userId}_${rateId}`;
 };
 export default {
   getActiveUserContracts,
+  getUserQuestContracts,
   getKey,
   startContract,
   endContract,
