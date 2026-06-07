@@ -30,7 +30,6 @@ const getFlottoDetails = async (quest: ReceivedQuestTableItem | SentQuestTableIt
   }
 
   const contract = await ContractUtility.getQuestContract(quest);
-  console.log(contract);
   if (contract) {
     const levels = quest.level * (quest.isElite ? 3 : 1);
     details.price = levels * contract.price;
