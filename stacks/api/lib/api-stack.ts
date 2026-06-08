@@ -202,6 +202,16 @@ export class ApiStack extends Stack {
       },
     });
 
+    const getContractsLambda = new NodejsFunction(this, "GetContractsLambda", {
+      entry: "src/handlers/getContracts.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_22_X,
+      timeout: Duration.minutes(1),
+      environment: {
+        CONTRACT_TABLE: contractTable.tableName,
+      },
+    });
+
     /**
      * Permissions
      */
@@ -216,6 +226,7 @@ export class ApiStack extends Stack {
     userTable.grantReadWriteData(postUserAvailabilityLambda);
 
     contractTable.grantReadData(postUserQuestsLambda);
+    contractTable.grantReadData(getContractsLambda);
     contractTable.grantReadWriteData(postUserAvailabilityLambda);
     contractTable.grantReadWriteData(postUserRatesLambda);
 
@@ -244,6 +255,7 @@ export class ApiStack extends Stack {
 
     //Paths
     const pathAuth = api.root.addResource("auth");
+    const pathContracts = api.root.addResource("contracts");
     const pathUsers = api.root.addResource("users");
     const pathUser = pathUsers.addResource("{id}");
     const pathQuests = pathUser.addResource("quests");
@@ -254,6 +266,7 @@ export class ApiStack extends Stack {
 
     //Integrations
     const authIntegration = new LambdaIntegration(authLamber);
+    const getContractsIntegration = new LambdaIntegration(getContractsLambda);
     const getUsersIntegration = new LambdaIntegration(getUsersLambda);
     const postSlotsIntegration = new LambdaIntegration(postUserSlotsLambda);
     const postRatesIntegration = new LambdaIntegration(postUserRatesLambda);
@@ -264,6 +277,7 @@ export class ApiStack extends Stack {
     //Create HTTP Methods
     pathAuth.addMethod("GET", authIntegration);
     pathAuth.addMethod("POST", authIntegration);
+    pathContracts.addMethod("GET", getContractsIntegration);
     pathUsers.addMethod("GET", getUsersIntegration);
     getQuests.addMethod("GET", getQuestsIntegration);
     pathQuests.addMethod("POST", postQuestsIntegration);
@@ -282,6 +296,10 @@ export class ApiStack extends Stack {
     new CfnOutput(this, "UserTableOutput", {
       exportName: "UserTableName",
       value: userTable.tableName,
+    });
+    new CfnOutput(this, "ContractTableOutput", {
+      exportName: "ContractTableName",
+      value: contractTable.tableName,
     });
     new CfnOutput(this, "ReceivedQuestsTableOutput", {
       exportName: "ReceivedQuestsTableName",

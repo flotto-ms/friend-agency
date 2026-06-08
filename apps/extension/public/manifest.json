@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Flotto FQA",
-  "version": "2.4",
+  "version": "2.5.1",
   "description": "An extension that updates your quest list to flotto.",
   "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": [

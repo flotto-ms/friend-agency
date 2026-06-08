@@ -1,4 +1,4 @@
-import type { SaveQuestsRequest, SaveQuestsResponse } from "@flotto/types";
+import type { GetContractsResponse, GetPricesResponse, SaveQuestsRequest, SaveQuestsResponse } from "@flotto/types";
 import { updatePrices } from "../utils/PriceData";
 
 const base = "https://hls6ldikcd.execute-api.us-east-1.amazonaws.com/prod"; //https://flotto.vercel.app/api";
@@ -36,6 +36,16 @@ export const FlottoApi = {
     return fetch(url, { method: "POST", body: JSON.stringify({ slots }) })
       .then((r) => r.json())
       .catch((ex) => console.error(ex));
+  },
+
+  getPrices: async (userId: number) => {
+    const url = `${base}/users/${userId}/quests/prices`;
+    return fetch(url).then((r) => r.json() as Promise<GetPricesResponse>);
+  },
+
+  getContracts: async () => {
+    const url = `${base}/contracts`;
+    return fetch(url).then((r) => r.json() as Promise<GetContractsResponse>);
   },
 };
 

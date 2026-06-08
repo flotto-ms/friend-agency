@@ -1,4 +1,5 @@
 import { parseQuests, type QuestResponse } from "./questParser";
+export type UserStatus = { id: number; username: string; country: string; isAccepting: boolean; isFull: boolean };
 
 type Response<D> = [string, [number, number, D]];
 type Callback = { accept: (data: any) => void; reject: (reason: any) => void };
@@ -78,10 +79,7 @@ const openSocket = async () => {
           break;
         default:
           const data: Response<any> = JSON.parse(m.data.substring(2));
-          if (
-            data[0] == "server_error" &&
-            (data as any)[1] === "Wrong AuthKey"
-          ) {
+          if (data[0] == "server_error" && (data as any)[1] === "Wrong AuthKey") {
             auth = null;
             socket?.close();
             connect(currentSession, currentBuild);
@@ -96,15 +94,7 @@ const openSocket = async () => {
   });
 };
 
-const sendRequest = ({
-  action,
-  cb,
-  args,
-}: {
-  action: string;
-  cb?: Callback;
-  args?: any[];
-}) => {
+const sendRequest = ({ action, cb, args }: { action: string; cb?: Callback; args?: any[] }) => {
   if (!socket || socket.readyState !== socket.OPEN) {
     cb?.reject(new Error("Socket not Open"));
     return;
@@ -158,7 +148,36 @@ export const getQuests = async () => {
     sendRequest({
       action: "QuestsController.getQuestsWsAction",
       cb: {
-        accept: (data: QuestResponse) => accept(parseQuests(data)),
+        accept: (data: QuestResponse) => {
+          const parsed = parseQuests(data);
+          chrome.storage.local.set({ quests: parsed });
+          accept(parsed);
+        },
+        reject,
+      },
+    });
+  });
+};
+
+export const getUserQQS = async (userId: number) => {
+  if (!socket) {
+    return;
+  }
+
+  return new Promise<UserStatus>((accept, reject) => {
+    sendRequest({
+      action: "FriendQuestsController.getSendQuestDataWsAction",
+      args: [userId],
+      cb: {
+        accept: (data: any[]) => {
+          accept({
+            id: userId,
+            username: data[0].username,
+            country: data[0].country,
+            isAccepting: data[0].allowFriendQuests === 1,
+            isFull: data[1],
+          });
+        },
         reject,
       },
     });

@@ -1,6 +1,5 @@
 import { ContractTableItem, FlottoQuestId } from "@flotto/types";
-import { createClient, putItem, queryItems, updateItem } from "./DynamoDbUtils";
-import { QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { putItem, queryItems, updateItem } from "./DynamoDbUtils";
 
 export const getActiveContracts = () => {
   return queryItems<ContractTableItem>({
@@ -112,6 +111,7 @@ const getKey = (userId: number, rateId: string) => {
   return `${userId}_${rateId}`;
 };
 export default {
+  getActiveContracts,
   getActiveUserContracts,
   getUserQuestContracts,
   getKey,
