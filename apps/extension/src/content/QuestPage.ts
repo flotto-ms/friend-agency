@@ -29,6 +29,8 @@ const headerTemplate = `
   </tbody></table>
 `;
 
+const loadingHtml = `<img src="/img/loading_big.gif" class="loading-small">`;
+
 let modalTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 const injectContractors = () => {
   if (modalTimeout) clearTimeout(modalTimeout);
@@ -44,6 +46,10 @@ const injectContractors = () => {
     const sendButton = content?.childNodes[1].firstChild as HTMLLinkElement;
 
     const links = document.createElement("div");
+    links.style.display = "flex";
+    links.style.flexWrap = "wrap";
+    links.style.justifyContent = "space-around";
+    links.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))";
     const users = new Set<number>();
 
     for (let contract of selectedContracts.contracts) {
@@ -92,7 +98,7 @@ const injectPrices = () => {
 
     if (received) injectPricesIntoTable(prices.received, quests.received, received);
     if (sent) injectPricesIntoTable(prices.sent, quests.sent, sent, "+");
-    if (unsent) injectPricesIntoUnsent(unsent);
+    if (unsent && quests.sent && quests.sent[0].initiatorId === 11698196) injectPricesIntoUnsent(unsent);
 
     if (!header) {
       injectSummary(prices);
@@ -151,7 +157,8 @@ const injectPricesIntoUnsent = (table: HTMLTableElement) => {
   table.querySelectorAll<HTMLTableRowElement>("tbody tr").forEach((row, i) => {
     const td = document.createElement("td");
     td.classList.add("text-nowrap");
-    td.innerText = "—";
+    td.style.userSelect = "none";
+    td.innerHTML = loadingHtml;
     row.insertBefore(td, row.childNodes[2]);
   });
 
@@ -163,15 +170,18 @@ const injectPricesIntoUnsent = (table: HTMLTableElement) => {
       })
       .then((response: { contracts: QuestContracts[] }) => {
         response.contracts.forEach((c) => {
-          if (c.bestPrice === 0) {
+          if (!table.querySelectorAll(`#quest_row_${c.id}`)) {
             return;
           }
 
           const cell = table.querySelectorAll(`#quest_row_${c.id} td`)[2];
-          const button = table.querySelector(`#quest_row_${c.id} button`);
-          cell.textContent = "";
+          if (!cell) {
+            return;
+          }
+
           if (cell.firstElementChild) cell.removeChild(cell.firstElementChild!);
-          cell.append(createMcElement(c.bestPrice));
+
+          const button = table.querySelector(`#quest_row_${c.id} button`);
 
           cell.addEventListener("mouseover", async () => {
             const span = cell.querySelector("span");
@@ -182,10 +192,25 @@ const injectPricesIntoUnsent = (table: HTMLTableElement) => {
             span?.setAttribute("data-toggle", "popover");
 
             let content = `<table class="table table-bordered" style="margin:0;zoom:0.9">`;
+
+            let count = 0;
+            let found = false;
+
             for (let item of c.contracts) {
-              content += await createContractRow(item);
+              const row = await createContractRow(item);
+              if (row && (count < 5 || (row?.available && !found))) {
+                count++;
+                if (row?.available) {
+                  found = true;
+                }
+                content += row?.template;
+              }
             }
-            content += "</tableclass>";
+            content += "</table>";
+
+            if (count < c.contracts.length) {
+              content += `<div style="text-align:center;margin-top:5px;font-size:12px;">Showing top ${count} of ${c.contracts.length}</div>`;
+            }
 
             span?.setAttribute("data-trigger", "hover");
             span?.setAttribute("data-html", "true");
@@ -202,9 +227,15 @@ const injectPricesIntoUnsent = (table: HTMLTableElement) => {
             });
           });
 
-          button?.addEventListener("click", () => {
-            selectedContracts = c;
-          });
+          if (c.bestPrice === 0) {
+            cell.textContent = "-";
+          } else {
+            cell.textContent = "";
+            cell.append(createMcElement(c.bestPrice).firstChild!);
+            button?.addEventListener("click", () => {
+              selectedContracts = c;
+            });
+          }
         });
       });
   };
@@ -241,7 +272,9 @@ const injectPricesIntoTable = (
     const td = document.createElement("td");
     td.classList.add("text-nowrap");
 
-    if ((price?.flotto.price ?? 0) > 0 && quest) {
+    if (!price?.flotto) {
+      td.innerHTML = loadingHtml;
+    } else if ((price.flotto.price ?? 0) > 0 && quest) {
       const amount = price!.flotto.price!;
       const levels = quest!.level * (quest!.isElite ? 3 : 1);
 
@@ -251,7 +284,7 @@ const injectPricesIntoTable = (
           content: `<div class="text-nowrap"><p>This quest was contracted on flotto<br />at the following rate: </p><p> ${createMcElement(amount / levels).innerHTML} &nbsp; per level</p></div>`,
         }),
       );
-    } else if (price?.flotto.status === "Inactive") {
+    } else if (price.flotto.status === "Inactive") {
       td.innerText = "No Contract";
     } else {
       td.innerText = "—";
@@ -276,11 +309,14 @@ const createContractRow = async (c: QuestContract) => {
     })
     .then((response: { status: UserStatus }) => {
       const status = response.status;
-      if (!status) return "";
+      if (!status) return;
       const elem = document.createElement("div");
       elem.textContent = status.username;
 
-      return `<tr><td class="text-nowrap"><nobr><img src="/img/flags/${status.country.toLowerCase()}.png" class="player-flag help"><a>${elem.innerHTML}</a></nobr></td><td class="text-nowrap">${c.price}</td><td class="text-nowrap">${getStatus(status!)}</td></tr>`;
+      return {
+        available: status.isAccepting && !status.isFull,
+        template: `<tr><td class="text-nowrap" style="overflow:hidden;text-overflow:ellipsis;max-width:200px"><nobr><img src="/img/flags/${status.country.toLowerCase()}.png" class="player-flag help"><a>${elem.innerHTML}</a></nobr></td><td class="text-nowrap">${c.price}</td><td class="text-nowrap">${getStatus(status!)}</td></tr>`,
+      };
     });
 };
 
@@ -301,15 +337,8 @@ const createContractorLink = async (c: QuestContract, sendButton: HTMLLinkElemen
       elem.append(span);
       elem.href = "javascript:void(0);";
 
-      const mc = createMcElement(c.price).firstElementChild! as HTMLElement;
-
-      elem.append(mc);
-      mc.prepend(" @ ");
       elem.style.display = "inline-block";
       elem.style.marginRight = "10px";
-
-      mc.style.display = "inline-block";
-      mc.style.marginLeft = "5px";
 
       elem.addEventListener("click", () => {
         try {
@@ -323,7 +352,16 @@ const createContractorLink = async (c: QuestContract, sendButton: HTMLLinkElemen
           button!.click();
         }, 50);
       });
-      return elem;
+
+      const mc = createMcElement(c.price).firstElementChild! as HTMLElement;
+
+      const div = document.createElement("div");
+      div.style.display = "flex";
+      div.style.alignItems = "justify";
+      div.append(elem);
+      div.append(mc);
+
+      return div;
     });
 };
 
@@ -373,7 +411,6 @@ const QuestPage = {
         attributes: true,
         childList: true,
       });
-      injectPrices();
     }
   },
   unmount: () => {

@@ -148,11 +148,7 @@ export const getQuests = async () => {
     sendRequest({
       action: "QuestsController.getQuestsWsAction",
       cb: {
-        accept: (data: QuestResponse) => {
-          const parsed = parseQuests(data);
-          chrome.storage.local.set({ quests: parsed });
-          accept(parsed);
-        },
+        accept: (data: QuestResponse) => accept(parseQuests(data)),
         reject,
       },
     });
@@ -170,6 +166,10 @@ export const getUserQQS = async (userId: number) => {
       args: [userId],
       cb: {
         accept: (data: any[]) => {
+          if (!data[0]) {
+            reject();
+            return;
+          }
           accept({
             id: userId,
             username: data[0].username,

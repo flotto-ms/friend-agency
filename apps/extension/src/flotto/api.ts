@@ -89,4 +89,9 @@ const getChanges = async (quests: SaveQuestsRequest) => {
   return changes;
 };
 
-//chrome.storage.local.set({ quests: { received: [], sent: [] } });
+chrome.storage.local.get(["quests"]).then((result) => {
+  if ((result.quests as any)?.version !== 2) {
+    console.log("Reset Store");
+    chrome.storage.local.set({ quests: { version: 2, received: [], sent: [] } });
+  }
+});

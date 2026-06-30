@@ -84,60 +84,76 @@ const startServer = (session: string, build: number) => {
 };
 
 const getContracts = async () => {
-  return Promise.all([getQuests().then((r) => r?.unsent ?? []), loadContracts()]).then(async ([unsent, contracts]) => {
-    unsent = [{ type: MSOQuestType.ArenaCoins } as any];
+  return Promise.all([getQuests().then((r) => r?.unsent ?? []), loadContracts()]).then(
+    async ([unsent, contracts = []]) => {
+      const unsentContracts = unsent.map((quest) => {
+        const type = getFlottoQuestType(quest);
+        let arena = quest.type === MSOQuestType.Arena ? getAreaType(quest) : undefined;
+        const userIds = new Set<number>();
 
-    const unsentContracts = unsent.map((quest) => {
-      const type = getFlottoQuestType(quest);
-      let arena = quest.type === MSOQuestType.Arena ? getAreaType(quest) : undefined;
-      const userIds = new Set<number>();
+        const questContracts = contracts
+          .filter((c) => c.type === type && c.userId !== quest.initiatorId)
+          .sort((a, b) => b.price - a.price);
 
-      return {
-        id: quest.id,
-        contracts: contracts.filter((c) => {
-          if (c.type !== type || c.userId === quest.initiatorId || userIds.has(c.userId)) {
-            return false;
+        if (quest.id === 29409344) {
+          console.log(questContracts);
+        }
+
+        return {
+          id: quest.id,
+          contracts: questContracts.filter((c) => {
+            if (userIds.has(c.userId)) {
+              return false;
+            }
+
+            if (!c.filter) {
+              if (c.userId === 6798490) {
+                console.log(c);
+              }
+              //userIds.add(c.userId);
+              return true;
+            }
+
+            let valid = false;
+
+            if (c.filter.level) {
+              const filter = c.filter.level;
+              const level = quest.level * (quest.isElite ? 3 : 1);
+              valid = filter.min <= level && level <= filter.max;
+
+              if (c.userId === 6798490) {
+                console.log(valid, c, level, filter);
+              }
+            }
+
+            if (c.filter.arenaLevel && arena) {
+              const filter = c.filter.arenaLevel;
+              valid = filter.min <= arena.level && arena.level <= filter.max;
+            }
+
+            if (valid) {
+              //userIds.add(c.userId);
+            }
+
+            return valid;
+          }),
+          bestPrice: 0,
+        };
+      });
+
+      for (let q of unsentContracts) {
+        for (let price of q.contracts) {
+          const user = await getUserStatus(price.userId);
+          if (user?.isAccepting && !user.isFull) {
+            q.bestPrice = price.price;
+            break;
           }
-          if (!c.filter) {
-            return true;
-          }
-
-          let valid = false;
-
-          if (c.filter.level) {
-            const filter = c.filter.level;
-            const level = quest.level * (quest.isElite ? 3 : 1);
-            valid = filter.min <= level && level <= filter.max;
-          }
-
-          if (c.filter.arenaLevel && arena) {
-            const filter = c.filter.arenaLevel;
-            valid = filter.min <= arena.level && arena.level <= filter.max;
-          }
-
-          if (valid) {
-            userIds.add(c.userId);
-          }
-
-          return valid;
-        }),
-        bestPrice: 0,
-      };
-    });
-
-    for (let q of unsentContracts) {
-      const prices = q.contracts.sort((a, b) => b.price - a.price);
-      for (let price of prices) {
-        const user = await getUserStatus(price.userId);
-        if (user?.isAccepting && !user.isFull) {
-          q.bestPrice = price.price;
-          break;
         }
       }
-    }
 
-    return unsentContracts;
-  });
+      return unsentContracts;
+    },
+  );
 };
 
 chrome.tabs.onActivated.addListener(({ tabId }) => inject(tabId));
@@ -157,7 +173,9 @@ chrome.runtime.onMessage.addListener(({ action, payload }, sender, sendResponse)
         .catch(() => {});
       return;
     case "getUserStatus":
-      getUserStatus(payload.userId).then((status) => sendResponse({ status }));
+      getUserStatus(payload.userId)
+        .then((status) => sendResponse({ status }))
+        .catch(() => sendResponse({}));
       return true;
     case "getContracts":
       getContracts().then((contracts) => sendResponse({ contracts }));
