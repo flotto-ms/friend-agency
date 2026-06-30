@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/nav/AppSidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { StoreProvider } from "./StoreProvider";
+import { StoreProvider } from "../components/providers/StoreProvider";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -36,8 +36,7 @@ export default function RootLayout({
             <TooltipProvider>
               <SidebarProvider>
                 <AppSidebar />
-                <main className="w-full">
-                  <SidebarTrigger />
+                <main className="relative w-full">
                   {children}
                   <Toaster position="top-right" />
                 </main>

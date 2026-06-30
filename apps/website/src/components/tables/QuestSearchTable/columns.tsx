@@ -49,7 +49,7 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
     cell: ({ row }) => {
       const data = row.original;
       const ep = data.level * (data.elite ? 3 : 1);
-      return `+${ep} ❤️`;
+      return `+${ep}`;
     },
   },
   {

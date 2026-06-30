@@ -64,8 +64,8 @@ export const getRateFilter = (name: string): RateFilter | undefined => {
     return undefined;
   }
 
-  const max = parseInt(result[3]);
-  const min = name.endsWith("+") ? 99 : result[2] ? parseInt(result[2]) : max;
+  const max = name.endsWith("+") ? 500 : parseInt(result[3]);
+  const min = name.endsWith("+") ? parseInt(result[3]) : result[2] ? parseInt(result[2]) : max;
 
   if (name.includes("arena")) {
     return { arenaLevel: { min, max } };

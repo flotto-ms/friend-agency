@@ -167,6 +167,17 @@ export class ApiStack extends Stack {
       },
     });
 
+    const userGroupsLambda = new NodejsFunction(this, "UserGroupsLambda", {
+      entry: "src/handlers/userGroups/index.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_22_X,
+      timeout: Duration.minutes(1),
+      environment: {
+        USER_TABLE: userTable.tableName,
+        CONFIG_BUCKET: configBucket.bucketName,
+      },
+    });
+
     const postUserQuestsLambda = new NodejsFunction(this, "PostUserQuestsLambda", {
       entry: "src/handlers/postUserQuests.ts",
       handler: "handler",
@@ -175,6 +186,17 @@ export class ApiStack extends Stack {
       environment: {
         USER_TABLE: userTable.tableName,
         CONTRACT_TABLE: contractTable.tableName,
+        RECEIVED_QUESTS_TABLE: receivedQuestsTable.tableName,
+        SENT_QUESTS_TABLE: sentQuestsTable.tableName,
+      },
+    });
+
+    const postQuestsLambda = new NodejsFunction(this, "PostQuestsLambda", {
+      entry: "src/handlers/postQuests.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_22_X,
+      timeout: Duration.minutes(15),
+      environment: {
         RECEIVED_QUESTS_TABLE: receivedQuestsTable.tableName,
         SENT_QUESTS_TABLE: sentQuestsTable.tableName,
       },
@@ -189,6 +211,7 @@ export class ApiStack extends Stack {
         USER_TABLE: userTable.tableName,
         RECEIVED_QUESTS_TABLE: receivedQuestsTable.tableName,
         SENT_QUESTS_TABLE: sentQuestsTable.tableName,
+        CONFIG_BUCKET: configBucket.bucketName,
       },
     });
 
@@ -199,6 +222,7 @@ export class ApiStack extends Stack {
       timeout: Duration.minutes(1),
       environment: {
         USER_TABLE: userTable.tableName,
+        CONFIG_BUCKET: configBucket.bucketName,
       },
     });
 
@@ -223,6 +247,7 @@ export class ApiStack extends Stack {
     userTable.grantReadWriteData(authLamber);
     userTable.grantReadWriteData(postUserSlotsLambda);
     userTable.grantReadWriteData(postUserRatesLambda);
+    userTable.grantReadWriteData(userGroupsLambda);
     userTable.grantReadWriteData(postUserAvailabilityLambda);
 
     contractTable.grantReadData(postUserQuestsLambda);
@@ -234,12 +259,17 @@ export class ApiStack extends Stack {
     contractActionsTable.grantReadWriteData(postUserAvailabilityLambda);
 
     receivedQuestsTable.grantReadData(getUserQuestsLambda);
+    receivedQuestsTable.grantReadWriteData(postQuestsLambda);
     receivedQuestsTable.grantReadWriteData(postUserQuestsLambda);
 
     sentQuestsTable.grantReadData(getUserQuestsLambda);
+    sentQuestsTable.grantReadWriteData(postQuestsLambda);
     sentQuestsTable.grantReadWriteData(postUserQuestsLambda);
 
     configBucket.grantReadWrite(authLamber);
+    configBucket.grantReadWrite(getUsersLambda);
+    configBucket.grantReadWrite(getUserQuestsLambda);
+    configBucket.grantReadWrite(userGroupsLambda);
 
     /**
      * API Gayteway
@@ -258,11 +288,16 @@ export class ApiStack extends Stack {
     const pathContracts = api.root.addResource("contracts");
     const pathUsers = api.root.addResource("users");
     const pathUser = pathUsers.addResource("{id}");
-    const pathQuests = pathUser.addResource("quests");
+    const pathUserContracts = pathUser.addResource("contracts");
+    const pathUserQuests = pathUser.addResource("quests");
     const pathSlots = pathUser.addResource("slots");
     const pathRates = pathUser.addResource("rates");
+    const pathRate = pathRates.addResource("{rate}");
+    const pathGroups = pathUser.addResource("groups");
+    const pathGroup = pathGroups.addResource("{group}");
     const pathAvailable = pathUser.addResource("available");
-    const getQuests = pathQuests.addResource("{type}");
+    const getQuests = pathUserQuests.addResource("{type}");
+    const pathQuests = api.root.addResource("quests");
 
     //Integrations
     const authIntegration = new LambdaIntegration(authLamber);
@@ -270,20 +305,40 @@ export class ApiStack extends Stack {
     const getUsersIntegration = new LambdaIntegration(getUsersLambda);
     const postSlotsIntegration = new LambdaIntegration(postUserSlotsLambda);
     const postRatesIntegration = new LambdaIntegration(postUserRatesLambda);
+    const userGroupsntegration = new LambdaIntegration(userGroupsLambda);
     const postAvaiabilityIntegration = new LambdaIntegration(postUserAvailabilityLambda);
-    const postQuestsIntegration = new LambdaIntegration(postUserQuestsLambda);
-    const getQuestsIntegration = new LambdaIntegration(getUserQuestsLambda);
+    const postUserQuestsIntegration = new LambdaIntegration(postUserQuestsLambda);
+    const getUserQuestsIntegration = new LambdaIntegration(getUserQuestsLambda);
+    const postQuestsIntegratoion = new LambdaIntegration(postQuestsLambda);
 
     //Create HTTP Methods
     pathAuth.addMethod("GET", authIntegration);
     pathAuth.addMethod("POST", authIntegration);
     pathContracts.addMethod("GET", getContractsIntegration);
+    pathUser.addMethod("GET", getUsersIntegration);
     pathUsers.addMethod("GET", getUsersIntegration);
-    getQuests.addMethod("GET", getQuestsIntegration);
-    pathQuests.addMethod("POST", postQuestsIntegration);
+    getQuests.addMethod("GET", getUserQuestsIntegration);
+    pathUserContracts.addMethod("GET", getContractsIntegration);
+    pathUserQuests.addMethod("POST", postUserQuestsIntegration);
     pathSlots.addMethod("POST", postSlotsIntegration);
+
+    //User Rates
+    pathRates.addMethod("GET", postRatesIntegration);
     pathRates.addMethod("POST", postRatesIntegration);
+    pathRates.addMethod("PUT", postRatesIntegration);
+    pathRate.addMethod("GET", postRatesIntegration);
+    pathRate.addMethod("POST", postRatesIntegration);
+    pathRate.addMethod("DELETE", postRatesIntegration);
+
+    //User Groups
+    pathGroups.addMethod("GET", userGroupsntegration);
+    pathGroups.addMethod("PUT", userGroupsntegration);
+    pathGroup.addMethod("GET", userGroupsntegration);
+    pathGroup.addMethod("POST", userGroupsntegration);
+    pathGroup.addMethod("DELETE", userGroupsntegration);
+
     pathAvailable.addMethod("POST", postAvaiabilityIntegration);
+    pathQuests.addMethod("POST", postQuestsIntegratoion);
 
     /**
      * Outputs

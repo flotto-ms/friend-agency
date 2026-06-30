@@ -17,9 +17,9 @@ export const createCSV = (quests: MsoQuest[], received: boolean) => {
   let expiredPoints = 0;
   let progressPoings = 0;
 
-  const type = received ? "Receiver" : "Sender";
+  const type = received ? "Sender" : "Receiver";
   const header = [
-    "Date Sent (UTC)",
+    `Date ${received ? "Received" : "Sent"} (UTC)`,
     "Expires at (UTC)",
     "Progress",
     "Level",
@@ -38,7 +38,7 @@ export const createCSV = (quests: MsoQuest[], received: boolean) => {
     const expires = new Date(expiresAt);
     const completed = quest.completed || quest.completedByInitiator || quest.progress === quest.required;
     const expired = !completed && expires < new Date();
-    const eventPoints = quest.items?.["536"] ?? 0;
+    const eventPoints = quest.level * (quest.isElite ? 3 : 1);
 
     if (completed) {
       completedPoints += eventPoints;

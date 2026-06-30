@@ -2,22 +2,13 @@
 
 import type { QuestSearchItem } from "./types";
 
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { columns } from "./columns";
+import { useEffect } from "react";
+import api from "@/data/authSlice/api";
 
 const QuestSearchTable: React.FC<{ data: QuestSearchItem[] }> = ({ data }) => {
   const table = useReactTable({
@@ -35,12 +26,7 @@ const QuestSearchTable: React.FC<{ data: QuestSearchItem[] }> = ({ data }) => {
               {headerGroup.headers.map((header) => {
                 return (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 );
               })}
@@ -50,10 +36,7 @@ const QuestSearchTable: React.FC<{ data: QuestSearchItem[] }> = ({ data }) => {
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
+              <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id} width={cell.column.columnDef.size}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

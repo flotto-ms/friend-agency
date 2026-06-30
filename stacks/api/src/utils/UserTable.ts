@@ -1,11 +1,35 @@
 import { Rate, UserTableItem } from "@flotto/types";
-import { createClient, getItem } from "./DynamoDbUtils";
+import DynamoDbUtils, { createClient, getItem } from "./DynamoDbUtils";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 const getUser = (id: number) => {
   return getItem<UserTableItem>({
     TableName: process.env.USER_TABLE!,
     Key: { id: id },
+  }).then((user) => {
+    if (!user || !user.rates) {
+      return user;
+    }
+
+    Object.values(user.rates).forEach((r) => {
+      if (r.groups) {
+        r.groups = [...(r.groups as any).values()];
+      }
+    });
+
+    return user;
+  });
+};
+
+const updateDetails = async (id: number, username: string, country: string) => {
+  return DynamoDbUtils.updateItem({
+    Key: { id },
+    TableName: process.env.USER_TABLE!,
+    Attrs: {
+      username,
+      country,
+    },
+    Upsert: true,
   });
 };
 
@@ -57,5 +81,6 @@ const updateRates = async (userId: number, rates: [string, Rate][]) => {
 
 export default {
   getUser,
+  updateDetails,
   updateRates,
 };

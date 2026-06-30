@@ -24,11 +24,14 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { NavMain } from "./NavMain";
 import { NavProjects } from "./NavProjects";
 import { NavUser } from "./NavUser";
 import { ModeToggle } from "./ModeToggle";
+import { useAppSelector } from "@/data/hooks";
+import { selectAuth } from "@/data/authSlice";
 
 // This is sample data.
 const data = {
@@ -145,18 +148,28 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const auth = useAppSelector(selectAuth);
+
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>Flotto Logo</SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <ModeToggle />
-        <NavUser user={data.user} />
+        {auth.status === "authorized" && (
+          <NavUser
+            user={{
+              avatar: data.user.avatar,
+              name: auth.username,
+              email: auth.type,
+            }}
+          />
+        )}
       </SidebarFooter>
       <SidebarRail />
+      <SidebarTrigger className="absolute top-2 -right-8" />
     </Sidebar>
   );
 }

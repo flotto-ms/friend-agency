@@ -1,7 +1,18 @@
+import { APIGatewayProxyEvent } from "aws-lambda";
 import ContractTable from "../utils/ContractTable";
+import { ContractTableItem } from "@flotto/types";
 
-export const handler = async () => {
-  const contracts = (await ContractTable.getActiveContracts()).map((c) => {
+export const handler = async (event: APIGatewayProxyEvent) => {
+  const id = event.pathParameters?.id;
+  let contracts: ContractTableItem[] = [];
+
+  if (id) {
+    contracts = await ContractTable.getActiveUserContracts(parseInt(id));
+  } else {
+    contracts = await ContractTable.getActiveContracts();
+  }
+
+  const output = contracts.map((c) => {
     const { key, rateId, startedAt, endedAt, ...rest } = c;
     return rest;
   });
@@ -9,6 +20,6 @@ export const handler = async () => {
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contracts }),
+    body: JSON.stringify({ contracts: output }),
   };
 };

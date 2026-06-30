@@ -2,24 +2,11 @@
 
 import type { RateItem } from "./types";
 
-import {
-  flexRender,
-  getCoreRowModel,
-  OnChangeFn,
-  RowSelectionState,
-  useReactTable,
-} from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, OnChangeFn, RowSelectionState, useReactTable } from "@tanstack/react-table";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import { columns } from "./columns";
+import { generateColumns } from "./columns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 
@@ -27,8 +14,10 @@ const RateTable: React.FC<{
   data: RateItem[];
   loading?: boolean;
   onRowSelectionChange?: (state: RowSelectionState) => void;
-}> = ({ data, loading = false, onRowSelectionChange }) => {
+  onRowDelete?: (id: string) => void;
+}> = ({ data, loading = false, onRowSelectionChange, onRowDelete }) => {
   const [selection, setSelection] = useState({});
+  const columns = generateColumns(onRowDelete);
 
   useEffect(() => {
     setSelection({});
@@ -69,12 +58,7 @@ const RateTable: React.FC<{
               {headerGroup.headers.map((header) => {
                 return (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 );
               })}
@@ -84,10 +68,7 @@ const RateTable: React.FC<{
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.original.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
+              <TableRow key={row.original.id} data-state={row.getIsSelected() && "selected"}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id} width={cell.column.columnDef.size}>
                     {loading ? (
