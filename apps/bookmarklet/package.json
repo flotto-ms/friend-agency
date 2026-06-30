@@ -1,0 +1,10 @@
+{
+  "name": "@flotto/bookmarklet",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "mkdir -p ./dist; uglifyjs ./src/main.js -o ./dist/script.js -c -m",
+    "build": "mkdir -p ./dist; uglifyjs ./src/main.js -o ./dist/script.js -c -m;bun ./src/encode.js; "
+  }
+}
