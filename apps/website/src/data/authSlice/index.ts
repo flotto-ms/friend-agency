@@ -1,6 +1,5 @@
-import { PayloadAction } from "@reduxjs/toolkit";
 import { createAppSlice } from "../createAppSlice";
-import api from "./api";
+import api from "../../lib/api";
 
 export interface AuthSliceState {
   status: "unauthorized" | "loading" | "authorized";

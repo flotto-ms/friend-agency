@@ -185,6 +185,8 @@ export class ApiStack extends Stack {
       timeout: Duration.minutes(1),
       environment: {
         USER_TABLE: userTable.tableName,
+        CONTRACT_TABLE: contractTable.tableName,
+        CONFIG_BUCKET: configBucket.bucketName,
       },
     });
 
@@ -265,6 +267,7 @@ export class ApiStack extends Stack {
     contractTable.grantReadData(getContractsLambda);
     contractTable.grantReadWriteData(postUserAvailabilityLambda);
     contractTable.grantReadWriteData(postUserRatesLambda);
+    contractTable.grantReadWriteData(userRatesLambda);
 
     contractActionsTable.grantReadWriteData(postUserRatesLambda);
     contractActionsTable.grantReadWriteData(postUserAvailabilityLambda);
@@ -281,6 +284,7 @@ export class ApiStack extends Stack {
     configBucket.grantReadWrite(getUsersLambda);
     configBucket.grantReadWrite(getUserQuestsLambda);
     configBucket.grantReadWrite(userGroupsLambda);
+    configBucket.grantReadWrite(userRatesLambda);
 
     /**
      * API Gayteway

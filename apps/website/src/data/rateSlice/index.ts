@@ -1,6 +1,13 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { createAppSlice } from "../createAppSlice";
-import { postAddGroup, postDeleteGroup, fetchRates, type GetRateResponse, postSaveRate, postDeleteRate } from "./api";
+import {
+  postAddGroup,
+  postDeleteGroup,
+  fetchRates,
+  type GetRateResponse,
+  postSaveRate,
+  postDeleteRate,
+} from "./thunks";
 
 export interface RateSliceState {
   status: "init" | "loading" | "failed" | "loaded";

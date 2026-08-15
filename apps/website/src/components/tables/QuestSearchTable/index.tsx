@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import { columns } from "./columns";
 import { useEffect } from "react";
-import api from "@/data/authSlice/api";
+import api from "@/lib/api";
 
 const QuestSearchTable: React.FC<{ data: QuestSearchItem[] }> = ({ data }) => {
   const table = useReactTable({

@@ -85,7 +85,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
           filter: getFilterDescription({ filter: filters }),
         }
       : {
-          id: crypto.randomUUID(),
+          id: "tmp_" + crypto.randomUUID(),
           type,
           stopping: false,
           enabled,

@@ -1,6 +1,6 @@
 import { RateFilter } from "@/lib/FilterDesc";
 import { createAppSlice } from "../createAppSlice";
-import api from "../authSlice/api";
+import api from "../../lib/api";
 import { QuestSearchItem } from "@/components/tables/QuestSearchTable/types";
 
 type Contractor = {

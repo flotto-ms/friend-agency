@@ -10,56 +10,60 @@ import { deleteRate } from "./methods/delete";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   console.debug(event);
+  try {
+    const id = await RequestUtils.getUserId(event).catch((ex) => {
+      console.error(ex);
+      return 0;
+    });
 
-  const id = await RequestUtils.getUserId(event).catch((ex) => {
-    console.error(ex);
-    return 0;
-  });
+    if (id === 0) {
+      return ResponseUtils.unauthorised("Invalid Token");
+    }
 
-  if (id === 0) {
-    return ResponseUtils.unauthorised("Invalid Token");
-  }
+    if (!id) {
+      return ResponseUtils.unauthorised("Unknown User");
+    }
 
-  if (!id) {
-    return ResponseUtils.unauthorised("Unknown User");
-  }
+    if (event.pathParameters?.id !== "current" && parseInt(event.pathParameters!.id!) !== id) {
+      return ResponseUtils.unauthorised("You can only manage your own rates");
+    }
 
-  if (event.pathParameters?.id !== "current" && parseInt(event.pathParameters!.id!) !== id) {
-    return ResponseUtils.unauthorised("You can only manage your own rates");
-  }
+    const user = await UserTable.getUser(id);
 
-  const user = await UserTable.getUser(id);
+    if (!user) {
+      return ResponseUtils.notFound("Unknown User");
+    }
 
-  if (!user) {
-    return ResponseUtils.notFound("Unknown User");
-  }
+    if (!event.pathParameters?.rate) {
+      switch (event.httpMethod) {
+        case "GET":
+          return listRates(user);
+        case "POST": {
+          const body = JSON.parse(event.body ?? "{}");
+          return createRate(user, body);
+        }
+        default:
+          return unknownMethod();
+      }
+    }
 
-  if (!event.pathParameters?.rate) {
+    const rateId = event.pathParameters!.rate!;
+
     switch (event.httpMethod) {
       case "GET":
-        return listRates(user);
-      case "POST": {
+        return getRate(user, rateId);
+      case "PUT": {
         const body = JSON.parse(event.body ?? "{}");
-        return createRate(user, body);
+        return updateRate(user, rateId, body);
       }
+      case "DELETE":
+        return deleteRate(user, rateId);
       default:
         return unknownMethod();
     }
-  }
-
-  const rateId = event.pathParameters!.rate!;
-
-  switch (event.httpMethod) {
-    case "GET":
-      return getRate(user, rateId);
-    case "PUT": {
-      const body = JSON.parse(event.body ?? "{}");
-      return updateRate(user, rateId, body);
-    }
-    case "DELETE":
-      return deleteRate(user, rateId);
-    default:
-      return unknownMethod();
+  } catch (ex) {
+    console.error(ex);
+    throw ex;
   }
 };
 
