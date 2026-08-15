@@ -8,6 +8,7 @@ import {
   postSaveRate,
   postDeleteRate,
 } from "./thunks";
+import api from "@/lib/api";
 
 export interface RateSliceState {
   status: "init" | "loading" | "failed" | "loaded";
@@ -25,17 +26,24 @@ export const rateSlice = createAppSlice({
   name: "rate",
   initialState,
   reducers: (create) => ({
-    setRateEnabled: create.reducer((state, action: PayloadAction<{ id: string; enabled: boolean }>) => {
-      const rate = state.rates[action.payload.id];
-      if (rate.enabled === action.payload.enabled) {
-        return;
-      }
-      rate.enabled = action.payload.enabled;
-      rate.stopping = !rate.enabled;
-      if (rate.stopping) {
-        rate.stopDate = Date.now() + 30_000;
-      }
-    }),
+    setRateEnabled: create.asyncThunk(
+      async ({ id, enabled }: { id: string; enabled: boolean }) => {
+        await api.user.rates.update(id, { enabled });
+      },
+      {
+        pending: (state, action) => {
+          const rate = state.rates[action.meta.arg.id];
+          if (rate.enabled === action.meta.arg.enabled) {
+            return;
+          }
+          rate.enabled = action.meta.arg.enabled;
+          rate.stopping = !rate.enabled;
+          if (rate.stopping) {
+            rate.stopDate = Date.now() + 30_000;
+          }
+        },
+      },
+    ),
     resetStopped: create.asyncThunk(
       async (id: string) => new Promise<string>((resolve) => setTimeout(() => resolve(id), 30_000)),
       {

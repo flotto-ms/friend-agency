@@ -67,6 +67,11 @@ export const postDeleteRate = async (id: string) => {
   return id;
 };
 
+export const postRateEnabled = async (id: string, enabled: boolean) => {
+  await api.user.rates.update(id, { enabled });
+  return id;
+};
+
 export const postAddGroup = async (data: { label: string; rates?: string[] }) => {
   return api.user.groups.create(data.label, data.rates).then((group) => {
     return {

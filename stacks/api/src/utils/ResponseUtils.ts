@@ -10,7 +10,15 @@ const notFound = (message: string) => {
     body: JSON.stringify({ message }),
   };
 };
+
+const noContent = (message: string = "No Content") => {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message }),
+  };
+};
 export default {
   unauthorised,
   notFound,
+  noContent,
 };

@@ -1,6 +1,7 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { UserTableItem } from "@flotto/types";
 import { createClient } from "../../../utils/DynamoDbUtils";
+import ResponseUtils from "../../../utils/ResponseUtils";
 
 export const deleteGroup = async (user: UserTableItem, groupId: string) => {
   if (!user.groups?.[groupId]) {
@@ -36,13 +37,11 @@ export const deleteGroup = async (user: UserTableItem, groupId: string) => {
     Key: { id: user.id },
     UpdateExpression: updateExpression,
     ExpressionAttributeNames: attributeNames,
-    ExpressionAttributeValues: attributeValues,
+    ExpressionAttributeValues: Object.keys(attributeValues).length > 0 ? attributeValues : undefined,
   });
 
   console.debug(command.input);
   await createClient().send(command);
 
-  return {
-    statusCode: 204,
-  };
+  return ResponseUtils.noContent("Group Deleted");
 };

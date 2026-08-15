@@ -2,6 +2,7 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { UserTableItem } from "@flotto/types";
 import { createClient } from "../../../utils/DynamoDbUtils";
 import ContractTable from "../../../utils/ContractTable";
+import ResponseUtils from "../../../utils/ResponseUtils";
 
 export const deleteRate = async (user: UserTableItem, rateId: string) => {
   const current = user.rates?.[rateId];
@@ -33,7 +34,5 @@ export const deleteRate = async (user: UserTableItem, rateId: string) => {
     await Promise.all(activeContracts.map((contract) => ContractTable.endContract(contract)));
   }
 
-  return {
-    statusCode: 204,
-  };
+  return ResponseUtils.noContent("Rate Deleted");
 };

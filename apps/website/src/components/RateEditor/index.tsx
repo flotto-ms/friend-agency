@@ -91,15 +91,8 @@ const RateEditor: React.FC = () => {
       <h1 className="text-3xl font-semibold text-center mb-6">Your Rates</h1>
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Testing Mode</CardTitle>
+          <CardTitle>Tip</CardTitle>
           <CardDescription>
-            <p>
-              Plese feel free to test the UI, changes will not be saved to database. Enabling and disabling is just
-              simulated.
-            </p>
-            <p>To reload your current rates, please refresh the page.</p>
-
-            <p className="mt-4 text-white">Tip</p>
             <p>
               Group rates by seelcting rows and clicking the + button from the group selector below...{" "}
               {Object.keys(slice.groups).length === 0 && `(currently only shows 'all' as you have not created any yet)`}
