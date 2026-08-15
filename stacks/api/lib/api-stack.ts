@@ -301,6 +301,7 @@ export class ApiStack extends Stack {
     //Paths
     const pathAuth = api.root.addResource("auth");
     const pathContracts = api.root.addResource("contracts");
+    const pathContract = pathContracts.addResource("{id}");
     const pathUsers = api.root.addResource("users");
     const pathUser = pathUsers.addResource("{id}");
     const pathUserContracts = pathUser.addResource("contracts");
@@ -331,6 +332,7 @@ export class ApiStack extends Stack {
     pathAuth.addMethod("GET", authIntegration);
     pathAuth.addMethod("POST", authIntegration);
     pathContracts.addMethod("GET", getContractsIntegration);
+    pathContract.addMethod("GET", getContractsIntegration);
     pathUser.addMethod("GET", getUsersIntegration);
     pathUsers.addMethod("GET", getUsersIntegration);
     getQuests.addMethod("GET", getUserQuestsIntegration);

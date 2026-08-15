@@ -4,18 +4,23 @@ import { ContractTableItem } from "@flotto/types";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const id = event.pathParameters?.id;
-  let contracts: ContractTableItem[] = [];
+  let output: Partial<ContractTableItem>[] = [];
 
   if (id) {
-    contracts = await ContractTable.getContractHistory(id);
+    output = await ContractTable.getContractHistory(id).then((r) =>
+      r.map((c) => {
+        const { key, userId, rateId, ...rest } = c;
+        return { ...rest };
+      }),
+    );
   } else {
-    contracts = await ContractTable.getActiveContracts();
+    output = await ContractTable.getActiveContracts().then((r) =>
+      r.map((c) => {
+        const { key, rateId, startedAt, endedAt, ...rest } = c;
+        return { id: key, ...rest };
+      }),
+    );
   }
-
-  const output = contracts.map((c) => {
-    const { key, rateId, startedAt, endedAt, ...rest } = c;
-    return { id: key, ...rest };
-  });
 
   return {
     statusCode: 200,
