@@ -37,7 +37,7 @@ const formatDate = (value?: string) => {
 export default function ContractsPage() {
   const searchParams = useSearchParams();
   const [questTypeFilter, setQuestTypeFilter] = useState(() => {
-    const type = Number(searchParams.get("quest") ?? "0");
+    const type = Number(searchParams.get("type") ?? "0");
     return Number.isFinite(type) && type > 0 ? type : 0;
   });
   const dispatch = useAppDispatch();
@@ -104,7 +104,7 @@ export default function ContractsPage() {
             <p className="text-sm text-muted-foreground mt-2">Live rates currently in force for contractors.</p>
           </div>
           <div className="flex max-w-sm items-end gap-2">
-            <div className="flex-1">
+            <div className="flex-1 min-w-[250px]">
               <QuestTypeSelect value={questTypeFilter} onChange={setQuestTypeFilter} />
             </div>
             {questTypeFilter !== 0 && (
@@ -166,12 +166,12 @@ export default function ContractsPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Price</span>
-                    <span className="font-medium">{card.price}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Started</span>
                     <span className="font-medium text-right">{formatDate(card.startedAt)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Price</span>
+                    <span className="font-medium">{card.price}</span>
                   </div>
                 </CardContent>
               </Card>
