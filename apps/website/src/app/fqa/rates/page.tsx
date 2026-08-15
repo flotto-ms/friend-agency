@@ -2,9 +2,9 @@
 
 import RateEditor from "@/components/RateEditor";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { UserSearch } from "@/components/UserSearch";
 import { selectAuth } from "@/data/authSlice";
 import { useAppSelector } from "@/data/hooks";
-import { UserSearch } from "lucide-react";
 import { PropsWithChildren, useMemo, useState } from "react";
 
 export default function Page() {
