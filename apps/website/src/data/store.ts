@@ -5,8 +5,16 @@ import { rateSlice } from "./rateSlice";
 import { searchSlice } from "./searchSlice";
 import { activeContractsSlice } from "./activeContractsSlice";
 import { contractorsSlice } from "./contractorsSlice";
+import { contractHistorySlice } from "./contractHistorySlice";
 
-const rootReducer = combineSlices(authSlice, rateSlice, searchSlice, activeContractsSlice, contractorsSlice);
+const rootReducer = combineSlices(
+  authSlice,
+  rateSlice,
+  searchSlice,
+  activeContractsSlice,
+  contractorsSlice,
+  contractHistorySlice,
+);
 export type RootState = ReturnType<typeof rootReducer>;
 
 export const makeStore = () => {

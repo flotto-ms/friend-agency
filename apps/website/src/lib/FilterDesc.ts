@@ -1,4 +1,5 @@
 import { formatNumber } from "./FormatNumber";
+import { gems, wins, winStreak } from "@/components/QuestTypeSelect";
 
 export type EliteFilter = "elite" | "notelite";
 export type RateFilterRange = {
@@ -15,13 +16,14 @@ export type RateFilter = {
   arenaLevel?: RateFilterRange;
 };
 
-export const getFilterDescription = (rate: { filter?: RateFilter }) => {
+type Rate = { type: number; filter?: RateFilter };
+export const getFilterDescription = (rate: Rate) => {
   if (!rate.filter || Object.keys(rate.filter).length === 0) {
     return undefined;
   }
 
   if (rate.filter.required) {
-    return `${formatNumber(rate.filter.required.min)} to ${formatNumber(rate.filter.required.max)}`;
+    return `${formatNumber(rate.filter.required.min)} to ${formatNumber(rate.filter.required.max)} ${getTypeDesc(rate)}`;
   }
 
   if (rate.filter.level) {
@@ -41,4 +43,22 @@ export const getFilterDescription = (rate: { filter?: RateFilter }) => {
   }
 
   return undefined;
+};
+
+const getTypeDesc = (rate: Rate) => {
+  if (rate.type === 1 || rate.type === 9) {
+    return "Coins";
+  }
+  if (rate.type === 8) {
+    return "Exp";
+  }
+  if (wins.some((w) => w.value === rate.type.toString())) {
+    return "Wins";
+  }
+  if (winStreak.some((w) => w.value === rate.type.toString())) {
+    return "Wins";
+  }
+  if (rate.type === 7 || gems.some((w) => w.value === rate.type.toString())) {
+    return "Gems";
+  }
 };

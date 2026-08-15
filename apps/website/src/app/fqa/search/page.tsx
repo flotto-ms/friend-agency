@@ -1,10 +1,8 @@
 "use client";
 import QuestSearchTable from "@/components/tables/QuestSearchTable";
-import { QuestSearchItem } from "@/components/tables/QuestSearchTable/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserSearch } from "@/components/UserSearch";
 import { selectAuth } from "@/data/authSlice";
-import api from "@/lib/api";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
 import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searchSlice";
 import { useEffect, useMemo, useState } from "react";

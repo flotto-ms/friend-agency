@@ -82,7 +82,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
           enabled,
           groups,
           filters: Object.keys(filters).length > 0 ? filters : undefined,
-          filter: getFilterDescription({ filter: filters }),
+          filter: getFilterDescription({ type: rate.type, filter: filters }),
         }
       : {
           id: "tmp_" + crypto.randomUUID(),
@@ -90,7 +90,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
           stopping: false,
           enabled,
           description: getQuestDescription(type.toString()),
-          filter: getFilterDescription({ filter: filters }),
+          filter: getFilterDescription({ type, filter: filters }),
           filters: Object.keys(filters).length > 0 ? filters : undefined,
           rate: amount,
           groups,

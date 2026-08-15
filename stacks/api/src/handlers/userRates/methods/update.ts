@@ -20,11 +20,6 @@ export const updateRate = async (
     ...(typeof changes.enabled === "boolean" ? { enabled: changes.enabled } : {}),
   };
 
-  const contractStateChanged =
-    current.enabled !== next.enabled ||
-    current.amount !== next.amount ||
-    JSON.stringify(current.filter ?? null) !== JSON.stringify(next.filter ?? null);
-
   if (changes.filter == null) {
     delete next.filter;
   } else if (changes.filter && Object.keys(changes.filter).length === 0) {
@@ -38,6 +33,11 @@ export const updateRate = async (
   } else if (changes.groups) {
     next.groups = [...new Set(changes.groups)];
   }
+
+  const contractStateChanged =
+    current.enabled !== next.enabled ||
+    current.amount !== next.amount ||
+    JSON.stringify(current.filter ?? null) !== JSON.stringify(next.filter ?? null);
 
   const command = new UpdateCommand({
     TableName: process.env.USER_TABLE!,
@@ -54,12 +54,17 @@ export const updateRate = async (
 
   await createClient().send(command);
 
+  console.debug("State Changed", contractStateChanged);
+  console.debug("Next Enabled", next.enabled);
+
   if (contractStateChanged) {
     const activeContracts = await ContractTable.getActiveUserContracts(user.id, rateId);
+    console.debug("Active Contracts", activeContracts);
     await Promise.all(activeContracts.map((contract) => ContractTable.endContract(contract)));
   }
 
   if (next.enabled && contractStateChanged) {
+    console.debug("Start Contract");
     await ContractTable.startContract({
       userId: user.id,
       rateId,

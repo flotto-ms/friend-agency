@@ -14,12 +14,14 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import RateStatsTable from "../RateStatsTable";
 import { rateStats } from "../RateStatsTable/columns";
-import { useAppDispatch } from "@/data/hooks";
+import { useAppDispatch, useAppSelector } from "@/data/hooks";
+import { selectAuth } from "@/data/authSlice";
 import { resetStopped, setRateEnabled } from "@/data/rateSlice";
 
 export const generateColumns = (onRateDelete?: (id: string) => void) => {
@@ -88,6 +90,8 @@ export const generateColumns = (onRateDelete?: (id: string) => void) => {
       id: "actions",
       cell: ({ row }) => {
         const rate = row.original;
+        const auth = useAppSelector(selectAuth);
+        const contractKey = `${auth.userId}_${rate.id}`;
 
         return (
           <DropdownMenu>
@@ -99,7 +103,10 @@ export const generateColumns = (onRateDelete?: (id: string) => void) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="right">
               <DropdownMenuItem onClick={(e) => document.getElementById(`rate-${rate.id}`)?.click()}>
-                Edit
+                Edit Rate
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/fqa/contracts/${encodeURIComponent(contractKey)}`}>Contract History</Link>
               </DropdownMenuItem>
               <Separator />
               {onRateDelete && (

@@ -29,6 +29,10 @@ const listContracts = async () => {
   return fetch(`/api/contracts`, withAuth()).then((r) => r.json());
 };
 
+const getContract = async (id: string) => {
+  return fetch(`/api/contracts/${id}`, withAuth()).then((r) => r.json());
+};
+
 const getUser = async (id: string = "current") => {
   return fetch(`/api/users/${id}`, withAuth()).then((r) => r.json());
 };
@@ -88,6 +92,7 @@ const api = {
   getUnsentQuests,
   contract: {
     list: listContracts,
+    get: getContract,
   },
   user: {
     list: listUsers,

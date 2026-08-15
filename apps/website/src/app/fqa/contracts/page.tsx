@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
@@ -129,52 +130,51 @@ export default function ContractsPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {cards.map((card) => (
-              <Card key={card.id} className="h-full">
-                <CardHeader>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-2">
-                      {card.contractor?.country && (
-                        <img
-                          src={`https://minesweeper.online/img/flags/${card.contractor.country.toLowerCase()}.png`}
-                          alt={`${card.contractor.country} flag`}
-                        />
-                      )}
-                      <CardTitle className="truncate">{card.contractor?.username ?? `User ${card.userId}`}</CardTitle>
+              <Link key={card.id} href={`/fqa/contracts/${encodeURIComponent(card.id)}`} className="block">
+                <Card className="h-full transition hover:border-primary/60 hover:shadow-sm">
+                  <CardHeader>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {card.contractor?.country && (
+                          <img
+                            src={`https://minesweeper.online/img/flags/${card.contractor.country.toLowerCase()}.png`}
+                            alt={`${card.contractor.country} flag`}
+                          />
+                        )}
+                        <CardTitle className="truncate">{card.contractor?.username ?? `User ${card.userId}`}</CardTitle>
+                      </div>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-medium ${
+                          card.contractor?.available
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {card.contractor?.available ? "Available" : "Busy"}
+                      </span>
                     </div>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-medium ${
-                        card.contractor?.available
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {card.contractor?.available ? "Available" : "Busy"}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-muted-foreground">Quest</span>
-                    <span className="font-medium text-right">
-                      {getQuestDescription(String(card.type))}
-                      {card.filter && getFilterDescription({ filter: card.filter as any }) && (
-                        <span className="text-muted-foreground">
-                          {" "}
-                          · {getFilterDescription({ filter: card.filter as any })}
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Started</span>
-                    <span className="font-medium text-right">{formatDate(card.startedAt)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Price</span>
-                    <span className="font-medium">{card.price}</span>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-muted-foreground">Quest</span>
+                      <span className="font-medium text-right">
+                        {getQuestDescription(String(card.type))}
+                        {card.filter && getFilterDescription(card) && (
+                          <span className="text-muted-foreground"> · {getFilterDescription(card)}</span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Started</span>
+                      <span className="font-medium text-right">{formatDate(card.startedAt)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Price</span>
+                      <span className="font-medium">{card.price}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         )}
