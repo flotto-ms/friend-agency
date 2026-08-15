@@ -5,7 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/nav/AppSidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { StoreProvider } from "./StoreProvider";
+import { StoreProvider } from "../components/providers/StoreProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,21 +31,14 @@ export default function RootLayout({
   return (
     <StoreProvider>
       <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <TooltipProvider>
               <SidebarProvider>
                 <AppSidebar />
-                <main className="w-full">
-                  <SidebarTrigger />
+                <main className="relative w-full">
                   {children}
+                  <Toaster position="top-right" />
                 </main>
               </SidebarProvider>
             </TooltipProvider>

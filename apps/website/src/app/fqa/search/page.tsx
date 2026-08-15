@@ -1,79 +1,60 @@
 "use client";
 import QuestSearchTable from "@/components/tables/QuestSearchTable";
 import { QuestSearchItem } from "@/components/tables/QuestSearchTable/types";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserSearch } from "@/components/UserSearch";
-
-const data: QuestSearchItem[] = [
-  {
-    level: 30,
-    elite: false,
-    description: "Complete L5 Speed arena or higher",
-    rate: 120,
-  },
-  {
-    level: 26,
-    elite: false,
-    description: "Win 8 Evil NG level games without hints",
-    rate: 240,
-  },
-  {
-    level: 35,
-    elite: false,
-    description: "Complete 18 games in PvP mode",
-    rate: 220,
-  },
-  {
-    level: 35,
-    elite: true,
-    description: "Find 35 gems",
-    rate: 250,
-  },
-  {
-    level: 21,
-    elite: false,
-    description: "Complete L4 Speed arena or higher",
-    rate: 120,
-  },
-  {
-    level: 32,
-    elite: false,
-    description: "Earn 8 000 minecoins",
-    rate: 200,
-  },
-];
+import { selectAuth } from "@/data/authSlice";
+import api from "@/data/authSlice/api";
+import { useAppDispatch, useAppSelector } from "@/data/hooks";
+import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searchSlice";
+import { useEffect, useMemo, useState } from "react";
 
 export default function Home() {
+  const auth = useAppSelector(selectAuth);
+  const searchStatus = useAppSelector(selectSearchStatus);
+  const data = useAppSelector(selectSearchQuests);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (auth.status === "authorized" && searchStatus === "init") {
+      dispatch(initSearch());
+    }
+  }, [auth.status, searchStatus]);
+
+  const component = useMemo(() => {
+    switch (auth.status) {
+      case "loading":
+        return <div>Loading...</div>;
+      case "authorized":
+        if (searchStatus !== "loaded") {
+          return <div>Loading...</div>;
+        } else {
+          return <QuestSearchTable data={data} />;
+        }
+      default:
+        return <SignIn />;
+    }
+  }, [auth.status, searchStatus]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-[1200px] flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black">
-        <Card className="w-[350px] mx-auto">
-          <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>
-              Please sing in to view contractor details.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <UserSearch />
-          </CardContent>
-        </Card>
-
-        <QuestSearchTable data={data} />
-        <Textarea
-          value=""
-          onChange={() => {}}
-          className="max-w-[400px]"
-          placeholder="Paste your quests here."
-        />
+        {component}
       </main>
     </div>
   );
 }
+
+const SignIn: React.FC = () => {
+  return (
+    <Card className="w-[350px] mx-auto">
+      <CardHeader>
+        <CardTitle>Sign In</CardTitle>
+        <CardDescription>Please sign in to search for contractors.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <UserSearch />
+      </CardContent>
+    </Card>
+  );
+};

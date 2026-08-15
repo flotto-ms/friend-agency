@@ -2,22 +2,7 @@ import { ReceivedQuestTableItem, SentQuestTableItem } from "@flotto/types";
 import UserTable from "./UserTable";
 import { getFlottoQuestType } from "@flotto/utils";
 import { FlottoQuestDetails } from "../../../../packages/types/src/flotto/FlottoQuestDetails";
-import ContractsTable from "./ContractsTable";
-
-const getContractPrice = async (quest: ReceivedQuestTableItem | SentQuestTableItem) => {
-  const start = getQuestStartedAt(quest);
-  if (!start) {
-    return undefined;
-  }
-
-  const contract = await ContractsTable.getContract(getFlottoQuestType(quest)!, quest.sentTo ?? quest.userId, start);
-  if (!contract) {
-    return undefined;
-  }
-
-  const levels = quest.level * (quest.isElite ? 3 : 1);
-  return levels * contract.price;
-};
+import ContractUtility from "./ContractUtility";
 
 const getQuestStartedAt = (quest: ReceivedQuestTableItem | SentQuestTableItem) => {
   if (quest.createdAt) {
@@ -44,9 +29,10 @@ const getFlottoDetails = async (quest: ReceivedQuestTableItem | SentQuestTableIt
     return details;
   }
 
-  const price = await getContractPrice(quest);
-  if (price) {
-    details.price = price;
+  const contract = await ContractUtility.getQuestContract(quest);
+  if (contract) {
+    const levels = quest.level * (quest.isElite ? 3 : 1);
+    details.price = levels * contract.price;
     details.status = "Active";
   } else {
     details.status = "Inactive";
@@ -55,6 +41,6 @@ const getFlottoDetails = async (quest: ReceivedQuestTableItem | SentQuestTableIt
 };
 
 export default {
-  getContractPrice,
+  getQuestStartedAt,
   getFlottoDetails,
 };

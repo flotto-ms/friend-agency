@@ -3,16 +3,39 @@
 import { useState } from "react";
 import { Slider } from "./ui/slider";
 import { Field, FieldLabel } from "./ui/field";
+import { formatNumber } from "@/lib/FormatNumber";
 
-const MinMaxSlider: React.FC = () => {
-  const [value, setValue] = useState([0, 50_000]);
+type Props = {
+  label: string;
+  min: number;
+  max: number;
+  step?: number;
+  initialValue?: [number, number];
+  onChange?: (value?: { min: number; max: number }) => void;
+};
+
+const MinMaxSlider: React.FC<Props> = ({ label, min, max, step = 1, initialValue, onChange }) => {
+  const [value, setValue] = useState(initialValue ?? [min, max]);
+
+  const onChangeInternal = (value: number[]) => {
+    setValue(value);
+    if (!onChange) {
+      return;
+    }
+    const range = { min: value[0], max: value[1] };
+    if (range.min === min && range.max === max) {
+      onChange(undefined);
+    } else {
+      onChange(range);
+    }
+  };
   return (
     <Field className="w-full pb-2">
       <FieldLabel>
         <div className="flex flex-1 items-center justify-between gap-2">
-          <div>Amount</div>
+          <div>{label}</div>
           <span className="text-muted-foreground text-sm">
-            {value[0]} to {value[1]}
+            {formatNumber(value[0])} to {formatNumber(value[1])}
           </span>
         </div>
       </FieldLabel>
@@ -20,10 +43,10 @@ const MinMaxSlider: React.FC = () => {
       <Slider
         id="slider-demo-temperature"
         value={value}
-        onValueChange={(value) => setValue(value as number[])}
-        min={0}
-        max={50_000}
-        step={1_000}
+        onValueChange={onChangeInternal}
+        min={min}
+        max={max}
+        step={step}
       />
     </Field>
   );

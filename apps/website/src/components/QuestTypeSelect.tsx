@@ -11,15 +11,14 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Field, FieldLabel } from "./ui/field";
-import { useMemo } from "react";
 
-const passives = [
+export const passives = [
   { label: "Experience", value: "8" },
   { label: "Mine Coins", value: "9" },
   { label: "Gems", value: "7" },
   { label: "Arena Coin", value: "1" },
 ];
-const wins = [
+export const wins = [
   { label: "Beginner Wins", value: "19" },
   { label: "Intermediate Wins", value: "20" },
   { label: "Expert Wins", value: "21" },
@@ -28,24 +27,24 @@ const wins = [
   { label: "Evil NG Wins", value: "24" },
   { label: "Custom", value: "3" },
 ];
-const winStreak = [
+export const winStreak = [
   { label: "Beginner Win Streak", value: "16" },
   { label: "Intermediate Win Streak", value: "17" },
   { label: "Expert Win Streak", value: "18" },
 ];
-const noFlag = [
+export const noFlag = [
   { label: "Beginner No Flag", value: "10" },
   { label: "Intermediate No Flag", value: "11" },
   { label: "Expert No Flag", value: "12" },
   { label: "Hard NG No Flag", value: "13" },
   { label: "Evil NG No Flag", value: "14" },
 ];
-const efficiency = [
+export const efficiency = [
   { label: "Beginner Eff", value: "4" },
   { label: "Intermediate Eff", value: "5" },
   { label: "Expert Eff", value: "6" },
 ];
-const arena = [
+export const arena = [
   { label: "Speed", value: "25" },
   { label: "Speed NG", value: "26" },
   { label: "No Flags", value: "27" },
@@ -55,7 +54,7 @@ const arena = [
   { label: "Hardcore", value: "31" },
   { label: "Hardcore NG", value: "32" },
 ];
-const gems = [
+export const gems = [
   { label: "Ruby", value: "33" },
   { label: "Sapphire", value: "34" },
   { label: "Topaz", value: "35" },
@@ -65,9 +64,9 @@ const gems = [
   { label: "Jade", value: "39" },
 ];
 
-const multiplayer = [{ label: "PvP", value: "15" }];
+export const multiplayer = [{ label: "PvP", value: "15" }];
 
-const groups = [
+export const groups = [
   { label: "Passives", items: passives },
   { label: "Wins", items: wins },
   { label: "Win Streak", items: winStreak },
@@ -78,16 +77,7 @@ const groups = [
   { label: "Arena", items: arena },
 ];
 
-const allItems = [
-  ...passives,
-  ...wins,
-  ...winStreak,
-  ...noFlag,
-  ...efficiency,
-  ...arena,
-  ...multiplayer,
-  ...gems,
-];
+const allItems = [...passives, ...wins, ...winStreak, ...noFlag, ...efficiency, ...arena, ...multiplayer, ...gems];
 
 export const getQuestDescription = (id: string) => {
   return allItems.find((item) => item.value === id)!.label;
@@ -99,11 +89,7 @@ export type QuestTypeSelectProps = {
   onChange: (val: number) => void;
 };
 
-const QuestTypeSelect: React.FC<QuestTypeSelectProps> = ({
-  value,
-  disabled = false,
-  onChange,
-}) => {
+const QuestTypeSelect: React.FC<QuestTypeSelectProps> = ({ value, disabled = false, onChange }) => {
   return (
     <Field>
       <FieldLabel>Quest Type</FieldLabel>

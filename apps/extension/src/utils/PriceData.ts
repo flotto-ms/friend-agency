@@ -1,4 +1,5 @@
 import type { SaveQuestsResponse } from "@flotto/types";
+import { FlottoApi } from "../flotto/api";
 
 export const getPrices = async () => {
   return chrome.storage.local.get(["prices"]).then((r) => r.prices as SaveQuestsResponse | undefined);
@@ -21,11 +22,9 @@ export const updatePrices = async (changes: SaveQuestsResponse) => {
 export const syncPrices = (userId: number) => {
   getPrices().then((r) => {
     if (!r?.received || true) {
-      fetch(`https://flotto.vercel.app/api/users/${userId}/quests/prices`)
-        .then((r) => r.json())
-        .then((result) => {
-          return chrome.storage.local.set({ prices: result });
-        });
+      FlottoApi.getPrices(userId).then((result) => {
+        return chrome.storage.local.set({ prices: result });
+      });
     }
   });
 };

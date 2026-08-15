@@ -1,4 +1,4 @@
-import { FlottoQuestId, FlottoQuestType } from "@flotto/types";
+import { FlottoQuestId, FlottoQuestType, RateFilter } from "@flotto/types";
 
 const lookup = {
   "arena coins": FlottoQuestType.ArenaCoins,
@@ -25,14 +25,14 @@ const lookup = {
   "wins med": FlottoQuestType.WinsMed,
   "wins hard": FlottoQuestType.WinsHard,
   "wins evil": FlottoQuestType.WinsEvil,
-  speed: FlottoQuestType.ArenaSpeed,
-  "speed ng": FlottoQuestType.ArenaSpeedNG,
-  "no flags": FlottoQuestType.ArenaNoFlags,
-  efficiency: FlottoQuestType.ArenaEfficiency,
-  "high difficulty": FlottoQuestType.ArenaHighDifficulty,
-  "random difficulty": FlottoQuestType.ArenaRandomDifficulty,
-  hardcore: FlottoQuestType.ArenaHardcore,
-  "hardcore ng": FlottoQuestType.ArenaHardcoreNG,
+  "speed arena": FlottoQuestType.ArenaSpeed,
+  "speed ng arena": FlottoQuestType.ArenaSpeedNG,
+  "nf arena": FlottoQuestType.ArenaNoFlags,
+  "eff arena": FlottoQuestType.ArenaEfficiency,
+  "hd arena": FlottoQuestType.ArenaHighDifficulty,
+  "rd arena": FlottoQuestType.ArenaRandomDifficulty,
+  "hc arena": FlottoQuestType.ArenaHardcore,
+  "hcng arena": FlottoQuestType.ArenaHardcoreNG,
   ruby: FlottoQuestType.GemRuby,
   sapphire: FlottoQuestType.GemSapphire,
   topaz: FlottoQuestType.GemTopaz,
@@ -42,6 +42,33 @@ const lookup = {
   jade: FlottoQuestType.GemJade,
 } as Record<string, FlottoQuestId>;
 
-export const getRateQuestId = (key: string): FlottoQuestId | undefined => {
+export const getRateQuestId = (name: string): FlottoQuestId | undefined => {
+  const attempt = lookup[name];
+  if (attempt) {
+    return attempt;
+  }
+
+  const key = name.replace(/ (l*(\d+)-)*L*(\d+)\+{0,1}/i, "");
+  console.log("getRateQuestId", name, key);
   return lookup[key];
+};
+
+export const getRateFilter = (name: string): RateFilter | undefined => {
+  const attempt = lookup[name];
+  if (attempt) {
+    return undefined;
+  }
+
+  const result = / (l*(\d+)-)*L*(\d+)\+{0,1}$/i.exec(name);
+  if (!result) {
+    return undefined;
+  }
+
+  const max = name.endsWith("+") ? 500 : parseInt(result[3]);
+  const min = name.endsWith("+") ? parseInt(result[3]) : result[2] ? parseInt(result[2]) : max;
+
+  if (name.includes("arena")) {
+    return { arenaLevel: { min, max } };
+  }
+  return { level: { min, max } };
 };

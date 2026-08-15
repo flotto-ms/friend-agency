@@ -3,6 +3,9 @@ import DynamoDbUtils from "../utils/DynamoDbUtils";
 import { AuthTableItem } from "@flotto/types";
 import { generateCode } from "../utils/AuthCode";
 import SendMessage from "../utils/mso/SendMessage";
+import { generateSearchToken, validateSearchToken } from "./authUser/searchToken";
+import JwtUtils from "../utils/JwtUtils";
+import UserTable from "../utils/UserTable";
 
 type Body = {
   userId?: number;
@@ -11,9 +14,22 @@ type Body = {
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   if (event.httpMethod === "GET") {
+    const token = await generateSearchToken();
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Search Tokens" }),
+      body: JSON.stringify({ message: "Under Construction" }),
+      headers: {
+        "X-FlottoToken": token,
+      },
+    };
+  }
+
+  const validToken = await validateSearchToken(event.headers["Authorization"]);
+
+  if (!validToken) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({ message: "Invalid Token" }),
     };
   }
 
@@ -39,20 +55,26 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     }
 
     if (record.code !== data.password) {
+      console.log(record, data);
       return {
         statusCode: 403,
         body: JSON.stringify({ message: "Invalid Password" }),
       };
     }
 
-    await DynamoDbUtils.deleteItem({
-      Key: { userId: data.userId },
-      TableName: process.env.AUTH_TABLE!,
-    });
+    const token = (
+      await Promise.all([
+        JwtUtils.create(data.userId, false),
+        DynamoDbUtils.deleteItem({
+          Key: { userId: data.userId },
+          TableName: process.env.AUTH_TABLE!,
+        }),
+      ])
+    )[0];
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Password Correct" }),
+      body: JSON.stringify({ token }),
     };
   } else if (!record) {
     const code = generateCode();
@@ -60,12 +82,16 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       Key: { userId: data.userId },
       TableName: process.env.AUTH_TABLE!,
       Attrs: {
+        ip: event.requestContext.identity.sourceIp,
         ttl: Math.floor(Date.now() / 1_000) + 300,
         code: code,
       },
+      Upsert: true,
     });
 
-    SendMessage.sendMessage(data.userId, `Your Flotto one time password is: ${code}`, 919);
+    await SendMessage.sendMessage(data.userId, `Your Flotto one time password is: ${code}`, 980).then((u) => {
+      return UserTable.updateDetails(u.id, u.username, u.country);
+    });
   }
 
   return {

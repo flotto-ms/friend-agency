@@ -1,20 +1,21 @@
 import jwt from "jsonwebtoken";
+import TokenUtils from "./TokenUtils";
 
-const tmpSecret = crypto.randomUUID();
-
-const verify = (token: string) => {
-  return jwt.verify(token, tmpSecret);
+const verify = async (token: string) => {
+  return TokenUtils.getSecret().then((secret) => jwt.verify(token, secret));
 };
 
-const create = (userId: number, name: string) => {
-  return jwt.sign(
-    {
-      sub: userId,
-      name,
-      iss: "https://flotto.vercel.app",
-    },
-    tmpSecret,
-    { expiresIn: "180 days" },
+const create = async (userId: number, isAdmin: boolean = false) => {
+  return TokenUtils.getSecret().then((secret) =>
+    jwt.sign(
+      {
+        sub: userId,
+        admin: isAdmin,
+        iss: "https://flotto.vercel.app",
+      },
+      secret,
+      { expiresIn: "180 days" },
+    ),
   );
 };
 

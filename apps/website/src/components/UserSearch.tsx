@@ -8,21 +8,46 @@ import { Input } from "./ui/input";
 import { SidebarMenuButton } from "./ui/sidebar";
 import { Button } from "./ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "./ui/input-otp";
-
-import auth from "../data/auth.json";
+import { tokenDecode } from "@/lib/jwtdecode";
+import { useAppDispatch } from "@/data/hooks";
+import { setToken } from "@/data/authSlice";
 
 export const UserSearch: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordSent, setPasswordSent] = useState(false);
+  const [signedOut, setSignedOut] = useState(true);
+  const [passwordInvalid, setPasswordInvalid] = useState(false);
   const [term, setTerm] = useState("");
+  const [authToken, setAuthToken] = useState("");
   const [result, setResult] = useState<SearchResult>([]);
   const [user, setUser] = useState<SearchResult[number] | undefined>(undefined);
+  const [disabled, setDisabled] = useState(false);
+
+  const dispatch = useAppDispatch();
 
   const ref = useRef(term);
 
   useEffect(() => {
-    setAuth(auth, auth.build);
+    if (typeof window === "undefined") {
+      return;
+    }
+    const sessionToken = sessionStorage.getItem("token");
+    if (sessionToken) {
+      setSignedOut(false);
+    }
+  });
+
+  useEffect(() => {
+    fetch("/api/auth").then((r) => {
+      const token = r.headers.get("X-FlottoToken");
+      if (!token) {
+        return;
+      }
+      setAuthToken(token);
+      const auth = tokenDecode(token);
+      setAuth(auth, auth.build);
+    });
   }, []);
 
   const onChange = useCallback(
@@ -77,7 +102,76 @@ export const UserSearch: React.FC = () => {
     setOpen(false);
   }, []);
 
+  const onSendPassword = useCallback(() => {
+    if (!user) {
+      return;
+    }
+    setDisabled(true);
+    fetch("/api/auth", {
+      method: "POST",
+      body: JSON.stringify({ userId: user.id }),
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+      .then((r) => r.json())
+      .then(() => setPasswordSent(true))
+      .finally(() => setDisabled(false));
+  }, [authToken, user]);
+
+  const onSignIn = useCallback(() => {
+    if (!user || !password) {
+      return;
+    }
+
+    setPasswordInvalid(false);
+    setDisabled(true);
+
+    fetch("/api/auth", {
+      method: "POST",
+      body: JSON.stringify({ userId: user.id, password: `${password.substring(0, 3)}-${password.substring(3, 6)}` }),
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+      .then(async (r) => {
+        return {
+          status: r.status,
+          data: await r.json(),
+        };
+      })
+      .then((r) => {
+        if (r.status === 200) {
+          dispatch(setToken(r.data.token));
+          setPasswordSent(false);
+          setSignedOut(false);
+          return;
+        }
+
+        if (r.data.message === "Invalid Password") {
+          setPasswordInvalid(true);
+        } else {
+          setPasswordSent(false);
+        }
+      })
+      .finally(() => setDisabled(false));
+  }, [password, user]);
+
+  const onSignOut = useCallback(() => {
+    sessionStorage.removeItem("token");
+    setSignedOut(true);
+  }, []);
+
   const preventDefault = (e: Event) => e.preventDefault();
+
+  if (!signedOut) {
+    return (
+      <div className="flex flex-col gap-2">
+        <FieldDescription>You are currently signed it to Flotto.</FieldDescription>
+        <Button onClick={onSignOut}>Sign Out</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -121,7 +215,7 @@ export const UserSearch: React.FC = () => {
               maxLength={6}
               value={password}
               onChange={setPassword}
-              pasteTransformer={(pasted) => pasted.replaceAll("-", "")}
+              pasteTransformer={(pasted) => pasted.trim().replaceAll("-", "")}
             >
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
@@ -142,12 +236,14 @@ export const UserSearch: React.FC = () => {
               </a>
             </FieldDescription>
           </Field>
-          <Button className="mt-6" disabled={password.length < 6} onClick={() => setPasswordSent(false)}>
+          <Button className="mt-6" disabled={password.length < 6} onClick={onSignIn}>
             Sign In
           </Button>
+
+          {passwordInvalid && <div className="my-2 text-red-500">Invalid Password</div>}
         </>
       ) : (
-        <Button disabled={!user} onClick={() => setPasswordSent(true)}>
+        <Button disabled={disabled || !user} onClick={onSendPassword}>
           Send Password
         </Button>
       )}

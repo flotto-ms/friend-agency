@@ -1,14 +1,9 @@
 "use client";
-import { PropsWithChildren, useMemo, useState } from "react";
+import { PropsWithChildren, ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 import MinMaxSlider from "../MinMaxSlider";
 import PriceSlider from "../PriceSlider";
 import QuestTypeSelect, { getQuestDescription } from "../QuestTypeSelect";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { Button } from "../ui/button";
 import {
   Drawer,
@@ -38,16 +33,15 @@ import { Spinner } from "../ui/spinner";
 import { Checkbox } from "../ui/checkbox";
 import { Card } from "../ui/card";
 
+import rateConfig from "../../../public/rateconfig.json";
+import { getFilterDescription, RateFilter, RateFilterRange } from "@/lib/FilterDesc";
+
 export type RateDrawProps = {
   rate?: RateItem;
   selectedGroup?: string;
 } & PropsWithChildren;
 
-const RateDraw: React.FC<RateDrawProps> = ({
-  rate,
-  selectedGroup,
-  children,
-}) => {
+const RateDraw: React.FC<RateDrawProps> = ({ rate, selectedGroup, children }) => {
   const [open, setOpen] = useState(false);
   const onClose = () => setOpen(false);
   return (
@@ -62,20 +56,19 @@ const RateDraw: React.FC<RateDrawProps> = ({
   );
 };
 
-const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({
-  rate,
-  selectedGroup,
-  onClose,
-}) => {
+const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, selectedGroup, onClose }) => {
   const slice = useAppSelector(selectRates);
 
   const [saving, setSaving] = useState(false);
   const [type, setType] = useState(rate?.type ?? 0);
   const [amount, setAmount] = useState(rate?.rate ?? 150);
   const [enabled, setEnabled] = useState(rate?.enabled ?? false);
-  const [groups, setGroups] = useState(
-    rate?.groups ?? (selectedGroup ? [selectedGroup] : []),
-  );
+  const [groups, setGroups] = useState(rate?.groups ?? (selectedGroup ? [selectedGroup] : []));
+  const [filters, setFilters] = useState<RateFilter>(rate?.filters ?? {});
+
+  useEffect(() => {}, [filters]);
+
+  useEffect(() => setFilters({}), [type]);
 
   const dispatch = useAppDispatch();
 
@@ -83,13 +76,22 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({
     setSaving(true);
 
     const newRate: RateItem = rate
-      ? { ...structuredClone(rate), rate: amount, enabled, groups }
+      ? {
+          ...structuredClone(rate),
+          rate: amount,
+          enabled,
+          groups,
+          filters: Object.keys(filters).length > 0 ? filters : undefined,
+          filter: getFilterDescription({ filter: filters }),
+        }
       : {
           id: crypto.randomUUID(),
           type,
           stopping: false,
           enabled,
           description: getQuestDescription(type.toString()),
+          filter: getFilterDescription({ filter: filters }),
+          filters: Object.keys(filters).length > 0 ? filters : undefined,
           rate: amount,
           groups,
         };
@@ -115,26 +117,92 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({
     });
   };
 
+  const setFilter = useCallback((key: keyof RateFilter, filter?: RateFilterRange) => {
+    setFilters((old) => {
+      const data = { ...old };
+      if (!filter) {
+        delete data[key];
+      } else if (key !== "elite") {
+        data[key] = filter;
+      }
+      return data;
+    });
+  }, []);
+
   const toggles = useMemo(() => {
     return Object.entries(slice.groups)
       .sort((a, b) => a[1].label.localeCompare(b[1].label))
       .map(([id, item]) => ({ id, ...item }));
   }, [slice.groups]);
 
+  const sliders = useMemo(() => {
+    if (!type) {
+      return [];
+    }
+
+    const components: ReactElement[] = [];
+    const config = rateConfig[`${type}` as keyof typeof rateConfig] as RateFilter;
+    if (config.required) {
+      components.push(
+        <MinMaxSlider
+          key={`${type}_amount`}
+          label="Quantity"
+          min={config.required.min}
+          max={config.required.max}
+          step={config.required.step}
+          initialValue={filters?.required ? [filters.required.min, filters.required.max] : undefined}
+          onChange={(range) => setFilter("required", range)}
+        />,
+      );
+    }
+    if (config.arenaLevel) {
+      components.push(
+        <MinMaxSlider
+          key={`${type}_arena`}
+          label="Arena Level"
+          min={config.arenaLevel.min}
+          max={config.arenaLevel.max}
+          initialValue={filters?.arenaLevel ? [filters.arenaLevel.min, filters.arenaLevel.max] : undefined}
+          onChange={(range) => setFilter("arenaLevel", range)}
+        />,
+      );
+    }
+    if (config.efficiency) {
+      components.push(
+        <MinMaxSlider
+          key={`${type}_eff`}
+          label="Efficiency"
+          min={config.efficiency.min}
+          max={config.efficiency.max}
+          initialValue={filters?.efficiency ? [filters.efficiency.min, filters.efficiency.max] : undefined}
+          onChange={(range) => setFilter("efficiency", range)}
+        />,
+      );
+    }
+    if (config.density) {
+      components.push(
+        <MinMaxSlider
+          key={`${type}_density`}
+          label="Density"
+          min={config.density.min}
+          max={config.density.max}
+          initialValue={filters?.density ? [filters.density.min, filters.density.max] : undefined}
+          onChange={(range) => setFilter("density", range)}
+        />,
+      );
+    }
+
+    return components;
+  }, [type]);
+
   return (
     <>
       <DrawerHeader>
         <DrawerTitle>Quest Rate</DrawerTitle>
-        <DrawerDescription>
-          Set the rate you are willing to pay for a quest.
-        </DrawerDescription>
+        <DrawerDescription>Set the rate you are willing to pay for a quest.</DrawerDescription>
       </DrawerHeader>
       <div className="no-scrollbar overflow-y-auto px-4 flex flex-col gap-4">
-        <QuestTypeSelect
-          value={type}
-          onChange={setType}
-          disabled={Boolean(rate)}
-        />
+        <QuestTypeSelect value={type} onChange={setType} disabled={Boolean(rate)} />
 
         {type > 0 && (
           <>
@@ -144,8 +212,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({
                 <FieldContent>
                   <FieldTitle>Active</FieldTitle>
                   <FieldDescription>
-                    You will receive quests when your status is set to open, and
-                    you have free slots
+                    You will receive quests when your status is set to open, and you have free slots
                   </FieldDescription>
                 </FieldContent>
                 <Switch
@@ -158,40 +225,34 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({
             </FieldLabel>
 
             <Accordion
+              defaultValue={Object.keys(filters).length > 0 ? "value" : undefined}
               type="single"
               collapsible
               className="max-w-lg rounded-lg border"
             >
-              <AccordionItem
-                value="value"
-                className="border-b px-4 last:border-b-0"
-              >
+              <AccordionItem value="value" className="border-b px-4 last:border-b-0">
                 <AccordionTrigger>Advanced Filter</AccordionTrigger>
-                <AccordionContent>
-                  <MinMaxSlider />
-                </AccordionContent>
+                <AccordionContent className="flex flex-col gap-8">{sliders}</AccordionContent>
               </AccordionItem>
             </Accordion>
 
-            <Card className="bg-transparent p-4">
-              <FieldSet>
-                <FieldLegend variant="label">Stack Groups</FieldLegend>
-                <FieldGroup>
-                  <div className="flex flex-wrap gap-2">
-                    {toggles.map((t) => (
-                      <Field key={t.id} orientation="horizontal">
-                        <Checkbox
-                          id={t.id}
-                          checked={groups.includes(t.id)}
-                          onClick={() => toggleGroup(t.id)}
-                        />
-                        <FieldLabel htmlFor={t.id}>{t.label}</FieldLabel>
-                      </Field>
-                    ))}
-                  </div>
-                </FieldGroup>
-              </FieldSet>
-            </Card>
+            {groups.length > 0 && (
+              <Card className="bg-transparent p-4">
+                <FieldSet>
+                  <FieldLegend variant="label">Stack Groups</FieldLegend>
+                  <FieldGroup>
+                    <div className="flex flex-wrap gap-2">
+                      {toggles.map((t) => (
+                        <Field key={t.id} orientation="horizontal">
+                          <Checkbox id={t.id} checked={groups.includes(t.id)} onClick={() => toggleGroup(t.id)} />
+                          <FieldLabel htmlFor={t.id}>{t.label}</FieldLabel>
+                        </Field>
+                      ))}
+                    </div>
+                  </FieldGroup>
+                </FieldSet>
+              </Card>
+            )}
           </>
         )}
       </div>

@@ -1,6 +1,7 @@
+import { ContractorRate } from "../api";
 import { FlottoQuestId } from "../flotto";
 
-export type ContractAction = "Price" | "Subscription" | "Pause";
+export type ContractAction = "Price" | "Subscription" | "Pause" | "Rate";
 
 export type ContractActionTableItem = {
   key: string;
@@ -11,4 +12,5 @@ export type ContractActionTableItem = {
   price?: number;
   subscribed?: boolean;
   paused?: boolean;
+  rate?: ContractorRate;
 };

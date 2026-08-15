@@ -1,15 +1,39 @@
 import { Rate, UserTableItem } from "@flotto/types";
-import { createClient, getItem } from "./DynamoDbUtils";
+import DynamoDbUtils, { createClient, getItem } from "./DynamoDbUtils";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 const getUser = (id: number) => {
   return getItem<UserTableItem>({
     TableName: process.env.USER_TABLE!,
     Key: { id: id },
+  }).then((user) => {
+    if (!user || !user.rates) {
+      return user;
+    }
+
+    Object.values(user.rates).forEach((r) => {
+      if (r.groups) {
+        r.groups = [...(r.groups as any).values()];
+      }
+    });
+
+    return user;
   });
 };
 
-const updateRates = async (userId: number, rates: Rate[]) => {
+const updateDetails = async (id: number, username: string, country: string) => {
+  return DynamoDbUtils.updateItem({
+    Key: { id },
+    TableName: process.env.USER_TABLE!,
+    Attrs: {
+      username,
+      country,
+    },
+    Upsert: true,
+  });
+};
+
+const updateRates = async (userId: number, rates: [string, Rate][]) => {
   const attributeKeys: Record<string, string> = {};
   const attributeValues: Record<string, any> = {};
 
@@ -17,8 +41,8 @@ const updateRates = async (userId: number, rates: Rate[]) => {
     .map((rate, i) => {
       const key = `#key${i}`;
       const val = `:val${i}`;
-      attributeKeys[key] = `quest_${rate.type}`;
-      attributeValues[val] = rate;
+      attributeKeys[key] = rate[0];
+      attributeValues[val] = rate[1];
       return `, #rate.${key} = ${val}`;
     })
     .join("");
@@ -33,7 +57,7 @@ const updateRates = async (userId: number, rates: Rate[]) => {
         TableName: process.env.USER_TABLE!,
         Key: { id: userId },
         UpdateExpression: "SET #rate = :rate",
-        ConditionExpression: "attribute_exists(id) AND attribute_not_exists(#rate)",
+        ConditionExpression: "attribute_not_exists(#rate)",
         ExpressionAttributeNames: { "#rate": "rates" },
         ExpressionAttributeValues: { ":rate": {} },
       }),
@@ -44,7 +68,7 @@ const updateRates = async (userId: number, rates: Rate[]) => {
     TableName: process.env.USER_TABLE!,
     Key: { id: userId },
     UpdateExpression: "SET #contractor = :contractor" + rateExpression,
-    ConditionExpression: "attribute_exists(id)",
+    //ConditionExpression: "attribute_exists(id)",
     ExpressionAttributeNames: attributeKeys,
     ExpressionAttributeValues: attributeValues,
     ReturnValues: "ALL_OLD",
@@ -57,5 +81,6 @@ const updateRates = async (userId: number, rates: Rate[]) => {
 
 export default {
   getUser,
+  updateDetails,
   updateRates,
 };

@@ -1,7 +1,7 @@
-import type { SaveQuestsRequest, SaveQuestsResponse } from "@flotto/types";
+import type { GetContractsResponse, GetPricesResponse, SaveQuestsRequest, SaveQuestsResponse } from "@flotto/types";
 import { updatePrices } from "../utils/PriceData";
 
-const base = "https://flotto.vercel.app/api";
+const base = "https://hls6ldikcd.execute-api.us-east-1.amazonaws.com/prod"; //https://flotto.vercel.app/api";
 
 let lastValue = 100;
 let timeout = Date.now();
@@ -36,6 +36,16 @@ export const FlottoApi = {
     return fetch(url, { method: "POST", body: JSON.stringify({ slots }) })
       .then((r) => r.json())
       .catch((ex) => console.error(ex));
+  },
+
+  getPrices: async (userId: number) => {
+    const url = `${base}/users/${userId}/quests/prices`;
+    return fetch(url).then((r) => r.json() as Promise<GetPricesResponse>);
+  },
+
+  getContracts: async () => {
+    const url = `${base}/contracts`;
+    return fetch(url).then((r) => r.json() as Promise<GetContractsResponse>);
   },
 };
 
@@ -79,4 +89,9 @@ const getChanges = async (quests: SaveQuestsRequest) => {
   return changes;
 };
 
-//chrome.storage.local.set({ quests: { received: [], sent: [] } });
+chrome.storage.local.get(["quests"]).then((result) => {
+  if ((result.quests as any)?.version !== 2) {
+    console.log("Reset Store");
+    chrome.storage.local.set({ quests: { version: 2, received: [], sent: [] } });
+  }
+});

@@ -1,6 +1,6 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { createAppSlice } from "../createAppSlice";
-import { postAddGroup, postDeleteGroup, fetchRates, type GetRateResponse, postSaveRate } from "./api";
+import { postAddGroup, postDeleteGroup, fetchRates, type GetRateResponse, postSaveRate, postDeleteRate } from "./api";
 
 export interface RateSliceState {
   status: "init" | "loading" | "failed" | "loaded";
@@ -50,10 +50,15 @@ export const rateSlice = createAppSlice({
         state.rates[id] = item;
       },
     }),
+    deleteRate: create.asyncThunk(postDeleteRate, {
+      fulfilled: (state, action) => {
+        delete state.rates[action.payload];
+      },
+    }),
     createGroup: create.asyncThunk(postAddGroup, {
       fulfilled: (state, action) => {
         state.groups[action.payload.id] = { label: action.payload.label };
-        action.payload.rates?.forEach((id) => {
+        action.meta.arg.rates?.forEach((id) => {
           const rate = state.rates[id];
           if (!rate) {
             return;
@@ -69,10 +74,10 @@ export const rateSlice = createAppSlice({
       fulfilled: (state, action) => {
         Object.values(state.rates).forEach((r) => {
           if (r.groups) {
-            r.groups = r.groups.filter((g) => g !== action.payload);
+            r.groups = r.groups.filter((g) => g !== action.meta.arg);
           }
         });
-        delete state.groups[action.payload];
+        delete state.groups[action.meta.arg];
       },
     }),
     loadInitialRates: create.asyncThunk(fetchRates, {
@@ -96,6 +101,6 @@ export const rateSlice = createAppSlice({
   },
 });
 
-export const { loadInitialRates, setRateEnabled, resetStopped, updateRate, createGroup, deleteGroup } =
+export const { loadInitialRates, setRateEnabled, resetStopped, updateRate, deleteRate, createGroup, deleteGroup } =
   rateSlice.actions;
 export const { selectRates } = rateSlice.selectors;

@@ -1,5 +1,6 @@
 "use client";
-import { type AppStore, makeStore } from "../data/store";
+import { setToken, signOut } from "@/data/authSlice";
+import { type AppStore, makeStore } from "../../data/store";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { type PropsWithChildren, useEffect, useRef } from "react";
 import { Provider } from "react-redux";
@@ -14,6 +15,15 @@ export const StoreProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
   useEffect(() => {
     if (storeRef.current != null) {
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("token");
+        if (token) {
+          storeRef.current.dispatch(setToken(token));
+        } else {
+          storeRef.current.dispatch(signOut());
+        }
+      }
+
       // configure listeners using the provided defaults
       // optional, but required for `refetchOnFocus`/`refetchOnReconnect` behaviors
       const unsubscribe = setupListeners(storeRef.current.dispatch);

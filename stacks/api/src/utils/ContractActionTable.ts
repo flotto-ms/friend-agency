@@ -1,4 +1,11 @@
-import { ContractAction, ContractActionTableItem, ContractsTableItem, FlottoQuestId } from "@flotto/types";
+import {
+  ContractAction,
+  ContractActionTableItem,
+  ContractorRate,
+  ContractsTableItem,
+  FlottoQuestId,
+  Rate,
+} from "@flotto/types";
 import DynamoDbUtils from "./DynamoDbUtils";
 
 const logPause = async (userId: number, paused: boolean, timestamp?: string) => {
@@ -9,6 +16,18 @@ const logPause = async (userId: number, paused: boolean, timestamp?: string) => 
     userId,
     action,
     paused,
+    timestamp: createTimestamp(timestamp),
+  });
+};
+
+const logRate = async (userId: number, rate: ContractorRate, timestamp?: string) => {
+  const action: ContractAction = "Rate";
+  return putItem({
+    key: `${userId}_${rate.name.replaceAll(" ", "_")}_${action}`,
+    type: 0,
+    userId,
+    action,
+    rate,
     timestamp: createTimestamp(timestamp),
   });
 };
@@ -29,7 +48,7 @@ const logPrice = async (userId: number, quest: FlottoQuestId, price: number, tim
   const action: ContractAction = "Price";
   return putItem({
     key: createKey(userId, quest, action),
-    type: quest,
+    type: 0,
     userId,
     action,
     price,
@@ -49,6 +68,7 @@ const putItem = async (item: ContractActionTableItem) => {
 
 export default {
   logPause,
+  logRate,
   logSubscription,
   logPrice,
   createKey,

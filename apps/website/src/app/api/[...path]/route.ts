@@ -29,6 +29,26 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const path = request.nextUrl.pathname.substring(4);
+  const body = await request.text();
+  return fetch(baseUrl + path, {
+    method: request.method,
+    headers: request.headers,
+    body,
+  }).then((r) => relayResponse(r, request));
+}
+
+export async function PUT(request: NextRequest) {
+  const path = request.nextUrl.pathname.substring(4);
+  const body = await request.text();
+  return fetch(baseUrl + path, {
+    method: request.method,
+    headers: request.headers,
+    body,
+  }).then((r) => relayResponse(r, request));
+}
+
+export async function DELETE(request: NextRequest) {
+  const path = request.nextUrl.pathname.substring(4);
   return fetch(baseUrl + path, {
     method: request.method,
     headers: request.headers,
@@ -37,7 +57,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const path = request.nextUrl.pathname.substring(4);
-  return fetch(baseUrl + path).then((r) => relayResponse(r, request));
+  return fetch(baseUrl + path + request.nextUrl.search, {
+    headers: request.headers,
+  }).then((r) => relayResponse(r, request));
 }
 
 const relayResponse = async (res: Response, req: NextRequest) => {

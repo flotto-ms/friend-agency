@@ -1,34 +1,148 @@
 import { formatNumber } from "@flotto/utils";
 import { getPrices } from "../utils/PriceData";
 import type { FlottoQuestDetails } from "../../../../packages/types/src/flotto/FlottoQuestDetails";
+import type { MsoQuest, SaveQuestsResponse } from "@flotto/types";
+import type { QuestContract, QuestContracts } from "../utils/ContractData";
+import { type UserStatus } from "../minesweeper/api";
+
+let selectedContracts: QuestContracts | undefined;
+let contractInterval: ReturnType<typeof setInterval> | undefined = undefined;
 
 const _observer = new MutationObserver((_) => injectPrices());
+const _modalObserver = new MutationObserver((_) => injectContractors());
+
+const headerTemplate = `
+  <div data-flotto="header"><table><tbody><tr><td style="width: 100%;"><h2 class="">Flotto Wallet (Estimate)</h2></td><td><h2 class="events-title"><span class="season help gray" title="" data-original-title="Flotto Season S7">[S7]</span></h2></td></tr></tbody></table><hr class="event-hr"></div>
+  <table class="table table-bordered" data-flotto="set"><thead><tr><th class="text-nowrap quest-column">Description</th><th class="text-nowrap">Amount</th></tr></thead><tbody>
+    <tr><td>Quests Sold</td><td class="text-nowrap" id="flotto-sold"></td></tr>
+    <tr><td>Quests Purchased</td><td class="text-nowrap" id="flotto-purchased"></td></tr>
+    <tr><td>Contractor Fees * (5%)</td><td class="text-nowrap" id="flotto-fees"></td></tr>
+    <tr><th>Balance</th><th class="text-nowrap" id="flotto-total"></div></td></tr>
+  </tbody></table>
+  <div><p class="text-nowrap transparent">* Agency fees can be offset by end of <a id="flotto-show">season rewards</a>.</p></div>
+  <table id="flotto-reward" style="display:none" class="table table-bordered" data-flotto="set"><thead><tr><th class="text-nowrap quest-column">Tier</th><th class="text-nowrap">Event Points Sent</th><th class="text-nowrap">Reward</th></tr></thead><tbody>
+    <tr><td>Tier 1</td><td class="text-nowrap">2 000 EP</td><td class="text-nowrap">2 000 <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></td></tr>
+    <tr><td>Tier 2</td><td class="text-nowrap">4 000 EP</td><td class="text-nowrap">5 000 <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></td></tr>
+    <tr><td>Tier 3</td><td class="text-nowrap">7 000 EP</td><td class="text-nowrap">10 000 <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></td></tr>
+    <tr><td>Tier 4</td><td class="text-nowrap">10 000 EP</td><td class="text-nowrap">15 000 <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></td></tr>
+    <tr><td>Tier 5</td><td class="text-nowrap">15 000 EP</td><td class="text-nowrap">30 000 <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></td></tr>
+  </tbody></table>
+`;
+
+const loadingHtml = `<img src="/img/loading_big.gif" class="loading-small">`;
+
+let modalTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
+const injectContractors = () => {
+  if (modalTimeout) clearTimeout(modalTimeout);
+
+  modalTimeout = setTimeout(async () => {
+    const modal = document.getElementById("SendQuestDialog");
+    if (modal?.getAttribute("class") === "modal fade" || !selectedContracts) {
+      selectedContracts = undefined;
+      return;
+    }
+
+    const content = modal?.querySelector("#send_quest_content > div");
+    const sendButton = content?.childNodes[1].firstChild as HTMLLinkElement;
+
+    const links = document.createElement("div");
+    links.style.display = "flex";
+    links.style.flexWrap = "wrap";
+    links.style.justifyContent = "space-around";
+    links.style.gridTemplateColumns = "repeat(auto-fill, minmax(250px, 1fr))";
+    const users = new Set<number>();
+
+    for (let contract of selectedContracts.contracts) {
+      if (users.has(contract.userId)) {
+        break;
+      }
+      users.add(contract.userId);
+      const link = await createContractorLink(contract, sendButton);
+      if (link) {
+        links.append(link);
+      }
+    }
+    links.className = "send-quest-option";
+
+    const before = content?.childNodes[2]!;
+    content?.insertBefore(links, before);
+
+    const head = document.createElement("div");
+    head.className = "send-quest-option";
+    head.innerText = "Available Flotto Contractors";
+    content?.insertBefore(head, links);
+  }, 250);
+};
 
 const injectPrices = () => {
   const questBlock = document.getElementById("QuestsBlock");
   const tables = [...questBlock!.querySelectorAll<HTMLTableElement>(".table")];
-  if (tables.length === 3) {
-    tables.shift();
-    //injectPricesIntoTest([230, 180, 215], quests!);
-  }
 
-  if (tables.length < 2) {
-    return;
-  }
+  const [received, sent] = tables.filter((tbl) => {
+    const thead = tbl.querySelector<HTMLTableElement>("thead tr")!;
+    return thead.childNodes.length > 5;
+  });
 
-  const [received, sent] = tables;
+  const unsent = tables.find((tbl) => {
+    const thead = tbl.querySelector<HTMLTableElement>("thead tr")!;
+    return thead.childNodes.length == 5;
+  });
 
-  getPrices().then((prices) => {
+  const header = questBlock?.querySelector('[data-flotto="header"]');
+
+  getPrices().then(async (prices) => {
     if (!prices) {
       return;
     }
+    const quests = (await chrome.storage.local.get(["quests"])).quests as any;
 
-    injectPricesIntoTable(prices.received, received);
-    injectPricesIntoTable(prices.sent, sent, "+");
+    if (received) injectPricesIntoTable(prices.received, quests.received, received);
+    if (sent) injectPricesIntoTable(prices.sent, quests.sent, sent, "+");
+    if (unsent && quests.sent && quests.sent[0].initiatorId === 11698196) injectPricesIntoUnsent(unsent);
+
+    if (!header) {
+      injectSummary(prices);
+    }
+
+    chrome.runtime.sendMessage({
+      action: "initPopover",
+      payload: {},
+    });
   });
 };
 
-const injectPricesIntoTest = (prices: number[], table: HTMLTableElement) => {
+const injectSummary = (prices: SaveQuestsResponse) => {
+  const sold = prices.sent.reduce((a, c) => a + (c?.flotto?.price ?? 0), 0);
+  const purchased = prices.received.reduce((a, c) => a + (c?.flotto?.price ?? 0), 0);
+  const fees = Math.round(purchased * 0.05);
+  const total = sold - purchased - fees;
+
+  if (purchased === 0 && sold === 0) {
+    return;
+  }
+
+  const questBlock = document.getElementById("QuestsBlock");
+  const div = document.createElement("div");
+  div.innerHTML = headerTemplate.trim();
+
+  questBlock?.prepend(...div.childNodes);
+
+  document.getElementById("flotto-sold")?.append(sold === 0 ? "—" : createMcElement(sold, "+"));
+  document.getElementById("flotto-purchased")?.append(purchased === 0 ? "—" : createMcElement(purchased, "-"));
+  document.getElementById("flotto-fees")?.append(fees === 0 ? "—" : createMcElement(fees, "-"));
+  document.getElementById("flotto-total")?.append(total === 0 ? "—" : createMcElement(total));
+
+  document.getElementById("flotto-show")?.addEventListener("click", (e) => {
+    const reward = document.getElementById("flotto-reward")!;
+    if (reward.style.display === "none") {
+      reward.style.removeProperty("display");
+    } else {
+      reward.style.display = "none";
+    }
+  });
+};
+
+const injectPricesIntoUnsent = (table: HTMLTableElement) => {
   if (table.getAttribute("data-flotto")) {
     return;
   }
@@ -36,27 +150,106 @@ const injectPricesIntoTest = (prices: number[], table: HTMLTableElement) => {
 
   const head = table.querySelectorAll<HTMLTableRowElement>("thead tr")[0];
   const th = document.createElement("th");
-  th.innerText = "Flotto";
+  th.innerText = "Flotto Rate";
   th.classList.add("text-nowrap");
   head.insertBefore(th, head.childNodes[3]);
 
   table.querySelectorAll<HTMLTableRowElement>("tbody tr").forEach((row, i) => {
-    const price = prices[i];
-
     const td = document.createElement("td");
     td.classList.add("text-nowrap");
-
-    if (price > 0) {
-      td.innerHTML = `<span class="text-nowrap-inline">${formatNumber(price)} / ❤️</span>`;
-    } else {
-      td.innerText = "—";
-    }
+    td.style.userSelect = "none";
+    td.innerHTML = loadingHtml;
     row.insertBefore(td, row.childNodes[2]);
   });
+
+  const initContracts = () => {
+    chrome.runtime
+      .sendMessage({
+        action: "getContracts",
+        payload: {},
+      })
+      .then((response: { contracts: QuestContracts[] }) => {
+        response.contracts.forEach((c) => {
+          if (!table.querySelectorAll(`#quest_row_${c.id}`)) {
+            return;
+          }
+
+          const cell = table.querySelectorAll(`#quest_row_${c.id} td`)[2];
+          if (!cell) {
+            return;
+          }
+
+          if (cell.firstElementChild) cell.removeChild(cell.firstElementChild!);
+
+          const button = table.querySelector(`#quest_row_${c.id} button`);
+
+          cell.addEventListener("mouseover", async () => {
+            const span = cell.querySelector("span");
+
+            if (!span || span.getAttribute("data-toggle")) {
+              return;
+            }
+            span?.setAttribute("data-toggle", "popover");
+
+            let content = `<table class="table table-bordered" style="margin:0;zoom:0.9">`;
+
+            let count = 0;
+            let found = false;
+
+            for (let item of c.contracts) {
+              const row = await createContractRow(item);
+              if (row && (count < 5 || (row?.available && !found))) {
+                count++;
+                if (row?.available) {
+                  found = true;
+                }
+                content += row?.template;
+              }
+            }
+            content += "</table>";
+
+            if (count < c.contracts.length) {
+              content += `<div style="text-align:center;margin-top:5px;font-size:12px;">Showing top ${count} of ${c.contracts.length}</div>`;
+            }
+
+            span?.setAttribute("data-trigger", "hover");
+            span?.setAttribute("data-html", "true");
+            span?.setAttribute("data-animation", "true");
+            span?.setAttribute(
+              "data-content",
+              `<div class="custom-popover-content"><strong>Flotto Contracts</strong><hr class="narrow-hr"/> ${content}</div>`,
+            );
+            span?.setAttribute("data-flotto", "popover");
+
+            chrome.runtime.sendMessage({
+              action: "initPopover",
+              payload: {},
+            });
+          });
+
+          if (c.bestPrice === 0) {
+            cell.textContent = "-";
+          } else {
+            cell.textContent = "";
+            cell.append(createMcElement(c.bestPrice).firstChild!);
+            button?.addEventListener("click", () => {
+              selectedContracts = c;
+            });
+          }
+        });
+      });
+  };
+
+  if (contractInterval) {
+    clearInterval(contractInterval);
+  }
+  contractInterval = setInterval(initContracts, 60_000);
+  initContracts();
 };
 
 const injectPricesIntoTable = (
   prices: { id: number; flotto: FlottoQuestDetails }[],
+  quests: MsoQuest[],
   table: HTMLTableElement,
   pricePrefix: string = "",
 ) => {
@@ -74,13 +267,24 @@ const injectPricesIntoTable = (
   table.querySelectorAll<HTMLTableRowElement>("tbody tr").forEach((row) => {
     const id = parseInt(row.id.replace("quest_row_", ""));
     const price = prices.find((e) => e.id === id);
+    const quest = quests.find((q) => q.id === id);
 
     const td = document.createElement("td");
     td.classList.add("text-nowrap");
 
-    if ((price?.flotto.price ?? 0) > 0) {
-      td.appendChild(createMcElement(price!.flotto.price!, pricePrefix));
-    } else if (price?.flotto.status === "Inactive") {
+    if (!price?.flotto) {
+      td.innerHTML = loadingHtml;
+    } else if ((price.flotto.price ?? 0) > 0 && quest) {
+      const amount = price!.flotto.price!;
+      const levels = quest!.level * (quest!.isElite ? 3 : 1);
+
+      td.appendChild(
+        createMcElement(amount, pricePrefix, {
+          title: "Flotto",
+          content: `<div class="text-nowrap"><p>This quest was contracted on flotto<br />at the following rate: </p><p> ${createMcElement(amount / levels).innerHTML} &nbsp; per level</p></div>`,
+        }),
+      );
+    } else if (price.flotto.status === "Inactive") {
       td.innerText = "No Contract";
     } else {
       td.innerText = "—";
@@ -97,9 +301,93 @@ const injectPricesIntoTable = (
   });
 };
 
-const createMcElement = (amount: number, prefix = "") => {
+const createContractRow = async (c: QuestContract) => {
+  return chrome.runtime
+    .sendMessage({
+      action: "getUserStatus",
+      payload: { userId: c.userId },
+    })
+    .then((response: { status: UserStatus }) => {
+      const status = response.status;
+      if (!status) return;
+      const elem = document.createElement("div");
+      elem.textContent = status.username;
+
+      return {
+        available: status.isAccepting && !status.isFull,
+        template: `<tr><td class="text-nowrap" style="overflow:hidden;text-overflow:ellipsis;max-width:200px"><nobr><img src="/img/flags/${status.country.toLowerCase()}.png" class="player-flag help"><a>${elem.innerHTML}</a></nobr></td><td class="text-nowrap">${c.price}</td><td class="text-nowrap">${getStatus(status!)}</td></tr>`,
+      };
+    });
+};
+
+const createContractorLink = async (c: QuestContract, sendButton: HTMLLinkElement) => {
+  return chrome.runtime
+    .sendMessage({
+      action: "getUserStatus",
+      payload: { userId: c.userId },
+    })
+    .then((response: { status: UserStatus }) => {
+      const status = response.status;
+      if (!status || !status.isAccepting || status.isFull) return;
+      const elem = document.createElement("a");
+      const span = document.createElement("span");
+
+      elem.innerHTML = `<img src="/img/flags/${status.country.toLowerCase()}.png" class="player-flag"/>`;
+      span.innerText = status.username;
+      elem.append(span);
+      elem.href = "javascript:void(0);";
+
+      elem.style.display = "inline-block";
+      elem.style.marginRight = "10px";
+
+      elem.addEventListener("click", () => {
+        try {
+          sendButton.click();
+        } catch {}
+
+        setTimeout(() => {
+          const input = document.querySelector("#SendQuestDialog #user_autocomplete") as HTMLInputElement;
+          input.value = status.username;
+          const button = input.closest("#SearchBlock")!.querySelector("button");
+          button!.click();
+        }, 50);
+      });
+
+      const mc = createMcElement(c.price).firstElementChild! as HTMLElement;
+
+      const div = document.createElement("div");
+      div.style.display = "flex";
+      div.style.alignItems = "justify";
+      div.append(elem);
+      div.append(mc);
+
+      return div;
+    });
+};
+
+const getStatus = (status: UserStatus) => {
+  if (!status.isAccepting || status.isFull) {
+    return `<i class="fa fa-circle new-quest-icon"></i>`;
+  }
+  return `<i class="fa fa-circle icon-online"></i>`;
+};
+
+const createMcElement = (amount: number, prefix = "", popover?: { title: string; content: string } | undefined) => {
   const mc = document.createElement("div");
   mc.innerHTML = `<span class="text-nowrap-inline">${prefix}${formatNumber(amount)} <img src="/img/other/coin.svg" class="coin-icon icon-right icon-small" alt="🟡"></span>`;
+  if (popover) {
+    const span = mc.firstElementChild;
+    span?.setAttribute("data-flotto", "popover");
+    span?.setAttribute("data-toggle", "popover");
+    span?.setAttribute("data-trigger", "hover");
+    span?.setAttribute("data-placement", "top");
+    span?.setAttribute("data-html", "true");
+    span?.setAttribute("data-animation", "true");
+    span?.setAttribute(
+      "data-content",
+      `<div class="custom-popover-content popover-min-width"><strong>${popover.title}</strong><hr class="narrow-hr"/> ${popover.content}</div>`,
+    );
+  }
   return mc;
 };
 
@@ -115,9 +403,23 @@ const QuestPage = {
       });
       injectPrices();
     }
+
+    const modal = document.getElementById("SendQuestDialog");
+    if (modal) {
+      _modalObserver.observe(modal, {
+        subtree: false,
+        attributes: true,
+        childList: true,
+      });
+    }
   },
   unmount: () => {
+    if (contractInterval) {
+      clearInterval(contractInterval);
+    }
+
     _observer.disconnect();
+    _modalObserver.disconnect();
   },
 };
 

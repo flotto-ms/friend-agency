@@ -1,80 +1,36 @@
 import { RateItem } from "@/components/tables/RateTable/types";
+import api from "../authSlice/api";
+import { getQuestDescription } from "@/components/QuestTypeSelect";
+import { getFilterDescription } from "@/lib/FilterDesc";
 
 export type GetRateResponse = {
   rates: Record<string, Omit<RateItem, "id">>;
   groups: Record<string, { label: string }>;
 };
 
-const data: GetRateResponse = {
-  rates: {
-    xp: {
-      type: 8,
-      description: "Experience",
-      rate: 220,
-      enabled: true,
-      stopping: false,
-      groups: ["group-1"],
-    },
-    mc: {
-      type: 9,
-      description: "Mine Coins",
-      rate: 220,
-      enabled: true,
-      stopping: false,
-      groups: ["group-1"],
-    },
-    "rate-1": {
-      type: 21,
-      description: "Expert Wins",
-      rate: 250,
-      enabled: true,
-      stopping: false,
-      groups: ["group-2"],
-    },
-    "rate-2": {
-      type: 18,
-      description: "Expert Win Streak",
-      rate: 240,
-      enabled: true,
-      stopping: false,
-      filter: "max 4 wins",
-      groups: ["group-2"],
-    },
-    "rate-3": {
-      type: 20,
-      description: "Intermediate Wins",
-      rate: 240,
-      enabled: false,
-      stopping: false,
-      filter: "min 15 wins",
-      groups: ["group-3"],
-    },
-    "rate-4": {
-      type: 17,
-      description: "Intermediate Win Streak",
-      rate: 240,
-      enabled: false,
-      stopping: false,
-      filter: "max 10 wins",
-      groups: ["group-3"],
-    },
-  },
-  groups: {
-    "group-1": {
-      label: "Passives",
-    },
-    "group-2": {
-      label: "Expert",
-    },
-    "group-3": {
-      label: "Intermediate",
-    },
-  },
-};
+export const fetchRates = async (userId?: number) => {
+  return api.getUser(userId ? userId.toString() : undefined).then((r) => {
+    const response: GetRateResponse = {
+      rates: {},
+      groups: r.groups ?? {},
+    };
 
-export const fetchRates = async (userId: number) => {
-  return new Promise<GetRateResponse>((resolve) => {
-    setTimeout(() => resolve(data), 1_250);
+    if (r.rates) {
+      Object.entries(r.rates as Record<string, any>).forEach(([id, rate]) => {
+        response.rates[id] = {
+          type: rate.type,
+          description: getQuestDescription(rate.type.toString()),
+          rate: rate.amount,
+          enabled: rate.enabled,
+          stopping: false,
+          groups: rate.groups,
+          filters: rate.filter,
+          filter: rate.filter ? getFilterDescription(rate) : undefined,
+        };
+      });
+    }
+
+    return response;
   });
 };
 
@@ -84,19 +40,22 @@ export const postSaveRate = async (rate: RateItem) => {
   });
 };
 
-export const postAddGroup = async (data: {
-  label: string;
-  rates?: string[];
-}) => {
-  return new Promise<{ id: string; label: string; rates?: string[] }>(
-    (resolve) => {
-      setTimeout(() => resolve({ id: crypto.randomUUID(), ...data }), 750);
-    },
-  );
-};
-
-export const postDeleteGroup = async (id: string) => {
+export const postDeleteRate = async (id: string) => {
   return new Promise<string>((resolve) => {
     setTimeout(() => resolve(id), 750);
   });
+};
+
+export const postAddGroup = async (data: { label: string; rates?: string[] }) => {
+  return api.user.groups.create(data.label, data.rates).then((group) => {
+    return {
+      id: group.id as string,
+      label: data.label,
+      rates: data.rates ?? [],
+    };
+  });
+};
+
+export const postDeleteGroup = async (id: string) => {
+  return api.user.groups.delete(id);
 };
