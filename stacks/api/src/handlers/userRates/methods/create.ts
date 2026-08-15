@@ -2,6 +2,7 @@ import { Rate, UserTableItem } from "@flotto/types";
 import IdUtils from "../../../utils/IdUtils";
 import { createClient } from "../../../utils/DynamoDbUtils";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import ContractTable from "../../../utils/ContractTable";
 
 export const createRate = async (user: UserTableItem, rate: Rate) => {
   const rateId = IdUtils.createId();
@@ -50,6 +51,17 @@ export const createRate = async (user: UserTableItem, rate: Rate) => {
 
   console.debug(command.input);
   await createClient().send(command);
+
+  if (obj.enabled) {
+    await ContractTable.startContract({
+      userId: user.id,
+      rateId,
+      type: obj.type,
+      price: obj.amount,
+      filter: obj.filter,
+      startedAt: new Date().toISOString(),
+    });
+  }
 
   return {
     statusCode: 200,

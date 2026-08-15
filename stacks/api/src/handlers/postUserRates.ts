@@ -87,10 +87,7 @@ const verifyContracts = async (userId: number, rateId: string, rate: Rate) => {
 };
 
 const endContracts = async (userId: number, rateId: string, rate: Rate) => {
-  const activeContracts = await ContractTable.getActiveUserContracts(userId, rate.type).then((r) => {
-    console.log(r);
-    return r.filter((rate) => rate.rateId == rateId);
-  });
+  const activeContracts = await ContractTable.getActiveUserContracts(userId, rateId);
 
   console.log(activeContracts);
 

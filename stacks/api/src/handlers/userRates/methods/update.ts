@@ -2,6 +2,7 @@ import { NullOptional, Rate, UserTableItem } from "@flotto/types";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { createClient } from "../../../utils/DynamoDbUtils";
 import ResponseUtils from "../../../utils/ResponseUtils";
+import ContractTable from "../../../utils/ContractTable";
 
 export const updateRate = async (
   user: UserTableItem,
@@ -18,6 +19,11 @@ export const updateRate = async (
     ...(changes.amount !== undefined ? { amount: changes.amount } : {}),
     ...(typeof changes.enabled === "boolean" ? { enabled: changes.enabled } : {}),
   };
+
+  const contractStateChanged =
+    current.enabled !== next.enabled ||
+    current.amount !== next.amount ||
+    JSON.stringify(current.filter ?? null) !== JSON.stringify(next.filter ?? null);
 
   if (changes.filter == null) {
     delete next.filter;
@@ -47,6 +53,22 @@ export const updateRate = async (
   });
 
   await createClient().send(command);
+
+  if (contractStateChanged) {
+    const activeContracts = await ContractTable.getActiveUserContracts(user.id, rateId);
+    await Promise.all(activeContracts.map((contract) => ContractTable.endContract(contract)));
+  }
+
+  if (next.enabled && contractStateChanged) {
+    await ContractTable.startContract({
+      userId: user.id,
+      rateId,
+      type: next.type,
+      price: next.amount,
+      filter: next.filter,
+      startedAt: new Date().toISOString(),
+    });
+  }
 
   return {
     statusCode: 200,

@@ -11,7 +11,7 @@ export const getActiveContracts = () => {
   });
 };
 
-export const getActiveUserContracts = async (userId: number, type?: FlottoQuestId) => {
+export const getActiveUserContracts = async (userId: number, rateId?: string) => {
   const items = await queryItems<ContractTableItem>({
     TableName: process.env.CONTRACT_TABLE!,
     IndexName: "EndedAtUserIdIndex",
@@ -21,8 +21,8 @@ export const getActiveUserContracts = async (userId: number, type?: FlottoQuestI
     },
   });
 
-  if (type) {
-    return items.filter((item) => item.type === type);
+  if (rateId) {
+    return items.filter((item) => item.rateId === rateId);
   }
 
   return items;
@@ -76,43 +76,23 @@ export const getUserQuestContracts = async (userId: number, type: FlottoQuestId,
     return date <= end;
   });
 };
-/*
-export const getContract = async (type: FlottoQuestId, userId: number, dateStart: Date) => {
-  const command = new QueryCommand({
+
+export const getContractHistory = async (key: string) => {
+  return queryItems<ContractTableItem>({
     TableName: process.env.CONTRACT_TABLE!,
-    KeyConditions: {
-      key: {
-        AttributeValueList: [getKey(userId, type)],
-        ComparisonOperator: "EQ",
-      },
-      startedAt: {
-        AttributeValueList: [dateStart.toISOString()],
-        ComparisonOperator: "LT",
-      },
+    KeyCondition: {
+      key,
     },
-    Limit: 1,
-  });
-  console.log(command.input);
-
-  const result = await createClient().send(command);
-  if (!result.Items) {
-    return undefined;
-  }
-  return (result.Items as ContractTableItem[]).find((item) => {
-    if (item.endedAt === "Active") {
-      return true;
-    }
-
-    return new Date(item.endedAt) > dateStart;
   });
 };
-*/
+
 const getKey = (userId: number, rateId: string) => {
   return `${userId}_${rateId}`;
 };
 export default {
   getActiveContracts,
   getActiveUserContracts,
+  getContractHistory,
   getUserQuestContracts,
   getKey,
   startContract,

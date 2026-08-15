@@ -7,7 +7,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   let contracts: ContractTableItem[] = [];
 
   if (id) {
-    contracts = await ContractTable.getActiveUserContracts(parseInt(id));
+    contracts = await ContractTable.getContractHistory(id);
   } else {
     contracts = await ContractTable.getActiveContracts();
   }
