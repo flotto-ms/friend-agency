@@ -80,7 +80,7 @@ export const groups = [
 const allItems = [...passives, ...wins, ...winStreak, ...noFlag, ...efficiency, ...arena, ...multiplayer, ...gems];
 
 export const getQuestDescription = (id: string) => {
-  return allItems.find((item) => item.value === id)!.label;
+  return allItems.find((item) => item.value === id)?.label ?? `Unknown ID: ${id}`;
 };
 
 export type QuestTypeSelectProps = {
@@ -94,6 +94,7 @@ const QuestTypeSelect: React.FC<QuestTypeSelectProps> = ({ value, disabled = fal
     <Field>
       <FieldLabel>Quest Type</FieldLabel>
       <Select
+        key={value === 0 ? "cleared" : value.toString()}
         disabled={disabled}
         value={value === 0 ? undefined : value.toString()}
         onValueChange={(v) => onChange(parseInt(v))}

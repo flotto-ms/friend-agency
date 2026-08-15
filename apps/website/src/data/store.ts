@@ -3,8 +3,10 @@ import { combineSlices, configureStore } from "@reduxjs/toolkit";
 import { authSlice } from "./authSlice";
 import { rateSlice } from "./rateSlice";
 import { searchSlice } from "./searchSlice";
+import { activeContractsSlice } from "./activeContractsSlice";
+import { contractorsSlice } from "./contractorsSlice";
 
-const rootReducer = combineSlices(authSlice, rateSlice, searchSlice);
+const rootReducer = combineSlices(authSlice, rateSlice, searchSlice, activeContractsSlice, contractorsSlice);
 export type RootState = ReturnType<typeof rootReducer>;
 
 export const makeStore = () => {

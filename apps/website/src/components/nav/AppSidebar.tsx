@@ -86,6 +86,10 @@ const data = {
           url: "/fqa/rates",
         },
         {
+          title: "Active Contracts",
+          url: "/fqa/contracts",
+        },
+        {
           title: "Wallet",
           url: "/account/wallet",
         },

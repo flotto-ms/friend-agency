@@ -16,7 +16,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   } else {
     output = await ContractTable.getActiveContracts().then((r) =>
       r.map((c) => {
-        const { key, rateId, startedAt, endedAt, ...rest } = c;
+        const { key, rateId, endedAt, ...rest } = c;
         return { id: key, ...rest };
       }),
     );
