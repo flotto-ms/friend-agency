@@ -5,29 +5,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { UserSearch } from "@/components/UserSearch";
 import { selectAuth } from "@/data/authSlice";
 import api from "@/data/authSlice/api";
-import { useAppSelector } from "@/data/hooks";
+import { useAppDispatch, useAppSelector } from "@/data/hooks";
+import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searchSlice";
 import { useEffect, useMemo, useState } from "react";
 
 export default function Home() {
   const auth = useAppSelector(selectAuth);
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<QuestSearchItem[]>([]);
+  const searchStatus = useAppSelector(selectSearchStatus);
+  const data = useAppSelector(selectSearchQuests);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (auth.status === "authorized") {
-      api.getUnsentQuests().then((r) => {
-        setData(r);
-        setLoading(false);
-      });
+    if (auth.status === "authorized" && searchStatus === "init") {
+      dispatch(initSearch());
     }
-  }, [auth.status]);
+  }, [auth.status, searchStatus]);
 
   const component = useMemo(() => {
     switch (auth.status) {
       case "loading":
         return <div>Loading...</div>;
       case "authorized":
-        if (loading) {
+        if (searchStatus !== "loaded") {
           return <div>Loading...</div>;
         } else {
           return <QuestSearchTable data={data} />;
@@ -35,7 +34,7 @@ export default function Home() {
       default:
         return <SignIn />;
     }
-  }, [auth.status, loading]);
+  }, [auth.status, searchStatus]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">

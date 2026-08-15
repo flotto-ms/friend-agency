@@ -1,9 +1,9 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
 import { getItem, queryItems } from "../utils/DynamoDbUtils";
 import { MsoQuest, UserTableItem } from "@flotto/types";
-import { createCSV, getQuestDescription } from "@flotto/utils";
+import { createCSV, getFlottoQuestType, getQuestDescription } from "@flotto/utils";
 import { getUserQuestPrices } from "./getUserQuests/getPrices";
-import { getUserReceivedQuests, getUserSentQuests } from "./getUserQuests/getQuests";
+import { getUserReceivedQuests, getUserSentQuests, getUserSentQuestsDate } from "./getUserQuests/getQuests";
 import RequestUtils from "../utils/RequestUtils";
 import GetQuests from "../utils/mso/GetQuests";
 
@@ -47,12 +47,14 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
 
   if (type === "unsent") {
-    const unsent = await GetQuests.getQuests(userId).then((r) => {
+    const promise =
+      userId === 11698196 ? getUserSentQuestsDate(userId, new Date("2026-06-05")) : GetQuests.getQuests(userId);
+
+    const unsent = await promise.then((r) => {
       return r.map((quest) => ({
-        level: quest.level,
-        elite: quest.isElite,
+        ...quest,
+        type: getFlottoQuestType(quest),
         description: getQuestDescription(quest),
-        rate: 250,
       }));
     });
     return {

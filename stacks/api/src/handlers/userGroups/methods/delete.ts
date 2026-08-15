@@ -43,7 +43,6 @@ export const deleteGroup = async (user: UserTableItem, groupId: string) => {
   await createClient().send(command);
 
   return {
-    statusCode: 200,
-    body: JSON.stringify({ id: groupId }),
+    statusCode: 204,
   };
 };

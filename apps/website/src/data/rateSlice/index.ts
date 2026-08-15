@@ -74,10 +74,10 @@ export const rateSlice = createAppSlice({
       fulfilled: (state, action) => {
         Object.values(state.rates).forEach((r) => {
           if (r.groups) {
-            r.groups = r.groups.filter((g) => g !== action.payload);
+            r.groups = r.groups.filter((g) => g !== action.meta.arg);
           }
         });
-        delete state.groups[action.payload];
+        delete state.groups[action.meta.arg];
       },
     }),
     loadInitialRates: create.asyncThunk(fetchRates, {

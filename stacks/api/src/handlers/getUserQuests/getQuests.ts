@@ -30,3 +30,22 @@ export const getUserSentQuests = async (userId: number) => {
   };
   return queryItemsInput<SentQuestTableItem>(sentQuery);
 };
+
+export const getUserSentQuestsDate = async (userId: number, date: Date) => {
+  const from = new Date(date.getTime());
+  from.setDate(from.getDate() + 3);
+  const to = new Date(from.getTime());
+  to.setDate(to.getDate() + 1);
+
+  const sentQuery: QueryCommandInput = {
+    TableName: process.env.SENT_QUESTS_TABLE,
+    IndexName: "UserIdExpiresAtIndex",
+    KeyConditionExpression: "userId = :userId AND expiresAt BETWEEN :from AND :to",
+    ExpressionAttributeValues: {
+      ":userId": userId,
+      ":from": from.toISOString().substring(0, 10),
+      ":to": to.toISOString().substring(0, 10),
+    },
+  };
+  return queryItemsInput<SentQuestTableItem>(sentQuery);
+};

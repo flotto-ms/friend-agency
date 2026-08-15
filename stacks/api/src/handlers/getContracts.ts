@@ -14,7 +14,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
   const output = contracts.map((c) => {
     const { key, rateId, startedAt, endedAt, ...rest } = c;
-    return rest;
+    return { id: key, ...rest };
   });
 
   return {

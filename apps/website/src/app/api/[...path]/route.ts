@@ -57,7 +57,7 @@ export async function DELETE(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const path = request.nextUrl.pathname.substring(4);
-  return fetch(baseUrl + path, {
+  return fetch(baseUrl + path + request.nextUrl.search, {
     headers: request.headers,
   }).then((r) => relayResponse(r, request));
 }

@@ -55,15 +55,15 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
   {
     header: "Contractor",
     size: 1000,
-    cell: () => (
+    cell: ({ row }) => (
       <div className="flex felx-col gap-2 items-center justify-start truncate text-ellipsis">
-        <img src={`https://minesweeper.online/img/flags/dj.png`} />
-        <span>Ady | Flotto</span>
+        <img src={`https://minesweeper.online/img/flags/${row.original.country.toLowerCase()}.png`} />
+        <span>{row.original.username}</span>
         <Button
           variant="ghost"
           size="icon"
           onClick={() => {
-            navigator.clipboard.writeText("11698196").then(() => {
+            navigator.clipboard.writeText(row.original.sentTo.toString()).then(() => {
               toast.info("User's ID coppied to clipboard, paste this into user search when sending the quest.");
             });
           }}

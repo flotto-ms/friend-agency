@@ -8,6 +8,16 @@ const createAuthHeaders = () => {
     },
   };
 };
+
+const listUsers = async (filter?: { type: "contractor" | "supplier" }) => {
+  const search = filter ? `?type=${filter.type}` : "";
+  return fetch(`/api/users${search}`, { ...createAuthHeaders() }).then((r) => r.json());
+};
+
+const listContracts = async () => {
+  return fetch(`/api/contracts`, { ...createAuthHeaders() }).then((r) => r.json());
+};
+
 const getUser = async (id: string = "current") => {
   return fetch(`/api/users/${id}`, { ...createAuthHeaders() }).then((r) => r.json());
 };
@@ -34,7 +44,11 @@ const deleteGroup = async (id: string) => {
 const api = {
   getUser,
   getUnsentQuests,
+  contract: {
+    list: listContracts,
+  },
   user: {
+    list: listUsers,
     get: getUser,
     getUnsentQuests,
     groups: {

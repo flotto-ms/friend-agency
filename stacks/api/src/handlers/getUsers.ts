@@ -20,7 +20,25 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   if (!id) {
     const users = await getItems<UserTableItem>({
       TableName: process.env.USER_TABLE!,
-    });
+    })
+      .then((r) => {
+        console.log("filter", event.queryStringParameters);
+
+        if (event.queryStringParameters?.type !== "contractor") {
+          return r;
+        }
+        return r.filter((u) => Boolean(u.contractor));
+      })
+      .then((r) => {
+        return r.map(({ id, username, contractor, slots, country, available }) => ({
+          id,
+          username,
+          contractor,
+          slots,
+          country,
+          available,
+        }));
+      });
 
     return {
       statusCode: 200,

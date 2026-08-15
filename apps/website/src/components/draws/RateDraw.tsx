@@ -236,21 +236,23 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
               </AccordionItem>
             </Accordion>
 
-            <Card className="bg-transparent p-4">
-              <FieldSet>
-                <FieldLegend variant="label">Stack Groups</FieldLegend>
-                <FieldGroup>
-                  <div className="flex flex-wrap gap-2">
-                    {toggles.map((t) => (
-                      <Field key={t.id} orientation="horizontal">
-                        <Checkbox id={t.id} checked={groups.includes(t.id)} onClick={() => toggleGroup(t.id)} />
-                        <FieldLabel htmlFor={t.id}>{t.label}</FieldLabel>
-                      </Field>
-                    ))}
-                  </div>
-                </FieldGroup>
-              </FieldSet>
-            </Card>
+            {groups.length > 0 && (
+              <Card className="bg-transparent p-4">
+                <FieldSet>
+                  <FieldLegend variant="label">Stack Groups</FieldLegend>
+                  <FieldGroup>
+                    <div className="flex flex-wrap gap-2">
+                      {toggles.map((t) => (
+                        <Field key={t.id} orientation="horizontal">
+                          <Checkbox id={t.id} checked={groups.includes(t.id)} onClick={() => toggleGroup(t.id)} />
+                          <FieldLabel htmlFor={t.id}>{t.label}</FieldLabel>
+                        </Field>
+                      ))}
+                    </div>
+                  </FieldGroup>
+                </FieldSet>
+              </Card>
+            )}
           </>
         )}
       </div>
