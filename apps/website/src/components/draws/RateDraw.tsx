@@ -236,7 +236,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
               </AccordionItem>
             </Accordion>
 
-            {groups.length > 0 && (
+            {toggles.length > 0 && (
               <Card className="bg-transparent p-4">
                 <FieldSet>
                   <FieldLegend variant="label">Stack Groups</FieldLegend>

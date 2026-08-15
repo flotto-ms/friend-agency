@@ -79,7 +79,12 @@ export default function ContractsPage() {
       }))
       .filter((contract) => Boolean(contract.contractor))
       .filter((contract) => (questTypeFilter === 0 ? true : contract.type === questTypeFilter))
-      .sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime());
+      .sort((a, b) => {
+        if (b.price !== a.price) {
+          return b.price - a.price;
+        }
+        return new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime();
+      });
   }, [activeContracts, contractors, questTypeFilter]);
 
   if (activeStatus !== "loaded" || contractorsStatus !== "loaded") {
