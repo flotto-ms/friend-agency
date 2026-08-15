@@ -6,14 +6,12 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 export const createRate = async (user: UserTableItem, rate: Rate) => {
   const rateId = IdUtils.createId();
 
-  let updateExpression = "";
-
   const attributeNames: Record<string, string> = { "#rates": "rates" };
   const attributeValues: Record<string, any> = {};
 
   const obj = {
     ...rate,
-    groups: rate.groups ? new Set(rate.groups) : undefined,
+    groups: rate.groups ? [...new Set(rate.groups)] : undefined,
   };
 
   if (!rate.groups || rate.groups.length === 0) {
@@ -21,18 +19,31 @@ export const createRate = async (user: UserTableItem, rate: Rate) => {
   }
 
   if (user.rates) {
-    attributeNames["#groupId"] = rateId;
+    attributeNames["#rateId"] = rateId;
     attributeValues[":rate"] = obj;
-    updateExpression = "SET #rates.#rateId = :rate";
   } else {
     attributeValues[":rates"] = { [rateId]: obj };
-    updateExpression = "SET #rates = :rates";
+    const command = new UpdateCommand({
+      TableName: process.env.USER_TABLE!,
+      Key: { id: user.id },
+      UpdateExpression: "SET #rates = :rates",
+      ExpressionAttributeNames: attributeNames,
+      ExpressionAttributeValues: attributeValues,
+    });
+
+    console.debug(command.input);
+    await createClient().send(command);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ id: rateId, ...obj }),
+    };
   }
 
   const command = new UpdateCommand({
     TableName: process.env.USER_TABLE!,
     Key: { id: user.id },
-    UpdateExpression: updateExpression,
+    UpdateExpression: "SET #rates.#rateId = :rate",
     ExpressionAttributeNames: attributeNames,
     ExpressionAttributeValues: attributeValues,
   });
@@ -42,6 +53,6 @@ export const createRate = async (user: UserTableItem, rate: Rate) => {
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ id: rateId, ...rate }),
+    body: JSON.stringify({ id: rateId, ...obj }),
   };
 };

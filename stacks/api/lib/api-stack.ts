@@ -178,6 +178,16 @@ export class ApiStack extends Stack {
       },
     });
 
+    const userRatesLambda = new NodejsFunction(this, "UserRatesLambda", {
+      entry: "src/handlers/userRates/index.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_22_X,
+      timeout: Duration.minutes(1),
+      environment: {
+        USER_TABLE: userTable.tableName,
+      },
+    });
+
     const postUserQuestsLambda = new NodejsFunction(this, "PostUserQuestsLambda", {
       entry: "src/handlers/postUserQuests.ts",
       handler: "handler",
@@ -248,6 +258,7 @@ export class ApiStack extends Stack {
     userTable.grantReadWriteData(postUserSlotsLambda);
     userTable.grantReadWriteData(postUserRatesLambda);
     userTable.grantReadWriteData(userGroupsLambda);
+    userTable.grantReadWriteData(userRatesLambda);
     userTable.grantReadWriteData(postUserAvailabilityLambda);
 
     contractTable.grantReadData(postUserQuestsLambda);
@@ -305,6 +316,7 @@ export class ApiStack extends Stack {
     const getUsersIntegration = new LambdaIntegration(getUsersLambda);
     const postSlotsIntegration = new LambdaIntegration(postUserSlotsLambda);
     const postRatesIntegration = new LambdaIntegration(postUserRatesLambda);
+    const userRatesIntegration = new LambdaIntegration(userRatesLambda);
     const userGroupsntegration = new LambdaIntegration(userGroupsLambda);
     const postAvaiabilityIntegration = new LambdaIntegration(postUserAvailabilityLambda);
     const postUserQuestsIntegration = new LambdaIntegration(postUserQuestsLambda);
@@ -323,12 +335,11 @@ export class ApiStack extends Stack {
     pathSlots.addMethod("POST", postSlotsIntegration);
 
     //User Rates
-    pathRates.addMethod("GET", postRatesIntegration);
-    pathRates.addMethod("POST", postRatesIntegration);
-    pathRates.addMethod("PUT", postRatesIntegration);
-    pathRate.addMethod("GET", postRatesIntegration);
-    pathRate.addMethod("POST", postRatesIntegration);
-    pathRate.addMethod("DELETE", postRatesIntegration);
+    pathRates.addMethod("GET", userRatesIntegration);
+    pathRates.addMethod("POST", userRatesIntegration);
+    pathRate.addMethod("GET", userRatesIntegration);
+    pathRate.addMethod("PUT", userRatesIntegration);
+    pathRate.addMethod("DELETE", userRatesIntegration);
 
     //User Groups
     pathGroups.addMethod("GET", userGroupsntegration);

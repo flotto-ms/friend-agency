@@ -6,7 +6,7 @@ export const deleteRate = async (user: UserTableItem, rateId: string) => {
   if (!user.rates?.[rateId]) {
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Group does not exist" }),
+      body: JSON.stringify({ message: "Rate does not exist" }),
     };
   }
 
