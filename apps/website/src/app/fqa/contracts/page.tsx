@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,20 @@ const formatDate = (value?: string) => {
 };
 
 export default function ContractsPage() {
+  return (
+    <Suspense
+      fallback={
+        <Centered>
+          <div>Loading active contracts...</div>
+        </Centered>
+      }
+    >
+      <ContractsPageContent />
+    </Suspense>
+  );
+}
+
+function ContractsPageContent() {
   const searchParams = useSearchParams();
   const [questTypeFilter, setQuestTypeFilter] = useState(() => {
     const type = Number(searchParams.get("type") ?? "0");
