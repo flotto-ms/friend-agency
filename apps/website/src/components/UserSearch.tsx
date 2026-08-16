@@ -214,6 +214,7 @@ export const UserSearch: React.FC = () => {
               autoFocus
               maxLength={6}
               value={password}
+              inputMode="text"
               onChange={setPassword}
               pasteTransformer={(pasted) => pasted.trim().replaceAll("-", "")}
             >

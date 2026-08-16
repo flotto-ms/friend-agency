@@ -79,8 +79,22 @@ export const groups = [
 
 const allItems = [...passives, ...wins, ...winStreak, ...noFlag, ...efficiency, ...arena, ...multiplayer, ...gems];
 
+const unknownDesc = (id: String) => `Unknown ID: ${id}`;
 export const getQuestDescription = (id: string) => {
-  return allItems.find((item) => item.value === id)?.label ?? `Unknown ID: ${id}`;
+  const group = groups.find((g) => g.items.find((i) => i.value === id));
+  if (!group) {
+    return unknownDesc(id);
+  }
+  const item = group.items.find((item) => item.value === id);
+  if (!item) {
+    return unknownDesc(id);
+  }
+
+  if (group.label === "Gems" || group.label === "Arena") {
+    return `${group.label}: ${item.label}`;
+  }
+
+  return item.label;
 };
 
 export type QuestTypeSelectProps = {

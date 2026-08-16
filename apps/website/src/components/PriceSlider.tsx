@@ -10,11 +10,7 @@ export type PriceSliderProps = {
   onChange: (val: number) => void;
 };
 
-const PriceSlider: React.FC<PriceSliderProps> = ({
-  min = 120,
-  value,
-  onChange,
-}) => {
+const PriceSlider: React.FC<PriceSliderProps> = ({ min = 100, value, onChange }) => {
   return (
     <Field className="w-full pb-2">
       <FieldLabel>
