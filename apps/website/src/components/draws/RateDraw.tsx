@@ -162,6 +162,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
           label="Arena Level"
           min={config.arenaLevel.min}
           max={config.arenaLevel.max}
+          step={config.arenaLevel.step}
           initialValue={filters?.arenaLevel ? [filters.arenaLevel.min, filters.arenaLevel.max] : undefined}
           onChange={(range) => setFilter("arenaLevel", range)}
         />,
@@ -174,6 +175,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
           label="Efficiency"
           min={config.efficiency.min}
           max={config.efficiency.max}
+          step={config.efficiency.step}
           initialValue={filters?.efficiency ? [filters.efficiency.min, filters.efficiency.max] : undefined}
           onChange={(range) => setFilter("efficiency", range)}
         />,
@@ -186,6 +188,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
           label="Density"
           min={config.density.min}
           max={config.density.max}
+          step={config.density.step}
           initialValue={filters?.density ? [filters.density.min, filters.density.max] : undefined}
           onChange={(range) => setFilter("density", range)}
         />,

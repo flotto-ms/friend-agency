@@ -55,7 +55,7 @@ export const searchSlice = createAppSlice({
         state.contractors = action.payload[1].users;
         state.quests = (action.payload[2] as QuestSearchItem[])
           .sort((a: any, b: any) => a.type - b.type)
-          .map((q: any) => ({ ...q, rate: q.flotto.price / (q.level * (q.isElite ? 3 : 1)) }));
+          .map((q: any) => ({ ...q, elite: q.isElite, rate: q.flotto.price / (q.level * (q.isElite ? 3 : 1)) }));
         state.status = "loaded";
       },
       rejected: (state) => {
