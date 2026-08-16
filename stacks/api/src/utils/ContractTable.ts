@@ -1,5 +1,6 @@
 import { ContractTableItem, FlottoQuestId } from "@flotto/types";
 import { putItem, queryItems, updateItem } from "./DynamoDbUtils";
+import { AppSyncUtility } from "./AppSyncUtility";
 
 export const getActiveContracts = () => {
   return queryItems<ContractTableItem>({
@@ -29,16 +30,30 @@ export const getActiveUserContracts = async (userId: number, rateId?: string) =>
 };
 
 export const startContract = async (item: Omit<ContractTableItem, "key" | "endedAt">) => {
+  const contract: ContractTableItem = {
+    ...item,
+    endedAt: "Active",
+    key: getKey(item.userId, item.rateId),
+  };
+
   await putItem({
     TableName: process.env.CONTRACT_TABLE!,
-    Item: { ...item, endedAt: "Active", key: getKey(item.userId, item.rateId) },
+    Item: contract,
   });
+
+  await AppSyncUtility.publishContractEvent("contract_started", contract);
 };
 
 export const endContract = async (item: ContractTableItem) => {
   if (item.endedAt !== "Active") {
     return;
   }
+
+  const endedAt = new Date().toISOString();
+  const endedContract: ContractTableItem = {
+    ...item,
+    endedAt,
+  };
 
   await updateItem({
     TableName: process.env.CONTRACT_TABLE!,
@@ -50,6 +65,8 @@ export const endContract = async (item: ContractTableItem) => {
       endedAt: new Date().toISOString(),
     },
   });
+
+  await AppSyncUtility.publishContractEvent("contract_ended", endedContract);
 };
 
 export const getUserQuestContracts = async (userId: number, type: FlottoQuestId, date: Date) => {

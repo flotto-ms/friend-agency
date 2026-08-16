@@ -6,6 +6,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/nav/AppSidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { StoreProvider } from "../components/providers/StoreProvider";
+import { AppSyncProvider } from "@/components/providers/AppSyncProvider";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -30,21 +31,23 @@ export default function RootLayout({
 }>) {
   return (
     <StoreProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <TooltipProvider>
-              <SidebarProvider>
-                <AppSidebar />
-                <main className="relative w-full">
-                  {children}
-                  <Toaster position="top-right" />
-                </main>
-              </SidebarProvider>
-            </TooltipProvider>
-          </ThemeProvider>
-        </body>
-      </html>
+      <AppSyncProvider>
+        <html lang="en" suppressHydrationWarning>
+          <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              <TooltipProvider>
+                <SidebarProvider>
+                  <AppSidebar />
+                  <main className="relative w-full">
+                    {children}
+                    <Toaster position="top-right" />
+                  </main>
+                </SidebarProvider>
+              </TooltipProvider>
+            </ThemeProvider>
+          </body>
+        </html>
+      </AppSyncProvider>
     </StoreProvider>
   );
 }

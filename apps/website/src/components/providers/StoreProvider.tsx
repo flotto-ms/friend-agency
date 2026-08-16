@@ -2,34 +2,25 @@
 import { setToken, signOut } from "@/data/authSlice";
 import { type AppStore, makeStore } from "../../data/store";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import { type PropsWithChildren, useEffect, useRef } from "react";
+import { type PropsWithChildren, useEffect, useState } from "react";
 import { Provider } from "react-redux";
 
 export const StoreProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const storeRef = useRef<AppStore | null>(null);
-
-  if (!storeRef.current) {
-    // Create the store instance the first time this renders
-    storeRef.current = makeStore();
-  }
+  const [store] = useState<AppStore>(() => makeStore());
 
   useEffect(() => {
-    if (storeRef.current != null) {
-      if (typeof window !== "undefined") {
-        const token = localStorage.getItem("token");
-        if (token) {
-          storeRef.current.dispatch(setToken(token));
-        } else {
-          storeRef.current.dispatch(signOut());
-        }
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token) {
+        store.dispatch(setToken(token));
+      } else {
+        store.dispatch(signOut());
       }
-
-      // configure listeners using the provided defaults
-      // optional, but required for `refetchOnFocus`/`refetchOnReconnect` behaviors
-      const unsubscribe = setupListeners(storeRef.current.dispatch);
-      return unsubscribe;
     }
-  }, []);
 
-  return <Provider store={storeRef.current}>{children}</Provider>;
+    const unsubscribe = setupListeners(store.dispatch);
+    return unsubscribe;
+  }, [store]);
+
+  return <Provider store={store}>{children}</Provider>;
 };

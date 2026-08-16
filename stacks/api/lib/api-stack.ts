@@ -1,5 +1,6 @@
 import { CfnOutput, Duration, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { Cors, LambdaIntegration, RestApi } from "aws-cdk-lib/aws-apigateway";
+import { AppSyncAuthorizationType, AppSyncAuthProvider, EventApi } from "aws-cdk-lib/aws-appsync";
 import { AttributeType, BillingMode, ProjectionType, Table } from "aws-cdk-lib/aws-dynamodb";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
@@ -64,6 +65,23 @@ export class ApiStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
       billingMode: BillingMode.PAY_PER_REQUEST,
     });
+
+    const contractEventsApiAuthProviders: AppSyncAuthProvider[] = [
+      { authorizationType: AppSyncAuthorizationType.IAM },
+      { authorizationType: AppSyncAuthorizationType.API_KEY },
+    ];
+
+    const contractEventsApi = new EventApi(this, "ContractEventsApi", {
+      apiName: "ContractEventsApi",
+      authorizationConfig: {
+        authProviders: contractEventsApiAuthProviders,
+        connectionAuthModeTypes: [AppSyncAuthorizationType.IAM, AppSyncAuthorizationType.API_KEY],
+        defaultPublishAuthModeTypes: [AppSyncAuthorizationType.IAM],
+        defaultSubscribeAuthModeTypes: [AppSyncAuthorizationType.API_KEY],
+      },
+    });
+
+    contractEventsApi.addChannelNamespace("contracts");
 
     /**
      * Secondary Indexes
@@ -152,6 +170,7 @@ export class ApiStack extends Stack {
         CONTRACT_TABLE: contractTable.tableName,
         CONTRACT_ACTION_TABLE: contractActionsTable.tableName,
         USER_TABLE: userTable.tableName,
+        APPSYNC_CONTRACT_EVENTS_URL: `https://${contractEventsApi.httpDns}`,
       },
     });
 
@@ -164,6 +183,7 @@ export class ApiStack extends Stack {
         CONTRACT_TABLE: contractTable.tableName,
         CONTRACT_ACTION_TABLE: contractActionsTable.tableName,
         USER_TABLE: userTable.tableName,
+        APPSYNC_CONTRACT_EVENTS_URL: `https://${contractEventsApi.httpDns}`,
       },
     });
 
@@ -187,8 +207,13 @@ export class ApiStack extends Stack {
         USER_TABLE: userTable.tableName,
         CONTRACT_TABLE: contractTable.tableName,
         CONFIG_BUCKET: configBucket.bucketName,
+        APPSYNC_CONTRACT_EVENTS_URL: `https://${contractEventsApi.httpDns}`,
       },
     });
+
+    contractEventsApi.grantPublish(postUserAvailabilityLambda);
+    contractEventsApi.grantPublish(postUserRatesLambda);
+    contractEventsApi.grantPublish(userRatesLambda);
 
     const postUserQuestsLambda = new NodejsFunction(this, "PostUserQuestsLambda", {
       entry: "src/handlers/postUserQuests.ts",
@@ -380,6 +405,18 @@ export class ApiStack extends Stack {
     new CfnOutput(this, "SentQuestsTableOutput", {
       exportName: "SentQuestsTableName",
       value: sentQuestsTable.tableName,
+    });
+    new CfnOutput(this, "ContractEventsApiUrlOutput", {
+      exportName: "ContractEventsApiUrl",
+      value: `https://${contractEventsApi.httpDns}`,
+    });
+    new CfnOutput(this, "ContractEventsApiRealtimeOutput", {
+      exportName: "ContractEventsApiRealtimeUrl",
+      value: `wss://${contractEventsApi.realtimeDns}`,
+    });
+    new CfnOutput(this, "ContractEventsApiKeyOutput", {
+      exportName: "ContractEventsApiKey",
+      value: contractEventsApi.apiKeys.Default?.attrApiKey || "",
     });
   }
 }
