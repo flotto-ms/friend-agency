@@ -20,7 +20,8 @@ export const updateRate = async (
     ...(typeof changes.enabled === "boolean" ? { enabled: changes.enabled } : {}),
   };
 
-  if (changes.filter == null) {
+  if (changes.filter === null) {
+    console.debug("Change Filter is null");
     delete next.filter;
   } else if (changes.filter && Object.keys(changes.filter).length === 0) {
     delete next.filter;
@@ -33,6 +34,9 @@ export const updateRate = async (
   } else if (changes.groups) {
     next.groups = [...new Set(changes.groups)];
   }
+
+  console.debug("Current", current);
+  console.debug("Next", next);
 
   const contractStateChanged =
     current.enabled !== next.enabled ||
@@ -51,7 +55,7 @@ export const updateRate = async (
       ":rate": next,
     },
   });
-
+  console.log(command.input);
   await createClient().send(command);
 
   console.debug("State Changed", contractStateChanged);

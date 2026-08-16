@@ -189,6 +189,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
           min={config.density.min}
           max={config.density.max}
           step={config.density.step}
+          suffix="%"
           initialValue={filters?.density ? [filters.density.min, filters.density.max] : undefined}
           onChange={(range) => setFilter("density", range)}
         />,

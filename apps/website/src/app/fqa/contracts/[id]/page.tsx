@@ -191,7 +191,7 @@ export default function ContractHistoryPage() {
             <TableBody>
               {sortedHistory.map((row) => {
                 const isSelected = row.startedAt === selectedContract?.startedAt;
-                const filterText = row.filter ? getFilterDescription(row) : "Any";
+                const filterText = row.filter ? getFilterDescription(row) : "None";
 
                 return (
                   <TableRow
