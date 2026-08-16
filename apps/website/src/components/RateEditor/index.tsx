@@ -87,7 +87,7 @@ const RateEditor: React.FC = () => {
   };
 
   return (
-    <main className="w-[900px] mx-auto">
+    <main className="md:w-[900px] md:mx-auto mx-2">
       <h1 className="text-3xl font-semibold text-center mb-6">Your Rates</h1>
       <Card className="mb-6">
         <CardHeader>

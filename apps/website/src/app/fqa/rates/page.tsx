@@ -29,7 +29,7 @@ export default function Page() {
     }
   }, [auth.status]);
 
-  return <div className="flex min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black py-8">{component}</div>;
+  return <div className=" min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black py-8">{component}</div>;
 }
 
 const Center: React.FC<PropsWithChildren> = ({ children }) => {

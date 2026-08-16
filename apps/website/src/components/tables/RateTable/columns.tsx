@@ -51,7 +51,7 @@ export const generateColumns = (onRateDelete?: (id: string) => void) => {
       size: 5000,
       cell: ({ getValue, row }) => (
         <RateDraw rate={row.original}>
-          <Button variant="link" className="px-0" id={`rate-${row.original.id}`}>{`${getValue()}`}</Button>
+          <Button variant="link" className="px-0 h-auto py-0" id={`rate-${row.original.id}`}>{`${getValue()}`}</Button>
         </RateDraw>
       ),
     },

@@ -4,13 +4,7 @@ import { createGroup, selectRates } from "@/data/rateSlice";
 import { useMemo, useState } from "react";
 import { Badge } from "./ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import {
-  CircleMinus,
-  CirclePlus,
-  MoreHorizontalIcon,
-  Plus,
-  Trash2Icon,
-} from "lucide-react";
+import { CircleMinus, CirclePlus, MoreHorizontalIcon, Plus, Trash2Icon } from "lucide-react";
 import { Field, FieldContent, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import { RateItem } from "./tables/RateTable/types";
@@ -61,9 +55,7 @@ const RateGroups: React.FC<RateGroupProps> = ({
     }
 
     const countGroups = (id: string) => {
-      return Object.values(slice.rates).filter((r) =>
-        Boolean(r.groups?.includes(id)),
-      ).length;
+      return Object.values(slice.rates).filter((r) => Boolean(r.groups?.includes(id))).length;
     };
 
     const data = {
@@ -75,18 +67,13 @@ const RateGroups: React.FC<RateGroupProps> = ({
         }))
         .sort((a, b) => a.label.localeCompare(b.label)),
       rates: Object.entries(slice.rates)
-        .filter(
-          ([_, r]) =>
-            selectedGroupId === "all" ||
-            Boolean(r.groups?.includes(selectedGroupId)),
-        )
+        .filter(([_, r]) => selectedGroupId === "all" || Boolean(r.groups?.includes(selectedGroupId)))
         .map(([id, data]) => ({ id, ...data }) as RateItem)
         .sort((a, b) => a.description.localeCompare(b.description)),
       allEnabled: false,
     };
 
-    data.allEnabled =
-      data.rates.filter((r) => r.enabled).length === data.rates.length;
+    data.allEnabled = data.rates.filter((r) => r.enabled).length === data.rates.length;
 
     return data;
   }, [slice, selectedGroupId]);
@@ -105,7 +92,7 @@ const RateGroups: React.FC<RateGroupProps> = ({
 
   return (
     <div className="flex flex-row justify-between items-center mb-6">
-      <Tabs value={selectedGroupId} onValueChange={onGroupChange}>
+      <Tabs className="max-md:hidden" value={selectedGroupId} onValueChange={onGroupChange}>
         <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex ">
           <TabsTrigger value="all">All</TabsTrigger>
           {loaded ? (
@@ -125,9 +112,7 @@ const RateGroups: React.FC<RateGroupProps> = ({
 
                   <PopoverContent>
                     <Field>
-                      <FieldLabel htmlFor="stack-group">
-                        Create Stack Group
-                      </FieldLabel>
+                      <FieldLabel htmlFor="stack-group">Create Stack Group</FieldLabel>
                       <FieldContent>
                         <Input
                           disabled={saving}
@@ -143,16 +128,11 @@ const RateGroups: React.FC<RateGroupProps> = ({
 
                     {selectedRateIds.length > 0 && (
                       <p className="text-sm my-4">
-                        The {selectedRateIds.length} selected Rates will be
-                        added to the group
+                        The {selectedRateIds.length} selected Rates will be added to the group
                       </p>
                     )}
 
-                    <Button
-                      disabled={saving}
-                      onClick={onCreateClick}
-                      className="mt-2"
-                    >
+                    <Button disabled={saving} onClick={onCreateClick} className="mt-2">
                       {saving && <Spinner />}
                       Create
                     </Button>
@@ -167,22 +147,13 @@ const RateGroups: React.FC<RateGroupProps> = ({
       </Tabs>
 
       <ButtonGroup>
-        <Button
-          variant="outline"
-          disabled={!loaded}
-          onClick={() => onGroupEnable(!allEnabled)}
-        >
+        <Button variant="outline" disabled={!loaded} onClick={() => onGroupEnable(!allEnabled)}>
           {allEnabled ? <CircleMinus /> : <CirclePlus />}
-          {allEnabled ? "Disable" : "Enable"}{" "}
-          {selectedGroupId == "all" ? "All" : "Group"}
+          {allEnabled ? "Disable" : "Enable"} {selectedGroupId == "all" ? "All" : "Group"}
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              disabled={!loaded}
-              aria-label="More Options"
-            >
+            <Button variant="outline" disabled={!loaded} aria-label="More Options">
               <MoreHorizontalIcon />
             </Button>
           </DropdownMenuTrigger>
@@ -199,11 +170,7 @@ const RateGroups: React.FC<RateGroupProps> = ({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem
-                disabled={selectedGroupId === "all"}
-                onClick={onGroupDelete}
-                variant="destructive"
-              >
+              <DropdownMenuItem disabled={selectedGroupId === "all"} onClick={onGroupDelete} variant="destructive">
                 <Trash2Icon />
                 Delete Group
               </DropdownMenuItem>
