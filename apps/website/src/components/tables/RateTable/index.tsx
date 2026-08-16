@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { generateColumns } from "./columns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useMemo, useState } from "react";
+import { Pencil } from "lucide-react";
 
 const RateTable: React.FC<{
   data: RateItem[];
@@ -125,9 +126,6 @@ const RateTable: React.FC<{
               const enabledCell = cells.find((cell) => cell.column.id === "enabled");
               const actionsCell = cells.find((cell) => cell.column.id === "actions");
 
-              const titleText = row.original.description || "Untitled rate";
-              const filterText = row.original.filter || "";
-
               return (
                 <div
                   key={row.original.id}
@@ -143,8 +141,13 @@ const RateTable: React.FC<{
                       ) : (
                         <div className="text-base font-medium">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span>{titleText}</span>
-                            {filterText && <span className="text-sm text-muted-foreground">{filterText}</span>}
+                            {descriptionCell &&
+                              flexRender(descriptionCell.column.columnDef.cell, descriptionCell.getContext())}
+                            {filterCell && (
+                              <span className="text-sm text-muted-foreground">
+                                {flexRender(filterCell.column.columnDef.cell, filterCell.getContext())}
+                              </span>
+                            )}
                           </div>
                         </div>
                       )}
