@@ -2,22 +2,54 @@
 import QuestSearchTable from "@/components/tables/QuestSearchTable";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserSearch } from "@/components/UserSearch";
+import {
+  loadActiveContractsAction,
+  selectActiveContracts,
+  selectActiveContractsStatus,
+} from "@/data/activeContractsSlice";
 import { selectAuth } from "@/data/authSlice";
+import { loadContractorsAction, selectContractors, selectContractorsStatus } from "@/data/contractorsSlice";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
 import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searchSlice";
+import { getBestMatchingContract } from "@/lib/ContractFilter";
 import { useEffect, useMemo, useState } from "react";
 
 export default function Home() {
   const auth = useAppSelector(selectAuth);
   const searchStatus = useAppSelector(selectSearchStatus);
-  const data = useAppSelector(selectSearchQuests);
+  const quests = useAppSelector(selectSearchQuests);
+  const contracts = useAppSelector(selectActiveContracts);
+  const contractors = useAppSelector(selectContractors);
+  const contractStatus = useAppSelector(selectActiveContractsStatus);
+  const contractorStatus = useAppSelector(selectContractorsStatus);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (auth.status === "authorized" && searchStatus === "init") {
+    if (auth.status !== "authorized") {
+      return;
+    }
+    if (searchStatus === "init") {
       dispatch(initSearch());
     }
-  }, [auth.status, searchStatus]);
+    if (contractorStatus === "init") {
+      dispatch(loadContractorsAction());
+    }
+    if (contractStatus === "init") {
+      dispatch(loadActiveContractsAction());
+    }
+  }, [auth.status, searchStatus, contractorStatus, contractStatus, dispatch]);
+
+  const data = useMemo(() => {
+    return quests.map((q) => {
+      const { country, username, rate, ...quest } = q;
+      const contract = getBestMatchingContract(q, contracts);
+      if (contract) {
+        const contractor = contractors.find((c) => c.id === contract.userId);
+        return { ...quest, rate: contract.price, username: contractor?.username, country: contractor?.country ?? "xx" };
+      }
+      return quest;
+    });
+  }, [quests, contractors, contracts]);
 
   const component = useMemo(() => {
     switch (auth.status) {
@@ -32,7 +64,7 @@ export default function Home() {
       default:
         return <SignIn />;
     }
-  }, [auth.status, searchStatus]);
+  }, [auth.status, searchStatus, data]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">

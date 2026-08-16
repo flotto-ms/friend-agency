@@ -64,35 +64,48 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
   {
     header: "Contractor",
     size: 1000,
-    cell: ({ row }) => (
-      <div className="flex felx-col gap-2 items-center justify-start truncate text-ellipsis">
-        <img src={`https://minesweeper.online/img/flags/${row.original.country.toLowerCase()}.png`} />
-        <span>{row.original.username}</span>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            navigator.clipboard.writeText(row.original.sentTo.toString()).then(() => {
-              toast.info("User's ID coppied to clipboard, paste this into user search when sending the quest.");
-            });
-          }}
-        >
-          <CopyCheckIcon />
-        </Button>
-      </div>
-    ),
+    cell: ({ row }) => {
+      if (!row.original.username) {
+        return "-";
+      }
+      return (
+        <div className="flex felx-col gap-2 items-center justify-start truncate text-ellipsis">
+          {row.original.country && (
+            <img src={`https://minesweeper.online/img/flags/${row.original.country.toLowerCase()}.png`} />
+          )}
+          <span>{row.original.username}</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              navigator.clipboard.writeText(row.original.sentTo.toString()).then(() => {
+                toast.info("User's ID coppied to clipboard, paste this into user search when sending the quest.");
+              });
+            }}
+          >
+            <CopyCheckIcon />
+          </Button>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "rate",
     header: "Rate",
-    cell: ({ getValue }) => (
-      <HoverCard openDelay={50} closeDelay={10}>
-        <HoverCardTrigger>{`${getValue()}`}</HoverCardTrigger>
-        <HoverCardContent className="p-2 pointer-events-none" side="top">
-          <RateStatsTable data={rateStats} />
-        </HoverCardContent>
-      </HoverCard>
-    ),
+    cell: ({ getValue }) => {
+      const rate = getValue();
+      if (!rate) {
+        return "-";
+      }
+      return (
+        <HoverCard openDelay={50} closeDelay={10}>
+          <HoverCardTrigger>{`${rate}`}</HoverCardTrigger>
+          <HoverCardContent className="p-2 pointer-events-none" side="top">
+            <RateStatsTable data={rateStats} />
+          </HoverCardContent>
+        </HoverCard>
+      );
+    },
   },
   {
     id: "actions",
