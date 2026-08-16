@@ -21,7 +21,7 @@
     },
     "efficiency": {
       "min": 90,
-      "max": 140,
+      "max": 100,
       "step": 5
     }
   },
@@ -32,14 +32,14 @@
     },
     "efficiency": {
       "min": 90,
-      "max": 140,
+      "max": 50,
       "step": 5
     }
   },
   "6": {
     "required": {
       "min": 1,
-      "max": 1000
+      "max": 20
     },
     "efficiency": {
       "min": 90,

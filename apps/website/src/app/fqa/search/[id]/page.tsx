@@ -97,7 +97,9 @@ export default function SearchQuestPage() {
           <div>
             <p className="text-sm text-muted-foreground">Quest search</p>
             <h1 className="text-3xl font-semibold">
-              {selectedQuest ? getQuestDescription(String(selectedQuest.type)) : "Quest"}
+              {selectedQuest
+                ? `L${selectedQuest.level}${selectedQuest.elite ? "E" : ""} ${selectedQuest.description}`
+                : "Quest"}
             </h1>
           </div>
           <Link href="/fqa/search" className="text-sm text-primary underline-offset-4 hover:underline">

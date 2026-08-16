@@ -40,9 +40,9 @@ export const noFlag = [
   { label: "Evil NG No Flag", value: "14" },
 ];
 export const efficiency = [
-  { label: "Beginner Eff", value: "4" },
-  { label: "Intermediate Eff", value: "5" },
-  { label: "Expert Eff", value: "6" },
+  { label: "Beginner Efficiency", value: "4" },
+  { label: "Intermediate Efficiency", value: "5" },
+  { label: "Expert Efficiency", value: "6" },
 ];
 export const arena = [
   { label: "Speed", value: "25" },

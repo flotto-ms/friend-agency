@@ -47,18 +47,14 @@ export const getFilterDescription = (rate: Rate) => {
 
 const getTypeDesc = (rate: Rate) => {
   if (rate.type === 1 || rate.type === 9) {
-    return "Coins";
+    return "coins";
   }
   if (rate.type === 8) {
-    return "Exp";
-  }
-  if (wins.some((w) => w.value === rate.type.toString())) {
-    return "Wins";
-  }
-  if (winStreak.some((w) => w.value === rate.type.toString())) {
-    return "Wins";
+    return "exp";
   }
   if (rate.type === 7 || gems.some((w) => w.value === rate.type.toString())) {
-    return "Gems";
+    return "gems";
   }
+
+  return "wins";
 };
