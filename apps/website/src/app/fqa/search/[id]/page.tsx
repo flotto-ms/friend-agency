@@ -14,6 +14,7 @@ import {
 } from "@/data/activeContractsSlice";
 import { loadContractorsAction, selectContractors, selectContractorsStatus } from "@/data/contractorsSlice";
 import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searchSlice";
+import { getMatchingContract } from "@/lib/ContractFilter";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -67,12 +68,11 @@ export default function SearchQuestPage() {
 
     const byUserId = new Map(contractors.map((contractor) => [contractor.id, contractor]));
 
-    return activeContracts
+    return getMatchingContract(selectedQuest, activeContracts)
       .map((contract) => ({
         ...contract,
         contractor: byUserId.get(contract.userId),
       }))
-      .filter((contract) => contract.type === selectedQuest.type)
       .filter((contract) => Boolean(contract.contractor))
       .sort((a, b) => {
         if (b.price !== a.price) {
