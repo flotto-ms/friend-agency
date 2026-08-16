@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 import { QuestSearchItem } from "./types";
 import { Button } from "@/components/ui/button";
-import { CopyCheckIcon, X } from "lucide-react";
+import { CopyCheckIcon, FolderOpen, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import RateStatsTable from "../RateStatsTable";
@@ -42,6 +43,14 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
     accessorKey: "description",
     header: "Description",
     size: 5000,
+    cell: ({ row }) => {
+      const quest = row.original;
+      return (
+        <Link className="hover:underline" href={`/fqa/search/${encodeURIComponent(String(quest.id))}`}>
+          {quest.description}
+        </Link>
+      );
+    },
   },
   {
     id: "ep",
@@ -87,12 +96,14 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
   },
   {
     id: "actions",
-    cell: () => {
+    cell: ({ row }) => {
+      const quest = row.original;
       return (
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Delete Quest</span>
-          <X className="h-4 w-4" />
-        </Button>
+        <Link href={`/fqa/search/${encodeURIComponent(String(quest.id))}`}>
+          <Button variant="ghost" className="h-8 w-8 p-0" aria-label="View matching contracts">
+            <FolderOpen className="h-4 w-4" />
+          </Button>
+        </Link>
       );
     },
   },
