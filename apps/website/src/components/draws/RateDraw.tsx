@@ -212,23 +212,24 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
         {type > 0 && (
           <>
             <PriceSlider value={amount} onChange={setAmount} />
-            <FieldLabel htmlFor="switch-focus-mode">
-              <Field orientation="horizontal" className="max-w-sm">
-                <FieldContent>
-                  <FieldTitle>Active</FieldTitle>
-                  <FieldDescription>
-                    You will receive quests when your status is set to open, and you have free slots
-                  </FieldDescription>
-                </FieldContent>
-                <Switch
-                  id="switch-focus-mode"
-                  checked={enabled}
-                  disabled={rate?.stopping ?? false}
-                  onClick={() => setEnabled(!enabled)}
-                />
-              </Field>
-            </FieldLabel>
-
+            {false && (
+              <FieldLabel htmlFor="switch-focus-mode">
+                <Field orientation="horizontal" className="max-w-sm">
+                  <FieldContent>
+                    <FieldTitle>Active</FieldTitle>
+                    <FieldDescription>
+                      You will receive quests when your status is set to open, and you have free slots
+                    </FieldDescription>
+                  </FieldContent>
+                  <Switch
+                    id="switch-focus-mode"
+                    checked={enabled}
+                    disabled={rate?.stopping ?? false}
+                    onClick={() => setEnabled(!enabled)}
+                  />
+                </Field>
+              </FieldLabel>
+            )}
             <Accordion
               defaultValue={Object.keys(filters).length > 0 ? "value" : undefined}
               type="single"
