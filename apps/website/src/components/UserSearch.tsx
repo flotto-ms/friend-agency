@@ -11,6 +11,7 @@ import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "./ui/i
 import { tokenDecode } from "@/lib/jwtdecode";
 import { useAppDispatch } from "@/data/hooks";
 import { setToken } from "@/data/authSlice";
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 
 export const UserSearch: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -214,20 +215,22 @@ export const UserSearch: React.FC = () => {
               autoFocus
               maxLength={6}
               value={password}
+              type="text"
               inputMode="text"
+              pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
               onChange={setPassword}
               pasteTransformer={(pasted) => pasted.trim().replaceAll("-", "")}
             >
               <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
+                <InputOTPSlot inputMode="text" index={0} />
+                <InputOTPSlot inputMode="text" index={1} />
+                <InputOTPSlot inputMode="text" index={2} />
               </InputOTPGroup>
               <InputOTPSeparator />
               <InputOTPGroup>
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
+                <InputOTPSlot inputMode="text" index={3} />
+                <InputOTPSlot inputMode="text" index={4} />
+                <InputOTPSlot inputMode="text" index={5} />
               </InputOTPGroup>
             </InputOTP>
             <FieldDescription>

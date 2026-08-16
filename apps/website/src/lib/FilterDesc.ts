@@ -31,7 +31,7 @@ export const getFilterDescription = (rate: Rate) => {
   }
 
   if (rate.filter.efficiency) {
-    return `${rate.filter.efficiency.min}% to ${rate.filter.efficiency.max} Efficient`;
+    return `${rate.filter.efficiency.min}% to ${rate.filter.efficiency.max}% Efficiency`;
   }
 
   if (rate.filter.arenaLevel) {

@@ -9,8 +9,6 @@ import { cn } from "@/lib/utils";
 function InputOTP({
   className,
   containerClassName,
-  inputMode,
-  pattern,
   ...props
 }: React.ComponentProps<typeof OTPInput> & {
   containerClassName?: string;

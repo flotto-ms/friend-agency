@@ -7,8 +7,6 @@ import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-tabl
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { columns } from "./columns";
-import { useEffect } from "react";
-import api from "@/lib/api";
 
 const QuestSearchTable: React.FC<{ data: QuestSearchItem[] }> = ({ data }) => {
   const table = useReactTable({

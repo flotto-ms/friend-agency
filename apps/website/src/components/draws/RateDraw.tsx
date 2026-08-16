@@ -176,6 +176,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
           min={config.efficiency.min}
           max={config.efficiency.max}
           step={config.efficiency.step}
+          suffix="%"
           initialValue={filters?.efficiency ? [filters.efficiency.min, filters.efficiency.max] : undefined}
           onChange={(range) => setFilter("efficiency", range)}
         />,

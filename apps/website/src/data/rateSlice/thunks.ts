@@ -42,8 +42,8 @@ export const postSaveRate = async (rate: RateItem) => {
     type: rest.type,
     amount: rest.rate,
     enabled: rest.enabled,
-    groups: rest.groups && rest.groups.length > 0 ? rest.groups : undefined,
-    filter: rest.filters && Object.keys(rest.filters).length > 0 ? rest.filters : undefined,
+    groups: rest.groups && rest.groups.length > 0 ? rest.groups : null,
+    filter: rest.filters && Object.keys(rest.filters).length > 0 ? rest.filters : null,
   };
 
   const isUpdate = Boolean(id && !id.startsWith("tmp_"));
