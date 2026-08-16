@@ -63,7 +63,7 @@ const RateTable: React.FC<{
     },
   });
 
-  const mobileRows = useMemo(() => table.getRowModel().rows, [table]);
+  const mobileRows = table.getRowModel().rows;
 
   return (
     <div className="w-full">
@@ -125,6 +125,9 @@ const RateTable: React.FC<{
               const enabledCell = cells.find((cell) => cell.column.id === "enabled");
               const actionsCell = cells.find((cell) => cell.column.id === "actions");
 
+              const titleText = row.original.description || "Untitled rate";
+              const filterText = row.original.filter || "";
+
               return (
                 <div
                   key={row.original.id}
@@ -132,25 +135,19 @@ const RateTable: React.FC<{
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      {loading && descriptionCell ? (
+                      {loading ? (
                         <div className="space-y-2">
                           <Skeleton className="h-5 w-32" />
                           <Skeleton className="h-4 w-full" />
                         </div>
-                      ) : descriptionCell ? (
+                      ) : (
                         <div className="text-base font-medium">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span>
-                              {flexRender(descriptionCell.column.columnDef.cell, descriptionCell.getContext())}
-                            </span>
-                            {filterCell && (
-                              <span className="text-sm text-muted-foreground">
-                                {flexRender(filterCell.column.columnDef.cell, filterCell.getContext())}
-                              </span>
-                            )}
+                            <span>{titleText}</span>
+                            {filterText && <span className="text-sm text-muted-foreground">{filterText}</span>}
                           </div>
                         </div>
-                      ) : null}
+                      )}
                     </div>
 
                     {actionsCell && (

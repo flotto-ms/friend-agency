@@ -120,7 +120,24 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    touch-action: pan-x pan-y;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-background text-foreground;
+    overscroll-behavior: none;
+  }
+
+  @media (max-width: 767px) {
+    html,
+    body {
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
   }
 }

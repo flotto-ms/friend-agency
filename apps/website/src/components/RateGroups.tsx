@@ -91,7 +91,7 @@ const RateGroups: React.FC<RateGroupProps> = ({
   };
 
   return (
-    <div className="flex flex-row justify-between items-center mb-6">
+    <div className="flex flex-row justify-between items-center max-md:justify-end mb-6">
       <Tabs className="max-md:hidden" value={selectedGroupId} onValueChange={onGroupChange}>
         <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex ">
           <TabsTrigger value="all">All</TabsTrigger>
