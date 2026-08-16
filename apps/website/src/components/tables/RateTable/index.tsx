@@ -29,7 +29,6 @@ const RateTable: React.FC<{
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
     const handleChange = () => {
-      console.log("isMobile", mediaQuery.matches);
       setIsMobile(mediaQuery.matches);
     };
 

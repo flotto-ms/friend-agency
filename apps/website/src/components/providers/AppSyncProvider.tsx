@@ -72,7 +72,6 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
         const message = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
         const contractEvent = JSON.parse(message.event);
         const channel = (message as Record<string, unknown>)?.channel as string | undefined;
-        console.log("event", contractEvent);
         if (!contractEvent || (channel && channel !== contractEventsChannel)) {
           return;
         }

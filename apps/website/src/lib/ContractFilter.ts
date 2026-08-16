@@ -58,6 +58,18 @@ export const getMatchingContract = (quest: QuestSearchItem, contracts: ActiveCon
       }
     }
 
+    if (contract.filter.density && quest.options) {
+      const width = quest.options.sizeX as number;
+      const height = quest.options.sizeY as number;
+      const mines = quest.options.mines as number;
+
+      const percent = (mines / (width * height)) * 100;
+      const filter = contract.filter.density as Filter;
+      if (!(filter.min <= percent && percent <= filter.max)) {
+        return false;
+      }
+    }
+
     return true;
   });
 };
