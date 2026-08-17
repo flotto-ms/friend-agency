@@ -1,6 +1,6 @@
 import { ContractTableItem, MsoQuest, MSOQuestLevel, MSOQuestType } from "@flotto/types";
 import QuestUtility from "./QuestUtility";
-import ContractTable from "./ContractTable";
+import ContractTable from "./tables/ContractTable";
 import { getAreaType, getFlottoQuestType } from "@flotto/utils";
 
 const getQuestContract = async (quest: MsoQuest): Promise<ContractTableItem | undefined> => {

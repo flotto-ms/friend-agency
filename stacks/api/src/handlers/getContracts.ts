@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
-import ContractTable from "../utils/ContractTable";
+import ContractTable from "../utils/tables/ContractTable";
 import { ContractTableItem } from "@flotto/types";
 import ResponseUtils from "../utils/ResponseUtils";
 

@@ -2,7 +2,7 @@ import { Rate, UserTableItem } from "@flotto/types";
 import IdUtils from "../../../utils/IdUtils";
 import { createClient } from "../../../utils/DynamoDbUtils";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import ContractTable from "../../../utils/ContractTable";
+import ContractTable from "../../../utils/tables/ContractTable";
 
 export const createRate = async (user: UserTableItem, rate: Rate) => {
   const rateId = IdUtils.createId();

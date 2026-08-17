@@ -1,7 +1,7 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { UserTableItem } from "@flotto/types";
 import { createClient } from "../../../utils/DynamoDbUtils";
-import ContractTable from "../../../utils/ContractTable";
+import ContractTable from "../../../utils/tables/ContractTable";
 import ResponseUtils from "../../../utils/ResponseUtils";
 
 export const deleteRate = async (user: UserTableItem, rateId: string) => {

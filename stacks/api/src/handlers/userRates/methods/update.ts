@@ -2,7 +2,7 @@ import { NullOptional, Rate, UserTableItem } from "@flotto/types";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { createClient } from "../../../utils/DynamoDbUtils";
 import ResponseUtils from "../../../utils/ResponseUtils";
-import ContractTable from "../../../utils/ContractTable";
+import ContractTable from "../../../utils/tables/ContractTable";
 
 export const updateRate = async (
   user: UserTableItem,

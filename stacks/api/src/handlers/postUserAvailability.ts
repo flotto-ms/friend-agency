@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent } from "aws-lambda";
 import { getItem, updateItem } from "../utils/DynamoDbUtils";
 import { SaveAvailabilityRequest, UserTableItem } from "@flotto/types";
 import ContractActionTable from "../utils/ContractActionTable";
-import ContractTable from "../utils/ContractTable";
+import ContractTable from "../utils/tables/ContractTable";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const id = event.pathParameters?.id;

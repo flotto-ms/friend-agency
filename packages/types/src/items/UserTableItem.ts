@@ -5,14 +5,20 @@ export type UserTableItem = {
   username: string;
   country: string;
   contractor: boolean;
+  client: boolean;
+  banned?: {
+    reason: BanReason;
+    message: string;
+  };
+  admin?: boolean;
   slots?: number;
   available?: boolean;
-  admin?: boolean;
   rates?: Record<string, Rate>;
   groups?: Record<string, Group>;
   season?: Record<string, SeasonAccess>;
 };
 
+export type BanReason = "inactive" | "abusive";
 export type SeasonAccess = "contractor" | "client";
 
 export type Rate = {

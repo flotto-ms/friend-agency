@@ -1,6 +1,6 @@
 import { ContractTableItem, FlottoQuestId } from "@flotto/types";
-import { putItem, queryItems, updateItem } from "./DynamoDbUtils";
-import { AppSyncUtility } from "./AppSyncUtility";
+import { putItem, queryItems, updateItem } from "../DynamoDbUtils";
+import { AppSyncUtility } from "../AppSyncUtility";
 
 export const getActiveContracts = () => {
   return queryItems<ContractTableItem>({
