@@ -4,6 +4,7 @@ import { FlottoQuestId, MsoQuest, ReceivedQuestTableItem, SentQuestTableItem } f
 import { FlottoQuestStatus } from "../../../../packages/types/src/flotto/FlottoQuestDetails";
 import ReceivedQuestsTable from "../utils/tables/ReceivedQuestsTable";
 import SentQuestsTable from "../utils/tables/SentQuestsTable";
+import { getFlottoQuestType, getQuestDescription } from "@flotto/utils";
 
 type UserTransactionItem = {
   id: number;
@@ -25,16 +26,13 @@ const buildTransactionItem = (
   quest: SentQuestTableItem | ReceivedQuestTableItem,
   sent: boolean,
 ): UserTransactionItem => {
-  const questType = (quest.type ?? "quest") as FlottoQuestId;
-  const description = quest.flotto?.type ? `${quest.flotto.type}` : `${questType}`;
-
   return {
     id: quest.id,
     sent,
-    type: questType,
+    type: getFlottoQuestType(quest),
     isElite: Boolean(quest.isElite),
     level: quest.level,
-    description,
+    description: getQuestDescription(quest),
     price: quest.flotto?.price ?? 0,
     status: quest.flotto?.status ?? "Ignored",
     date: quest.createdAt ?? quest.expiresAt ?? quest.reserveExpiresAt ?? new Date().toISOString(),
@@ -66,13 +64,13 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
   }
 
-  const [questsSentToUser, questsReceivedByUser] = await Promise.all([
-    SentQuestsTable.getQuestsSentTo(userId),
+  const [questsSentByUser, questsReceivedByUser] = await Promise.all([
+    SentQuestsTable.getQuestsSentBy(userId),
     ReceivedQuestsTable.getQuestsReceivedBy(userId),
   ]);
 
   const transactions = [
-    ...questsSentToUser.map((quest) => buildTransactionItem(quest, true)),
+    ...questsSentByUser.map((quest) => buildTransactionItem(quest, true)),
     ...questsReceivedByUser.map((quest) => buildTransactionItem(quest, false)),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 

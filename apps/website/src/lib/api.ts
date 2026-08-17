@@ -41,6 +41,11 @@ const getUnsentQuests = async () => {
   return fetch(`/api/users/current/quests/unsent`, withAuth()).then((r) => r.json());
 };
 
+const getUserTransactions = async (userId?: string | number) => {
+  const path = userId === undefined ? "/api/users/current/transactions" : `/api/users/${userId}/transactions`;
+  return fetch(path, withAuth()).then((r) => r.json());
+};
+
 const listRates = async (userId?: string | number) => {
   const path = userId === undefined ? "/api/users/current/rates" : `/api/users/${userId}/rates`;
   return fetch(path, withAuth()).then((r) => r.json());
@@ -98,6 +103,9 @@ const api = {
     list: listUsers,
     get: getUser,
     getUnsentQuests,
+    transactions: {
+      list: getUserTransactions,
+    },
     rates: {
       list: listRates,
       create: createRate,

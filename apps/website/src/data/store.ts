@@ -6,6 +6,7 @@ import { searchSlice } from "./searchSlice";
 import { activeContractsSlice } from "./activeContractsSlice";
 import { contractorsSlice } from "./contractorsSlice";
 import { contractHistorySlice } from "./contractHistorySlice";
+import { walletSlice } from "./walletSlice";
 
 const rootReducer = combineSlices(
   authSlice,
@@ -14,6 +15,7 @@ const rootReducer = combineSlices(
   activeContractsSlice,
   contractorsSlice,
   contractHistorySlice,
+  walletSlice,
 );
 export type RootState = ReturnType<typeof rootReducer>;
 

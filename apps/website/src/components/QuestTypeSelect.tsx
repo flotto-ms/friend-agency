@@ -100,23 +100,30 @@ export const getQuestDescription = (id: string) => {
 export type QuestTypeSelectProps = {
   value: number;
   disabled?: boolean;
+  allowAll?: boolean;
   onChange: (val: number) => void;
 };
 
-const QuestTypeSelect: React.FC<QuestTypeSelectProps> = ({ value, disabled = false, onChange }) => {
+const QuestTypeSelect: React.FC<QuestTypeSelectProps> = ({ value, disabled = false, allowAll = false, onChange }) => {
   return (
     <Field>
       <FieldLabel>Quest Type</FieldLabel>
       <Select
-        key={value === 0 ? "cleared" : value.toString()}
+        key={value === 0 && !allowAll ? "cleared" : value.toString()}
         disabled={disabled}
-        value={value === 0 ? undefined : value.toString()}
+        value={value === 0 && !allowAll ? undefined : value.toString()}
         onValueChange={(v) => onChange(parseInt(v))}
       >
         <SelectTrigger>
-          <SelectValue placeholder="No Quest Selected" />
+          <SelectValue placeholder={allowAll ? "All Quests" : "No Quest Selected"} />
         </SelectTrigger>
         <SelectContent>
+          {allowAll && (
+            <>
+              <SelectItem value="0">All Quests</SelectItem>
+              <SelectSeparator />
+            </>
+          )}
           {groups.map((g, i) => (
             <Fragment key={g.label}>
               {i > 0 && <SelectSeparator />}
