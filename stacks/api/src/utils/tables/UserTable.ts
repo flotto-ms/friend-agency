@@ -1,5 +1,5 @@
 import { Rate, UserTableItem } from "@flotto/types";
-import DynamoDbUtils, { createClient, getItem } from "./DynamoDbUtils";
+import DynamoDbUtils, { createClient, getItem } from "../DynamoDbUtils";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 const getUser = (id: number) => {

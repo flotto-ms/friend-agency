@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
 import { getItems } from "../utils/DynamoDbUtils";
 import { UserTableItem } from "@flotto/types";
-import UserTable from "../utils/UserTable";
+import UserTable from "../utils/tables/UserTable";
 import RequestUtils from "../utils/RequestUtils";
 
 export const handler = async (event: APIGatewayProxyEvent) => {

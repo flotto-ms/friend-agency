@@ -1,5 +1,5 @@
 import { ReceivedQuestTableItem, SentQuestTableItem } from "@flotto/types";
-import UserTable from "./UserTable";
+import UserTable from "./tables/UserTable";
 import { getFlottoQuestType } from "@flotto/utils";
 import { FlottoQuestDetails } from "../../../../packages/types/src/flotto/FlottoQuestDetails";
 import ContractUtility from "./ContractUtility";

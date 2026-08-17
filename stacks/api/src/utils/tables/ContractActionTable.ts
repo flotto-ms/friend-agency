@@ -6,7 +6,7 @@ import {
   FlottoQuestId,
   Rate,
 } from "@flotto/types";
-import DynamoDbUtils from "./DynamoDbUtils";
+import DynamoDbUtils from "../DynamoDbUtils";
 
 const logPause = async (userId: number, paused: boolean, timestamp?: string) => {
   const action: ContractAction = "Pause";

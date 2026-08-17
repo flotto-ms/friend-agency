@@ -1,5 +1,5 @@
 import { ContractsTableItem, FlottoQuestId } from "@flotto/types";
-import { createClient, putItem, queryItems, updateItem } from "./DynamoDbUtils";
+import { createClient, putItem, queryItems, updateItem } from "../DynamoDbUtils";
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 
 const removeEndedAt = (items: ContractsTableItem[]) => {

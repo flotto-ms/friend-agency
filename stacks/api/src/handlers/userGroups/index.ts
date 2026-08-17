@@ -6,7 +6,7 @@ import { getGroup } from "./methods/get";
 import { updateGroup } from "./methods/update";
 import { deleteGroup } from "./methods/delete";
 import ResponseUtils from "../../utils/ResponseUtils";
-import UserTable from "../../utils/UserTable";
+import UserTable from "../../utils/tables/UserTable";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   console.debug(event);

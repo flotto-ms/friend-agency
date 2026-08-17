@@ -5,7 +5,7 @@ import { generateCode } from "../utils/AuthCode";
 import SendMessage from "../utils/mso/SendMessage";
 import { generateSearchToken, validateSearchToken } from "./authUser/searchToken";
 import JwtUtils from "../utils/JwtUtils";
-import UserTable from "../utils/UserTable";
+import UserTable from "../utils/tables/UserTable";
 
 type Body = {
   userId?: number;

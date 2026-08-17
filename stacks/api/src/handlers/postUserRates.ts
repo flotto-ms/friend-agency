@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
 import type { ContractTableItem, Rate, SaveRatesRequest } from "@flotto/types";
 import { getRateFilter, getRateQuestId } from "../utils/FlottoQuestType";
-import UserTable from "../utils/UserTable";
-import ContractActionTable from "../utils/ContractActionTable";
+import UserTable from "../utils/tables/UserTable";
+import ContractActionTable from "../utils/tables/ContractActionTable";
 import ContractTable from "../utils/tables/ContractTable";
 
 export const handler = async (event: APIGatewayProxyEvent) => {

@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import RequestUtils from "../../utils/RequestUtils";
 import ResponseUtils from "../../utils/ResponseUtils";
-import UserTable from "../../utils/UserTable";
+import UserTable from "../../utils/tables/UserTable";
 import { listRates } from "./methods/list";
 import { getRate } from "./methods/get";
 import { createRate } from "./methods/create";

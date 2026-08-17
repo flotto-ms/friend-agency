@@ -1,5 +1,5 @@
 import { Rate, UserTableItem } from "@flotto/types";
-import ContractActionTable from "./ContractActionTable";
+import ContractActionTable from "./tables/ContractActionTable";
 
 export const logRateAction = async (user: UserTableItem, rate: Rate) => {
   const key = `quest_${rate.type}`;
