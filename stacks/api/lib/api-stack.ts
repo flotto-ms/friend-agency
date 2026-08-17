@@ -263,6 +263,18 @@ export class ApiStack extends Stack {
       },
     });
 
+    const getUserTransactionsLambda = new NodejsFunction(this, "GetUserTransactionsLambda", {
+      entry: "src/handlers/getUserTransactions.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_22_X,
+      timeout: Duration.minutes(1),
+      environment: {
+        RECEIVED_QUESTS_TABLE: receivedQuestsTable.tableName,
+        SENT_QUESTS_TABLE: sentQuestsTable.tableName,
+        CONFIG_BUCKET: configBucket.bucketName,
+      },
+    });
+
     const getContractsLambda = new NodejsFunction(this, "GetContractsLambda", {
       entry: "src/handlers/getContracts.ts",
       handler: "handler",
@@ -298,10 +310,12 @@ export class ApiStack extends Stack {
     contractActionsTable.grantReadWriteData(postUserAvailabilityLambda);
 
     receivedQuestsTable.grantReadData(getUserQuestsLambda);
+    receivedQuestsTable.grantReadData(getUserTransactionsLambda);
     receivedQuestsTable.grantReadWriteData(postQuestsLambda);
     receivedQuestsTable.grantReadWriteData(postUserQuestsLambda);
 
     sentQuestsTable.grantReadData(getUserQuestsLambda);
+    sentQuestsTable.grantReadData(getUserTransactionsLambda);
     sentQuestsTable.grantReadWriteData(postQuestsLambda);
     sentQuestsTable.grantReadWriteData(postUserQuestsLambda);
 
@@ -310,6 +324,7 @@ export class ApiStack extends Stack {
     configBucket.grantReadWrite(getUserQuestsLambda);
     configBucket.grantReadWrite(userGroupsLambda);
     configBucket.grantReadWrite(userRatesLambda);
+    configBucket.grantReadWrite(getUserTransactionsLambda);
 
     /**
      * API Gayteway
@@ -331,6 +346,7 @@ export class ApiStack extends Stack {
     const pathUser = pathUsers.addResource("{id}");
     const pathUserContracts = pathUser.addResource("contracts");
     const pathUserQuests = pathUser.addResource("quests");
+    const pathUserTransactions = pathUser.addResource("transactions");
     const pathSlots = pathUser.addResource("slots");
     const pathRates = pathUser.addResource("rates");
     const pathRate = pathRates.addResource("{rate}");
@@ -351,6 +367,7 @@ export class ApiStack extends Stack {
     const postAvaiabilityIntegration = new LambdaIntegration(postUserAvailabilityLambda);
     const postUserQuestsIntegration = new LambdaIntegration(postUserQuestsLambda);
     const getUserQuestsIntegration = new LambdaIntegration(getUserQuestsLambda);
+    const getUserTransactionsIntegration = new LambdaIntegration(getUserTransactionsLambda);
     const postQuestsIntegratoion = new LambdaIntegration(postQuestsLambda);
 
     //Create HTTP Methods
@@ -363,6 +380,7 @@ export class ApiStack extends Stack {
     getQuests.addMethod("GET", getUserQuestsIntegration);
     pathUserContracts.addMethod("GET", getContractsIntegration);
     pathUserQuests.addMethod("POST", postUserQuestsIntegration);
+    pathUserTransactions.addMethod("GET", getUserTransactionsIntegration);
     pathSlots.addMethod("POST", postSlotsIntegration);
 
     //User Rates
