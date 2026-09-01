@@ -27,7 +27,7 @@ const sendMessage = async (userId: number, message: string, build: number) => {
       } else if (code === "42") {
         const obj = JSON.parse(m.data.substring(2));
         const creactChannel = () => {
-          const createCommand = `42["request",["ChatController.createChannelWsAction",[${userId}],0,${build}]]`;
+          const createCommand = `42["request",["CreateChannelWS",{"withUserId":${userId}},0,${build}]]`;
           socket.send(createCommand);
         };
 
@@ -44,10 +44,10 @@ const sendMessage = async (userId: number, message: string, build: number) => {
           creactChannel();
         } else if (done) {
           closeSocket();
-        } else if (obj[1][2].length === 0) {
+        } else if (obj[1][1] === "OldVersionEvent") {
           build++;
           creactChannel();
-        } else if (channelId === 0) {
+        } else if (obj[1][1] === "NewChannelEvent") {
           const channel = obj[1][2][0];
           channelId = channel.id;
           user = {
@@ -55,9 +55,9 @@ const sendMessage = async (userId: number, message: string, build: number) => {
             username: channel.username1,
             country: channel.country1,
           };
-          const cmd1 = `42["request",["ChatController.sendMessageWsAction",${JSON.stringify([channelId, message])},1,${build}]]`;
+          const cmd1 = `42["request",["SendMessageWS",${JSON.stringify({ channelId, text: message })},0,${build}]]`;
           socket.send(cmd1);
-          const cmd2 = `42["request",["ChatController.closeChannelWsAction", ["${channelId}"],2,${build}]]`;
+          const cmd2 = `42["request",["CloseChannelWS", ${JSON.stringify({ channelId })},0,${build}]]`;
           socket.send(cmd2);
           done = true;
           closeSocket();

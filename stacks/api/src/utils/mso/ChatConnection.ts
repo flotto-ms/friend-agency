@@ -50,7 +50,7 @@ export const createConnection = async (type: TokenType) => {
         const obj = JSON.parse(m.data.substring(2));
         const processQueue = () => {
           const item = queue[0];
-          socket.send(`42["request",["ChatController.createChannelWsAction",[${item.userId}],0,${build}]]`);
+          socket.send(`42["request",["CreateChannelWS",${JSON.stringify({ widhtUserId: item.userId })},0,${build}]]`);
         };
 
         const controller: ChatConnection = {
@@ -71,26 +71,13 @@ export const createConnection = async (type: TokenType) => {
           accept(controller);
         } else if (obj[0] === "server_error") {
           reject(new Error("Server Error"));
-        } else if (obj[1][2].length === 0) {
+        } else if (obj[1][1] === "OldVersionEvent") {
           build++;
           processQueue();
-        } else {
+        } else if (obj[1][1] === "NewChannelEvent") {
           const response = obj[1][2] as any[];
           const item = queue[0];
-          if (response.length === 1 && response[0].userId === token.userId) {
-            item.sent({
-              user: user!,
-              message: response[0],
-            });
-            queue.shift();
-            if (queue.length > 0) {
-              user = undefined;
-              processQueue();
-            }
-          } else if (
-            response.length > 0 &&
-            (response[0].user1Id == item.userId || response[0].user2Id == item.userId)
-          ) {
+          if (response.length > 0 && (response[0].user1Id == item.userId || response[0].user2Id == item.userId)) {
             const channel = response[0];
             if (channel.user1Id == item.userId) {
               user = {
@@ -106,9 +93,23 @@ export const createConnection = async (type: TokenType) => {
               };
             }
 
-            const payload = JSON.stringify([channel.id, item.message]);
-            socket.send(`42["request",["ChatController.sendMessageWsAction",${payload},0,${build}]]`);
-            socket.send(`42["request",["ChatController.closeChannelWsAction", ["${channel.id}"],0,${build}]]`);
+            const sendPayload = JSON.stringify({ channelId: channel.id, text: item.message });
+            const closePayload = JSON.stringify({ channelId: channel.id });
+
+            socket.send(`42["request",["SendMessageWS",${sendPayload},0,${build}]]`);
+            socket.send(`42["request",["CloseChannelWS",${closePayload},0,${build}]]`);
+          } else if (obj[1][1] === "NewMessageEvent") {
+            const response = obj[1][2] as any[];
+            const item = queue[0];
+            item.sent({
+              user: user!,
+              message: response[0],
+            });
+            queue.shift();
+            if (queue.length > 0) {
+              user = undefined;
+              processQueue();
+            }
           } else {
             console.log("response", response);
           }

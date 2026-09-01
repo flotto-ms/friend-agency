@@ -1,7 +1,7 @@
-type Response<D> = [string, [number, number, D] | string];
+type Response<D> = [string, [number, string, [{ result: D }]] | string];
 type CallbackArgs = Array<object | string | number>;
 type Callback = {
-  accept: (data: CallbackArgs, build: number) => void;
+  accept: (build: number, data?: CallbackArgs) => void;
   reject: (reason: object) => void;
 };
 type Auth = { authKey: string; session: string; userId: number };
@@ -28,9 +28,14 @@ const processResponse = (data: Response<CallbackArgs>) => {
   }
 
   if (data[0] === "response") {
-    cb.accept(data[1][2], cb.build);
+    if (data[1][1] === "ApiEvent") {
+      const result = data[1][2][0].result;
+      cb.accept(cb.build, result);
+    } else {
+      cb.accept(cb.build);
+    }
   } else {
-    cb.reject(data[1][2]);
+    cb.reject(data[1]);
   }
 
   delete callbacks[data[1][0]];
@@ -95,7 +100,7 @@ const openSocket = async () => {
   });
 };
 
-const sendRequest = ({ action, cb, args }: { action: string; cb?: Callback; args?: (object | string | number)[] }) => {
+const sendRequest = ({ action, cb, args }: { action: string; cb?: Callback; args?: object }) => {
   if (!socket || socket.readyState !== socket.OPEN) {
     cb?.reject(new Error("Socket not Open"));
     return;
@@ -134,27 +139,28 @@ const connect = async () => {
 export const setAuth = (val: Auth, build: number) => {
   auth = val;
   currentBuild = build;
+  searchUsername("");
 };
 
 export const searchUsername = (val: string): Promise<SearchResult> => {
   return new Promise((accept, reject) => {
     connect().then(() => {
       sendRequest({
-        action: "SearchController.searchWsAction",
+        action: "SearchUserWS",
         cb: {
-          accept: (r, build) => {
-            if (r.length === 0) {
-              if (build === currentBuild) {
-                currentBuild++;
-              }
-              searchUsername(val).then((r) => accept(r));
+          accept: (build, r) => {
+            if (r) {
+              accept(r as SearchResult);
               return;
             }
-            accept(r[0] as SearchResult);
+            if (build === currentBuild) {
+              currentBuild++;
+            }
+            searchUsername(val).then((r) => accept(r));
           },
           reject,
         },
-        args: [val],
+        args: { query: val, isFinal: false } as object,
       });
     });
   });
