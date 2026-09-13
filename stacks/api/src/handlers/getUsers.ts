@@ -17,23 +17,47 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     };
   }
 
+  if (event.httpMethod === "PATCH") {
+    if (!id) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: "A current user is required" }),
+      };
+    }
+
+    const data = JSON.parse(event.body ?? "{}");
+    if (data.access !== "supplier" && data.access !== "contractor") {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: "Invalid access" }),
+      };
+    }
+
+    const user = await UserTable.updateAccess(id, data.access);
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user),
+    };
+  }
+
   if (!id) {
     const users = await getItems<UserTableItem>({
       TableName: process.env.USER_TABLE!,
     })
       .then((r) => {
         console.log("filter", event.queryStringParameters);
-
-        if (event.queryStringParameters?.type !== "contractor") {
+        const access = event.queryStringParameters?.access;
+        if (!access) {
           return r;
         }
-        return r.filter((u) => Boolean(u.contractor));
+        return r.filter((u) => u.access === access);
       })
       .then((r) => {
-        return r.map(({ id, username, contractor, slots, country, available }) => ({
+        return r.map(({ id, username, slots, country, available, access }) => ({
           id,
           username,
-          contractor,
+          access: access ?? "member",
           slots,
           country,
           available,

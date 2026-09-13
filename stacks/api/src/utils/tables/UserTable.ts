@@ -21,15 +21,27 @@ const getUser = (id: number) => {
   });
 };
 
-const updateDetails = async (id: number, username: string, country: string) => {
+const updateDetails = async (id: number, username?: string, country?: string) => {
   return DynamoDbUtils.updateItem({
     Key: { id },
     TableName: process.env.USER_TABLE!,
-    Attrs: {
-      username,
-      country,
-    },
-    Upsert: true,
+    Attrs: Object.fromEntries(Object.entries({ username, country }).filter(([, value]) => value !== undefined)),
+    Upsert: false,
+  });
+};
+
+const updateAccess = async (id: number, access: string) => {
+  const user = await getUser(id);
+
+  if (user?.access === "contractor" || user?.access === access) {
+    return user;
+  }
+
+  return DynamoDbUtils.updateItem({
+    Key: { id },
+    TableName: process.env.USER_TABLE!,
+    Attrs: { access },
+    Upsert: false,
   });
 };
 
@@ -82,5 +94,6 @@ const updateRates = async (userId: number, rates: [string, Rate][]) => {
 export default {
   getUser,
   updateDetails,
+  updateAccess,
   updateRates,
 };

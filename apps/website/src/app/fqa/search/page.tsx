@@ -1,13 +1,14 @@
 "use client";
 import QuestSearchTable from "@/components/tables/QuestSearchTable";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { UserSearch } from "@/components/UserSearch";
 import {
   loadActiveContractsAction,
   selectActiveContracts,
   selectActiveContractsStatus,
 } from "@/data/activeContractsSlice";
-import { selectAuth } from "@/data/authSlice";
+import { becomeSupplier, selectAuth } from "@/data/authSlice";
 import { loadContractorsAction, selectContractors, selectContractorsStatus } from "@/data/contractorsSlice";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
 import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searchSlice";
@@ -56,7 +57,9 @@ export default function Home() {
       case "loading":
         return <div>Loading...</div>;
       case "authorized":
-        if (searchStatus !== "loaded") {
+        if (!auth.access) {
+          return <BecomeSupplier />;
+        } else if (searchStatus !== "loaded") {
           return <div>Loading...</div>;
         } else {
           return <QuestSearchTable data={data} />;
@@ -64,7 +67,7 @@ export default function Home() {
       default:
         return <SignIn />;
     }
-  }, [auth.status, searchStatus, data]);
+  }, [auth.access, auth.status, searchStatus, data]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -84,6 +87,33 @@ const SignIn: React.FC = () => {
       </CardHeader>
       <CardContent>
         <UserSearch />
+      </CardContent>
+    </Card>
+  );
+};
+
+const BecomeSupplier: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const acceptTerms = async () => {
+    setIsSubmitting(true);
+    await dispatch(becomeSupplier());
+    setIsSubmitting(false);
+  };
+
+  return (
+    <Card className="w-full max-w-[520px]">
+      <CardHeader>
+        <CardTitle>Participate in Season 8</CardTitle>
+        <CardDescription>
+          Agree to the supplier terms and conditions to participate as a supplier in Season 8.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button type="button" onClick={acceptTerms} disabled={isSubmitting} className="w-full">
+          {isSubmitting ? "Joining Season 8..." : "Accept terms and participate in Season 8"}
+        </Button>
       </CardContent>
     </Card>
   );

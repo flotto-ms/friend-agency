@@ -8,7 +8,7 @@ const getHeaders = (r: NextRequest) => {
   const allowedOrigins = ["https://minesweeper.online"];
 
   const headers: Record<string, string> = {
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Methods": "POST, GET, PATCH, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "86400",
   };
@@ -38,6 +38,16 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const path = request.nextUrl.pathname.substring(4);
+  const body = await request.text();
+  return fetch(baseUrl + path, {
+    method: request.method,
+    headers: request.headers,
+    body,
+  }).then((r) => relayResponse(r, request));
+}
+
+export async function PATCH(request: NextRequest) {
   const path = request.nextUrl.pathname.substring(4);
   const body = await request.text();
   return fetch(baseUrl + path, {

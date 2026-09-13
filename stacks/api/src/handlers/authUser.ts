@@ -89,7 +89,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       Upsert: true,
     });
 
-    await SendMessage.sendMessage(data.userId, `Your Flotto one time password is: ${code}`, 980).then((u) => {
+    await SendMessage.sendMessage(data.userId, `Your Flotto one time password is: ${code}`).then((u) => {
       return UserTable.updateDetails(u.id, u.username, u.country);
     });
   }

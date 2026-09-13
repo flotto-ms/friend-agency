@@ -45,7 +45,8 @@ const QuestSearchTable: React.FC<{ data: QuestSearchItem[] }> = ({ data }) => {
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                No unsent quests found. Either all quests have been sent for today, or you need to sign in to MSO to
+                generate todays quests.
               </TableCell>
             </TableRow>
           )}

@@ -16,6 +16,7 @@ export type UserTableItem = {
   rates?: Record<string, Rate>;
   groups?: Record<string, Group>;
   season?: Record<string, SeasonAccess>;
+  access?: SeasonAccess;
 };
 
 export type BanReason = "inactive" | "abusive";

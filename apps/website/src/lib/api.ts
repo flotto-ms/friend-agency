@@ -21,7 +21,7 @@ const withAuth = (init: RequestInit = {}): RequestInit => {
 };
 
 const listUsers = async (filter?: { type: "contractor" | "supplier" }) => {
-  const search = filter ? `?type=${filter.type}` : "";
+  const search = filter ? `?access=${filter.type}` : "";
   return fetch(`/api/users${search}`, withAuth()).then((r) => r.json());
 };
 
@@ -35,6 +35,17 @@ const getContract = async (id: string) => {
 
 const getUser = async (id: string = "current") => {
   return fetch(`/api/users/${id}`, withAuth()).then((r) => r.json());
+};
+
+const updateUser = async (user: Record<string, unknown>) => {
+  return fetch(
+    `/api/users/current`,
+    withAuth({
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user),
+    }),
+  ).then((r) => r.json());
 };
 
 const getUnsentQuests = async () => {
@@ -102,6 +113,7 @@ const api = {
   user: {
     list: listUsers,
     get: getUser,
+    update: updateUser,
     getUnsentQuests,
     transactions: {
       list: getUserTransactions,

@@ -290,7 +290,7 @@ export class ApiStack extends Stack {
      */
     authTable.grantReadWriteData(authLamber);
 
-    userTable.grantReadData(getUsersLambda);
+    userTable.grantReadWriteData(getUsersLambda);
     userTable.grantReadData(getUserQuestsLambda);
     userTable.grantReadData(postUserQuestsLambda);
     userTable.grantReadWriteData(authLamber);
@@ -376,6 +376,7 @@ export class ApiStack extends Stack {
     pathContracts.addMethod("GET", getContractsIntegration);
     pathContract.addMethod("GET", getContractsIntegration);
     pathUser.addMethod("GET", getUsersIntegration);
+    pathUser.addMethod("PATCH", getUsersIntegration);
     pathUsers.addMethod("GET", getUsersIntegration);
     getQuests.addMethod("GET", getUserQuestsIntegration);
     pathUserContracts.addMethod("GET", getContractsIntegration);

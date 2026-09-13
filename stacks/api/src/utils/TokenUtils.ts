@@ -1,6 +1,6 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
-export type TokenType = "bot" | "qqs" | "notices";
+export type TokenType = "bot" | "qqs" | "search" | "notices";
 export type TokenResponse = {
   authKey: string;
   session: string;

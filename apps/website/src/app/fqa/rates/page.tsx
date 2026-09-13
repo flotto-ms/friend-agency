@@ -1,10 +1,11 @@
 "use client";
 
 import RateEditor from "@/components/RateEditor";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserSearch } from "@/components/UserSearch";
-import { selectAuth } from "@/data/authSlice";
-import { useAppSelector } from "@/data/hooks";
+import { becomeContractor, selectAuth } from "@/data/authSlice";
+import { useAppDispatch, useAppSelector } from "@/data/hooks";
 import { PropsWithChildren, useMemo, useState } from "react";
 
 export default function Page() {
@@ -19,7 +20,7 @@ export default function Page() {
           </Center>
         );
       case "authorized":
-        return <RateEditor />;
+        return auth.access === "contractor" ? <RateEditor /> : <BecomeContractor />;
       default:
         return (
           <Center>
@@ -27,7 +28,7 @@ export default function Page() {
           </Center>
         );
     }
-  }, [auth.status]);
+  }, [auth.access, auth.status]);
 
   return <div className=" min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black py-8">{component}</div>;
 }
@@ -49,6 +50,33 @@ const SignIn: React.FC = () => {
       </CardHeader>
       <CardContent>
         <UserSearch />
+      </CardContent>
+    </Card>
+  );
+};
+
+const BecomeContractor: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const acceptTerms = async () => {
+    setIsSubmitting(true);
+    await dispatch(becomeContractor());
+    setIsSubmitting(false);
+  };
+
+  return (
+    <Card className="w-full max-w-[520px] mx-auto">
+      <CardHeader>
+        <CardTitle>Become a Contractor</CardTitle>
+        <CardDescription>
+          Agree to the contractor terms and conditions to participate in Season 8 and manage your rates.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button type="button" onClick={acceptTerms} disabled={isSubmitting} className="w-full">
+          {isSubmitting ? "Joining Season 8..." : "Accept terms and become a contractor"}
+        </Button>
       </CardContent>
     </Card>
   );

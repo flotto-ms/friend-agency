@@ -1,10 +1,9 @@
 import { MsoQuest } from "@flotto/types";
 import TokenUtils from "../TokenUtils";
 
-let build = 980;
-
 const getQuests = async (userId: number) => {
   const token = await TokenUtils.getToken("bot");
+  let build = token.build;
 
   const server = "main" + (1 + (token.userId % 10));
   const url = `wss://${server}.minesweeper.online/mine-websocket/?authKey=${token.authKey}&session=${token.session}&userId=${token.userId}&EIO=4&transport=websocket`;
@@ -21,7 +20,7 @@ const getQuests = async (userId: number) => {
       } else if (code === "42") {
         const obj = JSON.parse(m.data.substring(2));
         const creactChannel = () => {
-          const cmd1 = `42["request",["ExchangeController.newExchangeDataWsAction",[${userId}],1000,${build}]]`;
+          const cmd1 = `42["request",["GetNewExchangeDataWS",{"buyerId":${userId}},1000,${build}]]`;
           socket.send(cmd1);
         };
 
@@ -36,12 +35,12 @@ const getQuests = async (userId: number) => {
 
         if (obj[0] === "authorized") {
           creactChannel();
-        } else if (obj[1][2].length === 0) {
+        } else if (obj[1][1] === "OldVersionEvent") {
           build++;
           console.log("Build", build);
           creactChannel();
         } else {
-          data = parseResponse(obj[1][2]);
+          data = parseResponse(obj[1][2][0]);
           closeSocket();
         }
       }
@@ -50,14 +49,12 @@ const getQuests = async (userId: number) => {
 };
 
 const parseResponse = (response: any) => {
-  const user = response[4];
-  const quests = response[7];
+  const user = response.buyerInfo;
+  const quests = response.friendQuestData;
 
   const questIds = Object.entries(user.items)
     .filter(([key, value]) => key.length > 9 && key.startsWith("41") && (value as number) > 0)
     .map(([key]) => parseInt(key.substring(2)));
-
-  console.log(questIds);
 
   return questIds.map((id) => quests[id] as MsoQuest);
 };

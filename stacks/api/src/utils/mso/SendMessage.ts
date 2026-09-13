@@ -8,8 +8,9 @@ type MsoUserDetails = {
   country: string;
 };
 
-const sendMessage = async (userId: number, message: string, build: number) => {
+const sendMessage = async (userId: number, message: string) => {
   const token = await TokenUtils.getToken("bot");
+  let build = token.build;
 
   let channelId = 0;
   let user: MsoUserDetails | undefined = undefined;

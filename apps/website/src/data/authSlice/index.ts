@@ -7,6 +7,7 @@ export interface AuthSliceState {
   username: string;
   country: string;
   type: string;
+  access?: string;
   isAdmin: boolean;
 }
 
@@ -40,7 +41,30 @@ export const authSlice = createAppSlice({
           state.userId = action.payload.id;
           state.username = action.payload.username;
           state.country = action.payload.country;
-          state.type = action.payload.contractor ? "Contractor" : "Member";
+          state.access = action.payload.access;
+          state.type = getType(action.payload.access);
+        },
+      },
+    ),
+    becomeSupplier: create.asyncThunk(
+      async () => {
+        return api.user.update({ access: "supplier" });
+      },
+      {
+        fulfilled: (state, action) => {
+          state.access = action.payload.access;
+          state.type = getType(action.payload.access);
+        },
+      },
+    ),
+    becomeContractor: create.asyncThunk(
+      async () => {
+        return api.user.update({ access: "contractor" });
+      },
+      {
+        fulfilled: (state, action) => {
+          state.access = action.payload.access;
+          state.type = getType(action.payload.access);
         },
       },
     ),
@@ -49,5 +73,16 @@ export const authSlice = createAppSlice({
     selectAuth: (state) => state,
   },
 });
-export const { setToken, signOut } = authSlice.actions;
+
+const getType = (access: string) => {
+  if (access === "contractor") {
+    return "Contractor";
+  }
+  if (access === "supplier") {
+    return "Supplier";
+  }
+  return "Member";
+};
+
+export const { becomeContractor, becomeSupplier, setToken, signOut } = authSlice.actions;
 export const { selectAuth } = authSlice.selectors;

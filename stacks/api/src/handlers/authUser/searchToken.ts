@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import TokenUtils from "../../utils/TokenUtils";
 
 export const generateSearchToken = async () => {
-  return Promise.all([TokenUtils.getToken("bot"), TokenUtils.getSecret()]).then(([token, secret]) => {
+  return Promise.all([TokenUtils.getToken("search"), TokenUtils.getSecret()]).then(([token, secret]) => {
     return jwt.sign(
       {
         sub: "search",
