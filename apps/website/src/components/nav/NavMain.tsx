@@ -14,6 +14,14 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { useAppSelector } from "@/data/hooks";
+import { authSlice, selectAuth } from "@/data/authSlice";
+
+type Item = {
+  access?: string;
+  title: string;
+  url: string;
+};
 
 export function NavMain({
   items,
@@ -23,12 +31,23 @@ export function NavMain({
     url: string;
     icon?: LucideIcon;
     isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-    }[];
+    items?: Item[];
   }[];
 }) {
+  const auth = useAppSelector(selectAuth);
+
+  const hasAccess = (item: Item) => {
+    if (!item.access) {
+      return true;
+    }
+
+    if (item.access === auth.access) {
+      return true;
+    }
+
+    return item.access === "supplier" && auth.access === "contractor";
+  };
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Flotto</SidebarGroupLabel>
@@ -45,7 +64,7 @@ export function NavMain({
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
-                  {item.items?.map((subItem) => (
+                  {item.items?.filter(hasAccess).map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
                         <Link href={subItem.url}>

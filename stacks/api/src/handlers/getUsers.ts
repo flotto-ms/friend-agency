@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
 import { getItems } from "../utils/DynamoDbUtils";
-import { UserTableItem } from "@flotto/types";
+import { SeasonAccess, UserTableItem } from "@flotto/types";
 import UserTable from "../utils/tables/UserTable";
 import RequestUtils from "../utils/RequestUtils";
 
@@ -42,27 +42,17 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
 
   if (!id) {
-    const users = await getItems<UserTableItem>({
-      TableName: process.env.USER_TABLE!,
-    })
-      .then((r) => {
-        console.log("filter", event.queryStringParameters);
-        const access = event.queryStringParameters?.access;
-        if (!access) {
-          return r;
-        }
-        return r.filter((u) => u.access === access);
-      })
-      .then((r) => {
-        return r.map(({ id, username, slots, country, available, access }) => ({
-          id,
-          username,
-          access: access ?? "member",
-          slots,
-          country,
-          available,
-        }));
-      });
+    const filter = event.queryStringParameters?.access as SeasonAccess | undefined;
+    const users = await UserTable.getUsers(filter).then((r) => {
+      return r.map(({ id, username, slots, country, available, access }) => ({
+        id,
+        username,
+        access: access ?? "member",
+        slots,
+        country,
+        available,
+      }));
+    });
 
     return {
       statusCode: 200,

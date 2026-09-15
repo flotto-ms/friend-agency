@@ -5,6 +5,7 @@ import { rateSlice } from "./rateSlice";
 import { searchSlice } from "./searchSlice";
 import { activeContractsSlice } from "./activeContractsSlice";
 import { contractorsSlice } from "./contractorsSlice";
+import { suppliersSlice } from "./suppliersSlice";
 import { contractHistorySlice } from "./contractHistorySlice";
 import { walletSlice } from "./walletSlice";
 
@@ -14,6 +15,7 @@ const rootReducer = combineSlices(
   searchSlice,
   activeContractsSlice,
   contractorsSlice,
+  suppliersSlice,
   contractHistorySlice,
   walletSlice,
 );

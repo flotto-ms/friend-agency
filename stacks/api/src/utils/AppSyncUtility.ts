@@ -1,5 +1,8 @@
-import AWS = require("aws-sdk");
 import { ContractTableItem } from "@flotto/types";
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
+import { SignatureV4 } from "@aws-sdk/signature-v4";
+import { HttpRequest } from "@aws-sdk/protocol-http";
+import { Sha256 } from "@aws-crypto/sha256-js";
 
 export type AppSyncContractEventType = "contract_started" | "contract_ended";
 
@@ -19,41 +22,36 @@ export class AppSyncUtility {
     };
 
     try {
-      const endpoint = new AWS.Endpoint(apiUrl.replace(/\/$/, ""));
-      const request = new AWS.HttpRequest(endpoint, AWS.config.region || process.env.AWS_REGION || "us-east-1");
-      request.method = "POST";
-      request.path = "/event";
-      request.headers["Content-Type"] = "application/json";
-      request.headers["Host"] = endpoint.host;
-      request.body = JSON.stringify(payload);
+      const url = new URL(apiUrl.replace(/\/$/, "") + "/event");
 
-      const credentials = await new Promise<AWS.Credentials>((resolve, reject) => {
-        AWS.config.getCredentials((error, creds) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-
-          if (!creds || !("accessKeyId" in creds)) {
-            reject(new Error("Missing AWS credentials for AppSync Event publish."));
-            return;
-          }
-
-          resolve(creds as AWS.Credentials);
-        });
+      const request = new HttpRequest({
+        method: "POST",
+        hostname: url.hostname,
+        path: url.pathname,
+        headers: {
+          "Content-Type": "application/json",
+          host: url.hostname,
+        },
+        body: JSON.stringify(payload),
       });
 
-      const signer = new (AWS as any).Signers.V4(request, "appsync");
-      signer.addAuthorization(credentials, new Date());
+      const signer = new SignatureV4({
+        credentials: fromNodeProviderChain(),
+        region: process.env.AWS_REGION || "us-east-1",
+        service: "appsync",
+        sha256: Sha256,
+      });
+
+      const signedRequest = await signer.sign(request);
 
       const options = {
-        method: request.method,
-        headers: request.headers,
-        body: request.body,
+        method: signedRequest.method,
+        headers: signedRequest.headers,
+        body: signedRequest.body as any,
       };
       console.debug(options);
 
-      const response = await fetch(`${endpoint.href.replace(/\/$/, "")}${request.path}`, options);
+      const response = await fetch(url.toString(), options as any);
 
       if (!response.ok) {
         await response.text().then((r) => console.error(r));

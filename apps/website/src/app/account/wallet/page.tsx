@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import QuestTypeSelect from "@/components/QuestTypeSelect";
 import { Field, FieldLabel } from "@/components/ui/field";
+import UserLink from "@/components/UserLink";
 
 export default function WalletPage() {
   const dispatch = useAppDispatch();
@@ -179,15 +180,7 @@ export default function WalletPage() {
                       <SelectItem value="all">All Users</SelectItem>
                       {uniqueUsers.map((user) => (
                         <SelectItem key={user.username} value={user.username}>
-                          <div className="flex items-center gap-2">
-                            {user.country && user.country.toLowerCase() !== "xx" && (
-                              <img
-                                src={`https://minesweeper.online/img/flags/${user.country.toLowerCase()}.png`}
-                                alt={`${user.country} flag`}
-                              />
-                            )}
-                            <span>{user.username}</span>
-                          </div>
+                          <UserLink country={user.country} username={user.username} />
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -250,17 +243,7 @@ const walletColumns: ColumnDef<WalletTransaction>[] = [
   {
     accessorKey: "user",
     header: "User",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2 font-medium">
-        {row.original.country && row.original.country.toLowerCase() !== "xx" && (
-          <img
-            src={`https://minesweeper.online/img/flags/${row.original.country.toLowerCase()}.png`}
-            alt={`${row.original.country} flag`}
-          />
-        )}
-        {row.original.username || row.original.country || "Unknown"}
-      </div>
-    ),
+    cell: ({ row }) => <UserLink country={row.original.country} username={row.original.username} />,
   },
   {
     accessorKey: "description",

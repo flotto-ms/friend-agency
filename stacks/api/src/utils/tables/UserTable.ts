@@ -1,4 +1,4 @@
-import { Rate, UserTableItem } from "@flotto/types";
+import { Rate, SeasonAccess, UserTableItem } from "@flotto/types";
 import DynamoDbUtils, { createClient, getItem } from "../DynamoDbUtils";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
@@ -19,6 +19,17 @@ const getUser = (id: number) => {
 
     return user;
   });
+};
+
+const getUsers = (access?: SeasonAccess) => {
+  if (access) {
+    return DynamoDbUtils.queryItems<UserTableItem>({
+      TableName: process.env.USER_TABLE!,
+      IndexName: "AccessIndex",
+      KeyCondition: { access },
+    });
+  }
+  return DynamoDbUtils.getItems<UserTableItem>({ TableName: process.env.USER_TABLE! });
 };
 
 const updateDetails = async (id: number, username?: string, country?: string) => {
@@ -93,6 +104,7 @@ const updateRates = async (userId: number, rates: [string, Rate][]) => {
 
 export default {
   getUser,
+  getUsers,
   updateDetails,
   updateAccess,
   updateRates,

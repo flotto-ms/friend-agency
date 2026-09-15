@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getFilterDescription } from "@/lib/FilterDesc";
 import { getQuestDescription } from "@/components/QuestTypeSelect";
+import UserLink from "./UserLink";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -30,6 +31,7 @@ type ContractCardProps = {
     startedAt: string;
     filter?: Record<string, unknown>;
     contractor?: {
+      id?: number;
       country?: string;
       username?: string;
       available?: boolean;
@@ -47,15 +49,12 @@ export default function ContractCard({ contract, href }: ContractCardProps) {
       <Card className="h-full transition hover:border-primary/60 hover:shadow-sm">
         <CardHeader>
           <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2">
-              {contract.contractor?.country && (
-                <img
-                  src={`https://minesweeper.online/img/flags/${contract.contractor.country.toLowerCase()}.png`}
-                  alt={`${contract.contractor.country} flag`}
-                />
-              )}
-              <CardTitle className="truncate">{contract.contractor?.username ?? `User ${contract.userId}`}</CardTitle>
-            </div>
+            <UserLink
+              id={contract.userId}
+              country={contract.contractor?.country}
+              username={contract.contractor?.username ?? `User ${contract.userId}`}
+              copyId
+            />
             <span
               className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-medium ${
                 contract.contractor?.available

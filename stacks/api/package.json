@@ -23,9 +23,13 @@
     "typescript": "~5.6.3"
   },
   "dependencies": {
+    "@aws-crypto/sha256-js": "^5.2.0",
     "@aws-sdk/client-dynamodb": "^3.1069.0",
     "@aws-sdk/client-s3": "^3.1069.0",
+    "@aws-sdk/credential-providers": "^3.1132.0",
     "@aws-sdk/lib-dynamodb": "^3.1069.0",
+    "@aws-sdk/protocol-http": "^3.370.0",
+    "@aws-sdk/signature-v4": "^3.370.0",
     "aws-cdk-lib": "2.206.0",
     "constructs": "^10.0.0",
     "jsonwebtoken": "^9.0.3"

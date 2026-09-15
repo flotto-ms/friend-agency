@@ -35,7 +35,7 @@ export default function Page() {
 
 const Center: React.FC<PropsWithChildren> = ({ children }) => {
   return (
-    <main className="flex min-h-screen w-full max-w-[1200px] flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black">
+    <main className="flex min-h-screen w-full max-w-[1200px] flex-col items-center justify-between px-16 bg-white dark:bg-black">
       {children}
     </main>
   );

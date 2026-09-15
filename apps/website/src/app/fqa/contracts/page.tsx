@@ -1,13 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ContractCard from "@/components/ContractCard";
 import QuestTypeSelect from "@/components/QuestTypeSelect";
-import { selectAuth } from "@/data/authSlice";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
 import {
   loadActiveContractsAction,
@@ -119,18 +116,8 @@ function ContractsPageContent() {
           </div>
           <div className="flex max-w-sm items-end gap-2">
             <div className="flex-1 min-w-[250px]">
-              <QuestTypeSelect value={questTypeFilter} onChange={setQuestTypeFilter} />
+              <QuestTypeSelect allowAll value={questTypeFilter} onChange={setQuestTypeFilter} />
             </div>
-            {questTypeFilter !== 0 && (
-              <button
-                type="button"
-                aria-label="Clear quest filter"
-                onClick={() => setQuestTypeFilter(0)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground transition hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
           </div>
         </div>
 
@@ -155,7 +142,7 @@ function ContractsPageContent() {
 const Centered: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <div className="flex min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black py-8">
-      <main className="flex min-h-screen w-full max-w-[1200px] flex-col items-center justify-between py-16 px-8 bg-white dark:bg-black">
+      <main className="flex min-h-screen w-full max-w-[1200px] flex-col items-center justify-between px-8 bg-white dark:bg-black">
         {children}
       </main>
     </div>

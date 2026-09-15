@@ -77,14 +77,10 @@ const data = {
           title: "Quest Search",
           url: "/fqa/search",
         },
-        {
+        /*{
           title: "Auction House",
           url: "/fqa/auctions",
-        },
-        {
-          title: "Your Rates",
-          url: "/fqa/rates",
-        },
+        },*/
         {
           title: "Active Contracts",
           url: "/fqa/contracts",
@@ -92,6 +88,15 @@ const data = {
         {
           title: "Wallet",
           url: "/account/wallet",
+        },
+        {
+          title: "Your Rates",
+          url: "/fqa/rates",
+          access: "contractor",
+        },
+        {
+          title: "Participants",
+          url: "/fqa/participants",
         },
       ],
     },

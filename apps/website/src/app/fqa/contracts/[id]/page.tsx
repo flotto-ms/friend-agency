@@ -16,6 +16,7 @@ import {
 } from "@/data/contractHistorySlice";
 import { getFilterDescription } from "@/lib/FilterDesc";
 import { getQuestDescription } from "@/components/QuestTypeSelect";
+import UserLink from "@/components/UserLink";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -119,17 +120,12 @@ export default function ContractHistoryPage() {
           <Card className="mb-6">
             <CardHeader>
               <div className="flex items-center justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-2">
-                  {contractor?.country && (
-                    <img
-                      src={`https://minesweeper.online/img/flags/${contractor.country.toLowerCase()}.png`}
-                      alt={`${contractor.country} flag`}
-                    />
-                  )}
-                  <CardTitle className="truncate">
-                    {contractor?.username ?? `User ${selectedContract.userId}`}
-                  </CardTitle>
-                </div>
+                <UserLink
+                  id={contractor?.id}
+                  country={contractor?.country}
+                  username={contractor?.username ?? `User ${selectedContract.userId}`}
+                  copyId
+                />
                 <span
                   className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-medium ${
                     contractor?.available

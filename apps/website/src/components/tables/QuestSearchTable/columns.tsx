@@ -10,6 +10,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import RateStatsTable from "../RateStatsTable";
 import { toast } from "sonner";
 import { rateStats } from "../RateStatsTable/columns";
+import UserLink from "@/components/UserLink";
 
 export const columns: ColumnDef<QuestSearchItem>[] = [
   {
@@ -68,25 +69,7 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
       if (!row.original.username) {
         return "-";
       }
-      return (
-        <div className="flex felx-col gap-2 items-center justify-start truncate text-ellipsis">
-          {row.original.country && (
-            <img src={`https://minesweeper.online/img/flags/${row.original.country.toLowerCase()}.png`} />
-          )}
-          <span>{row.original.username}</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              navigator.clipboard.writeText(row.original.sentTo.toString()).then(() => {
-                toast.info("User's ID coppied to clipboard, paste this into user search when sending the quest.");
-              });
-            }}
-          >
-            <CopyCheckIcon />
-          </Button>
-        </div>
-      );
+      return <UserLink country={row.original.country} username={row.original.username} id={row.original.id} copyId />;
     },
   },
   {
