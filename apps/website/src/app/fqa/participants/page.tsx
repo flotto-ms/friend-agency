@@ -10,7 +10,6 @@ import { useAppDispatch, useAppSelector } from "@/data/hooks";
 import { PropsWithChildren, useEffect, useMemo } from "react";
 
 export default function Page() {
-  const auth = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
 
   const contractors = useAppSelector(selectContractors);
@@ -20,53 +19,39 @@ export default function Page() {
   const suppliersStatus = useAppSelector(selectSuppliersStatus);
 
   useEffect(() => {
-    if (auth.status === "authorized") {
-      if (contractorsStatus === "init") {
-        dispatch(loadContractorsAction());
-      }
-      if (suppliersStatus === "init") {
-        dispatch(loadSuppliersAction());
-      }
+    if (contractorsStatus === "init") {
+      dispatch(loadContractorsAction());
     }
-  }, [auth.status, contractorsStatus, suppliersStatus, dispatch]);
+    if (suppliersStatus === "init") {
+      dispatch(loadSuppliersAction());
+    }
+  }, [contractorsStatus, suppliersStatus, dispatch]);
 
   const component = useMemo(() => {
-    switch (auth.status) {
-      case "loading":
-        return (
-          <Center>
-            <div>Loading...</div>
-          </Center>
-        );
-      case "authorized":
-        if (contractorsStatus !== "loaded" || suppliersStatus !== "loaded") {
-          return (
-            <Center>
-              <div>Loading participants...</div>
-            </Center>
-          );
-        }
-
-        return (
-          <div className="flex flex-wrap gap-8 w-full py-8 w-full max-w-[1200px] mx-auto">
-            <div className="flex-1">
-              <h2 className="text-2xl font-semibold tracking-tight mb-4">Contractors</h2>
-              <ParticipantsTable data={contractors} />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-semibold tracking-tight mb-4">Suppliers</h2>
-              <ParticipantsTable data={suppliers} />
-            </div>
-          </div>
-        );
-      default:
-        return (
-          <Center>
-            <SignIn />
-          </Center>
-        );
+    if (contractorsStatus !== "loaded" || suppliersStatus !== "loaded") {
+      return (
+        <Center>
+          <div>Loading participants...</div>
+        </Center>
+      );
     }
-  }, [auth.status, contractorsStatus, suppliersStatus, contractors, suppliers]);
+
+    return (
+      <div>
+        <h1 className="text-3xl font-semibold text-center mb-6">Season 8</h1>
+        <div className="flex flex-wrap gap-8 py-8 w-full max-w-[1200px] mx-auto">
+          <div className="flex-1">
+            <h2 className="text-2xl font-semibold tracking-tight mb-4">Contractors</h2>
+            <ParticipantsTable data={contractors} />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-2xl font-semibold tracking-tight mb-4">Suppliers</h2>
+            <ParticipantsTable data={suppliers} />
+          </div>
+        </div>
+      </div>
+    );
+  }, [contractorsStatus, suppliersStatus, contractors, suppliers]);
 
   return <div className="min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black py-8 px-4">{component}</div>;
 }

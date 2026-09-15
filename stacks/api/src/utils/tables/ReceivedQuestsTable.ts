@@ -2,7 +2,7 @@ import { QueryCommandInput } from "@aws-sdk/lib-dynamodb";
 import { queryItemsInput } from "../DynamoDbUtils";
 import { ReceivedQuestTableItem } from "@flotto/types";
 
-const date = "2026-06-01";
+const date = "2026-10-01";
 
 const getQuestsReceivedBy = async (userId: number) => {
   const receivedQuery: QueryCommandInput = {
