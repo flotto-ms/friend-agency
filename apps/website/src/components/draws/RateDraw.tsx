@@ -135,13 +135,23 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
       .map(([id, item]) => ({ id, ...item }));
   }, [slice.groups]);
 
+  const minAmount = useMemo(() => {
+    return (rateConfig[`${type}` as keyof typeof rateConfig] as any)?.minAmount as number | undefined;
+  }, [type]);
+
+  useEffect(() => {
+    if (minAmount && amount < minAmount) {
+      setAmount(minAmount);
+    }
+  }, [minAmount, amount]);
+
   const sliders = useMemo(() => {
     if (!type) {
       return [];
     }
 
     const components: ReactElement[] = [];
-    const config = rateConfig[`${type}` as keyof typeof rateConfig] as RateFilter;
+    const config = (rateConfig[`${type}` as keyof typeof rateConfig] as any).filters as RateFilter;
     if (config.required) {
       components.push(
         <MinMaxSlider
@@ -211,7 +221,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
 
         {type > 0 && (
           <>
-            <PriceSlider value={amount} onChange={setAmount} />
+            <PriceSlider value={amount} min={minAmount} onChange={setAmount} />
             {false && (
               <FieldLabel htmlFor="switch-focus-mode">
                 <Field orientation="horizontal" className="max-w-sm">

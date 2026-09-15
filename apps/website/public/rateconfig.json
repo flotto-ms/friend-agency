@@ -1,253 +1,367 @@
 {
   "1": {
-    "required": {
-      "min": 5,
-      "max": 750,
-      "step": 5
-    }
+    "filters": {
+      "required": {
+        "min": 5,
+        "max": 750,
+        "step": 5
+      }
+    },
+    "minAmount": 180
   },
   "3": {
-    "elite": "elite",
-    "density": {
-      "min": 20,
-      "max": 25,
-      "step": 0.25
-    }
+    "filters": {
+      "elite": "elite",
+      "density": {
+        "min": 20,
+        "max": 25,
+        "step": 0.25
+      }
+    },
+    "minAmount": 110
   },
   "4": {
-    "required": {
-      "min": 1,
-      "max": 100
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 100
+      },
+      "efficiency": {
+        "min": 90,
+        "max": 100,
+        "step": 5
+      }
     },
-    "efficiency": {
-      "min": 90,
-      "max": 100,
-      "step": 5
-    }
+    "minAmount": 160
   },
   "5": {
-    "required": {
-      "min": 1,
-      "max": 100
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 100
+      },
+      "efficiency": {
+        "min": 90,
+        "max": 50,
+        "step": 5
+      }
     },
-    "efficiency": {
-      "min": 90,
-      "max": 50,
-      "step": 5
-    }
+    "minAmount": 190
   },
   "6": {
-    "required": {
-      "min": 1,
-      "max": 20
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 20
+      },
+      "efficiency": {
+        "min": 90,
+        "max": 140,
+        "step": 5
+      }
     },
-    "efficiency": {
-      "min": 90,
-      "max": 140,
-      "step": 5
-    }
+    "minAmount": 200
   },
   "7": {
-    "required": {
-      "min": 1,
-      "max": 150
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 150
+      }
+    },
+    "minAmount": 200
   },
   "8": {
-    "required": {
-      "min": 2500,
-      "max": 375000,
-      "step": 2500
-    }
+    "filters": {
+      "required": {
+        "min": 2500,
+        "max": 375000,
+        "step": 2500
+      }
+    },
+    "minAmount": 200
   },
   "9": {
-    "required": {
-      "min": 250,
-      "max": 37500,
-      "step": 250
-    }
+    "filters": {
+      "required": {
+        "min": 250,
+        "max": 37500,
+        "step": 250
+      }
+    },
+    "minAmount": 200
   },
   "10": {
-    "required": {
-      "min": 1,
-      "max": 1000
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 1000
+      }
+    },
+    "minAmount": 170
   },
   "11": {
-    "required": {
-      "min": 1,
-      "max": 1000
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 1000
+      }
+    },
+    "minAmount": 160
   },
   "12": {
-    "required": {
-      "min": 1,
-      "max": 1000
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 1000
+      }
+    },
+    "minAmount": 150
   },
   "13": {
-    "required": {
-      "min": 1,
-      "max": 1000
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 1000
+      }
+    },
+    "minAmount": 140
   },
   "14": {
-    "required": {
-      "min": 1,
-      "max": 1000
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 1000
+      }
+    },
+    "minAmount": 120
   },
   "15": {
-    "required": {
-      "min": 1,
-      "max": 76,
-      "step": 2
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 76,
+        "step": 2
+      }
+    },
+    "minAmount": 160
   },
   "16": {
-    "required": {
-      "min": 10,
-      "max": 50
-    }
+    "filters": {
+      "required": {
+        "min": 10,
+        "max": 50
+      }
+    },
+    "minAmount": 150
   },
   "17": {
-    "required": {
-      "min": 2,
-      "max": 15
-    }
+    "filters": {
+      "required": {
+        "min": 2,
+        "max": 15
+      }
+    },
+    "minAmount": 170
   },
   "18": {
-    "required": {
-      "min": 2,
-      "max": 6
-    }
+    "filters": {
+      "required": {
+        "min": 2,
+        "max": 6
+      }
+    },
+    "minAmount": 190
   },
   "19": {
-    "required": {
-      "min": 5,
-      "max": 900,
-      "step": 5
-    }
+    "filters": {
+      "required": {
+        "min": 5,
+        "max": 900,
+        "step": 5
+      }
+    },
+    "minAmount": 150
   },
   "20": {
-    "required": {
-      "min": 5,
-      "max": 100,
-      "step": 5
-    }
+    "filters": {
+      "required": {
+        "min": 5,
+        "max": 100,
+        "step": 5
+      }
+    },
+    "minAmount": 180
   },
   "21": {
-    "required": {
-      "min": 1,
-      "max": 50
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 50
+      }
+    },
+    "minAmount": 200
   },
   "22": {
-    "required": {
-      "min": 1,
-      "max": 1000
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 1000
+      }
+    },
+    "minAmount": 150
   },
   "23": {
-    "required": {
-      "min": 1,
-      "max": 1000
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 1000
+      }
+    },
+    "minAmount": 170
   },
   "24": {
-    "required": {
-      "min": 1,
-      "max": 1000
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 1000
+      }
+    },
+    "minAmount": 170
   },
   "25": {
-    "arenaLevel": {
-      "min": 1,
-      "max": 8
-    }
+    "filters": {
+      "arenaLevel": {
+        "min": 1,
+        "max": 8
+      }
+    },
+    "minAmount": 170
   },
   "26": {
-    "arenaLevel": {
-      "min": 1,
-      "max": 8
-    }
+    "filters": {
+      "arenaLevel": {
+        "min": 1,
+        "max": 8
+      }
+    },
+    "minAmount": 170
   },
   "27": {
-    "arenaLevel": {
-      "min": 1,
-      "max": 8
-    }
+    "filters": {
+      "arenaLevel": {
+        "min": 1,
+        "max": 8
+      }
+    },
+    "minAmount": 170
   },
   "28": {
-    "arenaLevel": {
-      "min": 1,
-      "max": 8
-    }
+    "filters": {
+      "arenaLevel": {
+        "min": 1,
+        "max": 8
+      }
+    },
+    "minAmount": 170
   },
   "29": {
-    "arenaLevel": {
-      "min": 1,
-      "max": 8
-    }
+    "filters": {
+      "arenaLevel": {
+        "min": 1,
+        "max": 8
+      }
+    },
+    "minAmount": 170
   },
   "30": {
-    "arenaLevel": {
-      "min": 1,
-      "max": 8
-    }
+    "filters": {
+      "arenaLevel": {
+        "min": 1,
+        "max": 8
+      }
+    },
+    "minAmount": 170
   },
   "31": {
-    "arenaLevel": {
-      "min": 1,
-      "max": 8
-    }
+    "filters": {
+      "arenaLevel": {
+        "min": 1,
+        "max": 8
+      }
+    },
+    "minAmount": 170
   },
   "32": {
-    "arenaLevel": {
-      "min": 1,
-      "max": 8
-    }
+    "filters": {
+      "arenaLevel": {
+        "min": 1,
+        "max": 8
+      }
+    },
+    "minAmount": 170
   },
   "33": {
-    "required": {
-      "min": 1,
-      "max": 30
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 30
+      }
+    },
+    "minAmount": 190
   },
   "34": {
-    "required": {
-      "min": 1,
-      "max": 30
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 30
+      }
+    },
+    "minAmount": 190
   },
   "35": {
-    "required": {
-      "min": 1,
-      "max": 30
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 30
+      }
+    },
+    "minAmount": 190
   },
   "36": {
-    "required": {
-      "min": 1,
-      "max": 30
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 30
+      }
+    },
+    "minAmount": 190
   },
   "37": {
-    "required": {
-      "min": 1,
-      "max": 30
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 30
+      }
+    },
+    "minAmount": 190
   },
   "38": {
-    "required": {
-      "min": 1,
-      "max": 30
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 30
+      }
+    },
+    "minAmount": 190
   },
   "39": {
-    "required": {
-      "min": 1,
-      "max": 30
-    }
+    "filters": {
+      "required": {
+        "min": 1,
+        "max": 30
+      }
+    },
+    "minAmount": 190
   }
 }
