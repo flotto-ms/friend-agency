@@ -57,7 +57,7 @@ export default function Home() {
       case "loading":
         return <div>Loading...</div>;
       case "authorized":
-        if (!auth.access) {
+        if (auth.access !== "supplier" && auth.access !== "contractor") {
           return <BecomeSupplier />;
         } else if (searchStatus !== "loaded") {
           return <div>Loading...</div>;
@@ -107,12 +107,33 @@ const BecomeSupplier: React.FC = () => {
       <CardHeader>
         <CardTitle>Participate in Season 8</CardTitle>
         <CardDescription>
-          Agree to the supplier terms and conditions to participate as a supplier in Season 8.
+          <p className="mb-2">
+            If a Contractor expires your quest, we encourage you to inform us as soon as possible so we can bring it up
+            with them. You will receive 10x the original quest value as compensation for any expired quests.
+          </p>
+          <p className="mb-2">
+            You agree to send quests to other Contractors. How many is up to you, but the more you send through our
+            service, the more you benefit from it (and the better it is for our Contractors). Earnings (e.g. sending
+            quests, rewards, compensation, etc.) will be deposited to your Flotto Wallet.
+          </p>
+          <p className="mb-2">
+            Your Flotto Wallet balance (from above) will be consolidated into a single final exchange sent within 3 days
+            after the event concludes. If it is negative, you agree to settle this outstanding balance in full within
+            one week.
+          </p>
+          <p className="mb-2">
+            You cannot withdraw from your Flotto Wallet until the end of the season. If a Contractor refuses to pay for
+            your quests, we will cover 100% of your lost revenue within 10 days after the event ends. This is why we
+            carefully select Contractors, taking on these risks to ensure your continued confidence in our agency.
+          </p>
+          <p className="mb-2">
+            If Flippa is late, it means they're totally next to a black hole and that everything is actually on time!
+          </p>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Button type="button" onClick={acceptTerms} disabled={isSubmitting} className="w-full">
-          {isSubmitting ? "Joining Season 8..." : "Accept terms and participate in Season 8"}
+          {isSubmitting ? "Joining Season 8..." : "Agree and participate in Season 8"}
         </Button>
       </CardContent>
     </Card>

@@ -100,6 +100,7 @@ const data = {
         },
       ],
     },
+    /*
     {
       title: "Documentation",
       url: "#",
@@ -146,6 +147,7 @@ const data = {
         },
       ],
     },
+    */
   ],
   projects: [
     {

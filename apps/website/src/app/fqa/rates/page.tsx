@@ -70,12 +70,49 @@ const BecomeContractor: React.FC = () => {
       <CardHeader>
         <CardTitle>Become a Contractor</CardTitle>
         <CardDescription>
-          Agree to the contractor terms and conditions to participate in Season 8 and manage your rates.
+          <p className="mb-2">
+            Contractors who let quests expire will incur a penalty of 10x the original quest value to compensate
+            Suppliers. Most Contractors can complete their quests - if you're unsure about your capabilities, please
+            reconsider your registration for this role. We don't want you to expire our quests!
+          </p>
+          <p className="mb-2">
+            If a Contractor expires your quest, we encourage you to inform us as soon as possible so we can bring it up
+            with them. You will receive 10x the original quest value as compensation for any expired quests.
+          </p>
+          <p className="mb-2">You will not be charged for quests you did not subscribe to.</p>
+          <p className="mb-2">
+            You agree to send quests to other Contractors. How much is up to you, but the more you send through our
+            service, the more you benefit from it (and the better it is for our Contractors).
+          </p>
+          <p className="mb-2">
+            If you wish to withdraw as a Contractor later down the line (after registering), please inform us.
+          </p>
+          <p className="mb-2">
+            Earnings (e.g. sending quests, rewards, compensation, etc.) will be deposited to your Flotto Wallet. Your
+            transaction history is also provided.
+          </p>
+          <p className="mb-2">
+            Charges (e.g. receiving quests, expiration penalties) will be deducted from your Flotto Wallet. Your
+            transaction history is also provided.
+          </p>
+          <p className="mb-2">
+            Your Flotto Wallet balance (from above) will be consolidated into a single final exchange sent within 3 days
+            after the event concludes. If it is negative, you agree to settle this outstanding balance in full within
+            one week. You cannot withdraw from your Flotto Wallet until the end of the season.
+          </p>
+          <p className="mb-2">
+            If a Contractor refuses to pay for your quests, we will cover 100% of your lost revenue within 10 days after
+            the event ends. This is why we carefully select Contractors, taking on these risks to ensure your continued
+            confidence in our agency.
+          </p>
+          <p className="mb-2">
+            If Flippa is late, it means they're totally next to a black hole and that everything is actually on time!
+          </p>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Button type="button" onClick={acceptTerms} disabled={isSubmitting} className="w-full">
-          {isSubmitting ? "Joining Season 8..." : "Accept terms and become a contractor"}
+          {isSubmitting ? "Joining Season 8..." : "Agree and become a contractor"}
         </Button>
       </CardContent>
     </Card>

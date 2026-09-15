@@ -117,7 +117,7 @@ export class ApiStack extends Stack {
     userTable.addGlobalSecondaryIndex({
       indexName: "AccessIndex",
       partitionKey: { name: "access", type: AttributeType.STRING },
-      sortKey: { name: "userId", type: AttributeType.NUMBER },
+      sortKey: { name: "id", type: AttributeType.NUMBER },
       projectionType: ProjectionType.ALL,
     });
 
@@ -141,6 +141,7 @@ export class ApiStack extends Stack {
 
     const authLamber = new NodejsFunction(this, "AuthLambda", {
       entry: "src/handlers/authUser.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
@@ -153,6 +154,7 @@ export class ApiStack extends Stack {
 
     const postUserSlotsLambda = new NodejsFunction(this, "PostUserSlotsLambda", {
       entry: "src/handlers/postUserSlots.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
@@ -163,6 +165,7 @@ export class ApiStack extends Stack {
 
     const postUserAvailabilityLambda = new NodejsFunction(this, "PostUserAvailabilityLambda", {
       entry: "src/handlers/postUserAvailability.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
@@ -176,6 +179,7 @@ export class ApiStack extends Stack {
 
     const postUserRatesLambda = new NodejsFunction(this, "PostUserRatesLambda", {
       entry: "src/handlers/postUserRates.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
@@ -189,6 +193,7 @@ export class ApiStack extends Stack {
 
     const userGroupsLambda = new NodejsFunction(this, "UserGroupsLambda", {
       entry: "src/handlers/userGroups/index.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
@@ -200,6 +205,7 @@ export class ApiStack extends Stack {
 
     const userRatesLambda = new NodejsFunction(this, "UserRatesLambda", {
       entry: "src/handlers/userRates/index.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
@@ -217,6 +223,7 @@ export class ApiStack extends Stack {
 
     const postUserQuestsLambda = new NodejsFunction(this, "PostUserQuestsLambda", {
       entry: "src/handlers/postUserQuests.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
@@ -230,6 +237,7 @@ export class ApiStack extends Stack {
 
     const postQuestsLambda = new NodejsFunction(this, "PostQuestsLambda", {
       entry: "src/handlers/postQuests.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(15),
@@ -241,6 +249,7 @@ export class ApiStack extends Stack {
 
     const getUserQuestsLambda = new NodejsFunction(this, "GetUserQuestsLambda", {
       entry: "src/handlers/getUserQuests.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
@@ -254,6 +263,7 @@ export class ApiStack extends Stack {
 
     const getUsersLambda = new NodejsFunction(this, "GetUsersLambda", {
       entry: "src/handlers/getUsers.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
@@ -265,6 +275,7 @@ export class ApiStack extends Stack {
 
     const getUserTransactionsLambda = new NodejsFunction(this, "GetUserTransactionsLambda", {
       entry: "src/handlers/getUserTransactions.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
@@ -277,6 +288,7 @@ export class ApiStack extends Stack {
 
     const getContractsLambda = new NodejsFunction(this, "GetContractsLambda", {
       entry: "src/handlers/getContracts.ts",
+      bundling: { bundleAwsSDK: true },
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
       timeout: Duration.minutes(1),
