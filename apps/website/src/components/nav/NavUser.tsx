@@ -74,20 +74,23 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              {/*  
               <DropdownMenuItem>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
+              */}
               <Link href="/account/wallet">
                 <DropdownMenuItem>
                   <Wallet2 />
                   Wallet
                 </DropdownMenuItem>
               </Link>
-              <DropdownMenuItem>
+              {/*  <DropdownMenuItem>
                 <Bell />
                 Notifications
               </DropdownMenuItem>
+              */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onSignOut}>
