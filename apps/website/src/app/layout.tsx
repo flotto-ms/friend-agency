@@ -47,6 +47,7 @@ export default function RootLayout({
                 <SidebarProvider>
                   <AppSidebar />
                   <main className="relative w-full">
+                    <SidebarTrigger className="fixed top-2 left-2" />
                     {children}
                     <Toaster position="top-right" />
                   </main>

@@ -14,7 +14,7 @@ import { Field, FieldLabel } from "./ui/field";
 
 export const passives = [
   { label: "Experience", value: "8" },
-  { label: "Mine Coins", value: "9" },
+  { label: "Minecoins", value: "9" },
   { label: "Gems", value: "7" },
   { label: "Arena Coin", value: "1" },
 ];

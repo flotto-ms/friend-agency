@@ -46,6 +46,8 @@ export const createConnection = async (type: TokenType) => {
       const code = /^\d+/.exec(m.data)![0];
       if (code === "0") {
         socket.send("40");
+      } else if (code === "2") {
+        socket.send("3");
       } else if (code === "42") {
         const obj = JSON.parse(m.data.substring(2));
         const processQueue = () => {

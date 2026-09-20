@@ -66,9 +66,13 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
   const [groups, setGroups] = useState(rate?.groups ?? (selectedGroup ? [selectedGroup] : []));
   const [filters, setFilters] = useState<RateFilter>(rate?.filters ?? {});
 
-  useEffect(() => {}, [filters]);
-
-  useEffect(() => setFilters({}), [type]);
+  useEffect(() => {
+    console.log(rate);
+    if (rate) {
+      return;
+    }
+    setFilters({});
+  }, [type]);
 
   const dispatch = useAppDispatch();
 
