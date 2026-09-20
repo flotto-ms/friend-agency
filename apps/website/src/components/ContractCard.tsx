@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getFilterDescription } from "@/lib/FilterDesc";
 import { getQuestDescription } from "@/components/QuestTypeSelect";
 import UserLink from "./UserLink";
+import AvailableBadge from "./badges/AvailableBadge";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -55,16 +56,9 @@ export default function ContractCard({ contract, href }: ContractCardProps) {
               country={contract.contractor?.country}
               username={contract.contractor?.username ?? `User ${contract.userId}`}
               copyId
+              openExchange={contract.preferExchange}
             />
-            <span
-              className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-medium ${
-                contract.contractor?.available
-                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              {contract.contractor?.available ? "Available" : "Busy"}
-            </span>
+            <AvailableBadge available={contract.contractor?.available} />
           </div>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">

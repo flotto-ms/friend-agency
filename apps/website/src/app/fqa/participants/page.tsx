@@ -27,6 +27,15 @@ export default function Page() {
     }
   }, [contractorsStatus, suppliersStatus, dispatch]);
 
+  const sortedContractors = useMemo(
+    () => [...contractors].sort((a, b) => a.username.localeCompare(b.username)),
+    [contractors],
+  );
+  const sortedSuppliers = useMemo(
+    () => [...suppliers].sort((a, b) => a.username.localeCompare(b.username)),
+    [suppliers],
+  );
+
   const component = useMemo(() => {
     if (contractorsStatus !== "loaded" || suppliersStatus !== "loaded") {
       return (
@@ -40,13 +49,13 @@ export default function Page() {
       <div>
         <h1 className="text-3xl font-semibold text-center mb-6">Season 8</h1>
         <div className="flex flex-wrap gap-8 py-8 w-full max-w-[1200px] mx-auto">
-          <div className="flex-1">
+          <div className="flex-1 min-w-[350px]">
             <h2 className="text-2xl font-semibold tracking-tight mb-4">Contractors</h2>
-            <ParticipantsTable data={contractors} />
+            <ParticipantsTable data={sortedContractors} contractors />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-[350px]">
             <h2 className="text-2xl font-semibold tracking-tight mb-4">Suppliers</h2>
-            <ParticipantsTable data={suppliers} />
+            <ParticipantsTable data={sortedSuppliers} />
           </div>
         </div>
       </div>

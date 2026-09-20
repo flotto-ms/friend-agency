@@ -18,6 +18,7 @@ import { getFilterDescription } from "@/lib/FilterDesc";
 import { getQuestDescription } from "@/components/QuestTypeSelect";
 import UserLink from "@/components/UserLink";
 import ExchangeBadge from "@/components/badges/ExchangeBadge";
+import AvailableBadge from "@/components/badges/AvailableBadge";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -127,15 +128,7 @@ export default function ContractHistoryPage() {
                   username={contractor?.username ?? `User ${selectedContract.userId}`}
                   copyId
                 />
-                <span
-                  className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-medium ${
-                    contractor?.available
-                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {contractor?.available ? "Available" : "Busy"}
-                </span>
+                <AvailableBadge available={contractor?.available} />
               </div>
               <CardDescription>
                 Contract history for {getQuestDescription(String(selectedContract.type))}

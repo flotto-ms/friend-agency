@@ -8,10 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import { columns } from "./columns";
 
-const ParticipantsTable: React.FC<{ data: ParticipantItem[] }> = ({ data }) => {
+const ParticipantsTable: React.FC<{ data: ParticipantItem[]; contractors?: boolean }> = ({ data, contractors }) => {
   const table = useReactTable({
     data,
-    columns,
+    columns: contractors ? columns : [columns[0]],
     getCoreRowModel: getCoreRowModel(),
   });
 

@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import ContractCard from "@/components/ContractCard";
 import QuestTypeSelect from "@/components/QuestTypeSelect";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
@@ -51,6 +52,8 @@ function ContractsPageContent() {
     const type = Number(searchParams.get("type") ?? "0");
     return Number.isFinite(type) && type > 0 ? type : 0;
   });
+  const [page, setPage] = useState(0);
+  const pageSize = 12;
   const dispatch = useAppDispatch();
   const activeContracts = useAppSelector(selectActiveContracts);
   const contractors = useAppSelector(selectContractors);
@@ -94,9 +97,15 @@ function ContractsPageContent() {
         if (b.price !== a.price) {
           return b.price - a.price;
         }
+        if (b.type !== a.type) {
+          return b.type - a.type;
+        }
         return new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime();
       });
   }, [activeContracts, contractors, questTypeFilter]);
+
+  const totalPages = Math.ceil(cards.length / pageSize);
+  const paginatedCards = cards.slice(page * pageSize, (page + 1) * pageSize);
 
   if (activeStatus !== "loaded" || contractorsStatus !== "loaded") {
     return (
@@ -116,7 +125,14 @@ function ContractsPageContent() {
           </div>
           <div className="flex max-w-sm items-end gap-2">
             <div className="flex-1 min-w-[250px]">
-              <QuestTypeSelect allowAll value={questTypeFilter} onChange={setQuestTypeFilter} />
+              <QuestTypeSelect
+                allowAll
+                value={questTypeFilter}
+                onChange={(v) => {
+                  setQuestTypeFilter(v);
+                  setPage(0);
+                }}
+              />
             </div>
           </div>
         </div>
@@ -128,10 +144,39 @@ function ContractsPageContent() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {cards.map((card) => (
-              <ContractCard key={card.id} contract={card} href={`/fqa/contracts/${encodeURIComponent(card.id)}`} />
-            ))}
+          <div className="flex flex-col gap-6 w-full">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {paginatedCards.map((card) => (
+                <ContractCard key={card.id} contract={card} href={`/fqa/contracts/${encodeURIComponent(card.id)}`} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Showing {page * pageSize + 1} to {Math.min((page + 1) * pageSize, cards.length)} of {cards.length}{" "}
+                  contracts
+                </p>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                    disabled={page === 0}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                    disabled={page >= totalPages - 1}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

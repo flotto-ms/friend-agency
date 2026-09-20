@@ -60,7 +60,15 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
       if (!row.original.username) {
         return "-";
       }
-      return <UserLink country={row.original.country} username={row.original.username} id={row.original.id} copyId />;
+      return (
+        <UserLink
+          country={row.original.country}
+          username={row.original.username}
+          id={row.original.id}
+          copyId
+          openExchange={row.original.preferExchange}
+        />
+      );
     },
   },
   {

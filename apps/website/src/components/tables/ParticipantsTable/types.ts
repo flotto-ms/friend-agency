@@ -3,4 +3,5 @@ export type ParticipantItem = {
   username: string;
   country: string;
   available?: boolean;
+  slots?: number;
 };

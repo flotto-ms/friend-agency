@@ -15,6 +15,7 @@ import {
 import { loadContractorsAction, selectContractors, selectContractorsStatus } from "@/data/contractorsSlice";
 import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searchSlice";
 import { getMatchingContract } from "@/lib/ContractFilter";
+import { selectAuth } from "@/data/authSlice";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -44,6 +45,7 @@ export default function SearchQuestPage() {
   const contractorsStatus = useAppSelector(selectContractorsStatus);
   const quests = useAppSelector(selectSearchQuests);
   const searchStatus = useAppSelector(selectSearchStatus);
+  const auth = useAppSelector(selectAuth);
 
   useEffect(() => {
     if (activeStatus === "init") {
@@ -67,8 +69,9 @@ export default function SearchQuestPage() {
     }
 
     const byUserId = new Map(contractors.map((contractor) => [contractor.id, contractor]));
+    const contracts = activeContracts.filter((c) => c.userId !== auth.userId);
 
-    return getMatchingContract(selectedQuest, activeContracts)
+    return getMatchingContract(selectedQuest, contracts)
       .map((contract) => ({
         ...contract,
         contractor: byUserId.get(contract.userId),
