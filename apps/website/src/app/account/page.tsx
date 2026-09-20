@@ -1,5 +1,11 @@
+import { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserSearch } from "@/components/UserSearch";
+
+export const metadata: Metadata = {
+  title: "Account | Flotto",
+  description: "Manage your account",
+};
 
 export default function Account() {
   return (
