@@ -74,7 +74,7 @@ export const authSlice = createAppSlice({
   },
 });
 
-const getType = (access: string) => {
+export const getType = (access?: string) => {
   if (access === "contractor") {
     return "Contractor";
   }

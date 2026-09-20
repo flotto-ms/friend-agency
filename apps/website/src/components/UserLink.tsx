@@ -1,7 +1,7 @@
 import { ClipboardPen, CopyCheckIcon, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 type Props = {
   id?: number;
   country?: string;
@@ -11,6 +11,7 @@ type Props = {
   href?: string;
 };
 const UserLink: React.FC<Props> = ({ id, country = "xx", username, href, copyId = false, openExchange = false }) => {
+  const router = useRouter();
   return (
     <div className="flex felx-col gap-2 items-center justify-start truncate text-ellipsis">
       <img src={`https://minesweeper.online/img/flags/${country.toLowerCase()}.png`} alt={`${country} flag`} />
@@ -20,7 +21,11 @@ const UserLink: React.FC<Props> = ({ id, country = "xx", username, href, copyId 
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            window.open(href, href.startsWith("/") ? undefined : "_blank");
+            if (href.startsWith("/")) {
+              router.push(href);
+            } else {
+              window.open(href, "_blank");
+            }
           }}
         >
           {username}

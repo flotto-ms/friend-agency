@@ -55,6 +55,7 @@ export default function ContractCard({ contract, href }: ContractCardProps) {
               id={contract.userId}
               country={contract.contractor?.country}
               username={contract.contractor?.username ?? `User ${contract.userId}`}
+              href={`/fqa/participants/${contract.contractor?.id}`}
               copyId
               openExchange={contract.preferExchange}
             />

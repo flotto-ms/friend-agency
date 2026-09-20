@@ -126,6 +126,7 @@ export default function ContractHistoryPage() {
                   id={contractor?.id}
                   country={contractor?.country}
                   username={contractor?.username ?? `User ${selectedContract.userId}`}
+                  href={`/fqa/participants/${selectedContract.userId}`}
                   copyId
                 />
                 <AvailableBadge available={contractor?.available} />

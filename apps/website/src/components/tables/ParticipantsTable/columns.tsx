@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { ColumnDef } from "@tanstack/react-table";
 import { ParticipantItem } from "./types";
 import UserLink from "@/components/UserLink";
@@ -13,7 +12,7 @@ export const columns: ColumnDef<ParticipantItem>[] = [
     cell: ({ row }) => {
       return (
         <UserLink
-          href={`https://minesweeper.online/player/${row.original.id}`}
+          href={`/fqa/participants/${row.original.id}`}
           country={row.original.country}
           username={row.original.username}
           id={row.original.id}
