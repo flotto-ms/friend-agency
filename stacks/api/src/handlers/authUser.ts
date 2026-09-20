@@ -55,7 +55,6 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     }
 
     if (record.code !== data.password) {
-      console.log(record, data);
       return {
         statusCode: 403,
         body: JSON.stringify({ message: "Invalid Password" }),

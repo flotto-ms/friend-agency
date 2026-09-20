@@ -9,6 +9,7 @@ export type ActiveContractItem = {
   price: number;
   startedAt: string;
   endedAt?: string;
+  preferExchange?: boolean;
   filter?: Record<string, unknown>;
 };
 
@@ -20,6 +21,7 @@ export type ContractTableItem = {
   price: number;
   startedAt: string;
   endedAt: string;
+  preferExchange?: boolean;
   filter?: Record<string, unknown>;
 };
 
@@ -58,6 +60,7 @@ export const activeContractsSlice = createAppSlice({
           type: contract.type,
           endedAt: contract.endedAt,
           filter: contract.filter,
+          preferExchange: contract.preferExchange,
           price: contract.price,
         },
         ...state.contracts,

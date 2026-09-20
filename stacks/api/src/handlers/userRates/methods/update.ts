@@ -18,6 +18,7 @@ export const updateRate = async (
     ...current,
     ...(changes.amount !== undefined ? { amount: changes.amount } : {}),
     ...(typeof changes.enabled === "boolean" ? { enabled: changes.enabled } : {}),
+    ...(typeof changes.preferExchange === "boolean" ? { preferExchange: changes.preferExchange } : {}),
   };
 
   if (changes.filter === null) {
@@ -41,6 +42,7 @@ export const updateRate = async (
   const contractStateChanged =
     current.enabled !== next.enabled ||
     current.amount !== next.amount ||
+    current.preferExchange !== next.preferExchange ||
     JSON.stringify(current.filter ?? null) !== JSON.stringify(next.filter ?? null);
 
   const command = new UpdateCommand({
@@ -75,6 +77,7 @@ export const updateRate = async (
       type: next.type,
       price: next.amount,
       filter: next.filter,
+      preferExchange: next.preferExchange,
       startedAt: new Date().toISOString(),
     });
   }

@@ -24,6 +24,7 @@ export default function Home() {
   const contractStatus = useAppSelector(selectActiveContractsStatus);
   const contractorStatus = useAppSelector(selectContractorsStatus);
   const dispatch = useAppDispatch();
+  const [hideExchangeOnly, setHideExchangeOnly] = useState(false);
 
   useEffect(() => {
     if (auth.status !== "authorized") {
@@ -41,16 +42,29 @@ export default function Home() {
   }, [auth.status, searchStatus, contractorStatus, contractStatus, dispatch]);
 
   const data = useMemo(() => {
+    const availableContractors = contractors.filter((c) => c.id !== auth.userId && c.available);
+    const availableContracts = contracts.filter(
+      (c) =>
+        (!hideExchangeOnly && c.preferExchange && c.userId !== auth.userId) ||
+        (!c.preferExchange && availableContractors.some((con) => con.id == c.userId)),
+    );
+
     return quests.map((q) => {
       const { country, username, rate, ...quest } = q;
-      const contract = getBestMatchingContract(q, contracts);
+      const contract = getBestMatchingContract(q, availableContracts);
       if (contract) {
         const contractor = contractors.find((c) => c.id === contract.userId);
-        return { ...quest, rate: contract.price, username: contractor?.username, country: contractor?.country ?? "xx" };
+        return {
+          ...quest,
+          rate: contract.price,
+          preferExchange: contract.preferExchange,
+          username: contractor?.username,
+          country: contractor?.country ?? "xx",
+        };
       }
       return quest;
     });
-  }, [quests, contractors, contracts]);
+  }, [quests, contractors, contracts, hideExchangeOnly]);
 
   const component = useMemo(() => {
     switch (auth.status) {
@@ -62,7 +76,13 @@ export default function Home() {
         } else if (searchStatus !== "loaded") {
           return <div>Loading...</div>;
         } else {
-          return <QuestSearchTable data={data} />;
+          return (
+            <QuestSearchTable
+              hideExchangeOnly={hideExchangeOnly}
+              onChangeHideExchangeOnly={setHideExchangeOnly}
+              data={data}
+            />
+          );
         }
       default:
         return <SignIn />;

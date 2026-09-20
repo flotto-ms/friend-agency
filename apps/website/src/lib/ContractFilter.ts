@@ -77,5 +77,11 @@ export const getBestMatchingContract = (
   quest: QuestSearchItem,
   contracts: ActiveContractItem[],
 ): ActiveContractItem | undefined => {
-  return getMatchingContract(quest, contracts).sort((a, b) => b.price - a.price)?.[0];
+  const sorted = getMatchingContract(quest, contracts).sort((a, b) => b.price - a.price);
+  if (sorted.length === 0) {
+    return undefined;
+  }
+
+  const bestPrice = sorted[0].price;
+  return sorted.filter((q) => q.price === bestPrice).sort(() => Math.random() - 0.5)[0];
 };

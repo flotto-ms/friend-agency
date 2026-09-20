@@ -9,6 +9,7 @@ export type RateItem = {
   stopping?: boolean;
   stopDate?: number;
   filter?: string;
+  preferExchange?: boolean;
   filters?: RateFilter;
   groups?: string[];
 };

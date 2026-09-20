@@ -9,5 +9,6 @@ export type QuestSearchItem = {
   username?: string;
   country?: string;
   sentTo: number;
+  preferExchange?: boolean;
   options?: Record<string, unknown>;
 };

@@ -63,11 +63,11 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
   const [type, setType] = useState(rate?.type ?? 0);
   const [amount, setAmount] = useState(rate?.rate ?? 150);
   const [enabled, setEnabled] = useState(rate?.enabled ?? false);
+  const [preferExchange, setpreferExchange] = useState(rate?.preferExchange ?? false);
   const [groups, setGroups] = useState(rate?.groups ?? (selectedGroup ? [selectedGroup] : []));
   const [filters, setFilters] = useState<RateFilter>(rate?.filters ?? {});
 
   useEffect(() => {
-    console.log(rate);
     if (rate) {
       return;
     }
@@ -85,6 +85,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
           rate: amount,
           enabled,
           groups,
+          preferExchange,
           filters: Object.keys(filters).length > 0 ? filters : undefined,
           filter: getFilterDescription({ type: rate.type, filter: filters }),
         }
@@ -96,6 +97,7 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
           description: getQuestDescription(type.toString()),
           filter: getFilterDescription({ type, filter: filters }),
           filters: Object.keys(filters).length > 0 ? filters : undefined,
+          preferExchange,
           rate: amount,
           groups,
         };
@@ -226,6 +228,19 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
         {type > 0 && (
           <>
             <PriceSlider value={amount} min={minAmount} onChange={setAmount} />
+            <FieldLabel htmlFor="switch-exchange-mode">
+              <Field orientation="horizontal" className="max-w-sm">
+                <FieldContent>
+                  <FieldTitle>Prefer Exchange</FieldTitle>
+                </FieldContent>
+                <Switch
+                  id="switch-exchange-mode"
+                  checked={preferExchange}
+                  onClick={() => setpreferExchange(!preferExchange)}
+                />
+              </Field>
+            </FieldLabel>
+
             {false && (
               <FieldLabel htmlFor="switch-focus-mode">
                 <Field orientation="horizontal" className="max-w-sm">

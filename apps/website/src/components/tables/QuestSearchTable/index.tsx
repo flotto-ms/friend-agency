@@ -12,8 +12,14 @@ import { useAppDispatch } from "@/data/hooks";
 import { initSearch } from "@/data/searchSlice";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Field, FieldContent, FieldLabel, FieldTitle } from "@/components/ui/field";
 
-const QuestSearchTable: React.FC<{ data: QuestSearchItem[] }> = ({ data }) => {
+const QuestSearchTable: React.FC<{
+  data: QuestSearchItem[];
+  hideExchangeOnly: boolean;
+  onChangeHideExchangeOnly: (value: boolean) => void;
+}> = ({ data, hideExchangeOnly, onChangeHideExchangeOnly }) => {
   const dispatch = useAppDispatch();
 
   const table = useReactTable({
@@ -29,36 +35,51 @@ const QuestSearchTable: React.FC<{ data: QuestSearchItem[] }> = ({ data }) => {
   return (
     <div className="w-full">
       <h1 className="text-3xl font-semibold text-center mb-6">Available Quests</h1>
-
       {table.getRowModel().rows?.length ? (
-        <div className="overflow-hidden rounded-md border">
-          <Table>
-            <TableHeader className="bg-muted">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} width={cell.column.columnDef.size}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <>
+          <FieldLabel htmlFor="switch-exchange-mode" className="mb-6 inline-block max-w-fit">
+            <Field orientation="horizontal" className="max-w-sm">
+              <FieldContent>
+                <FieldTitle>Hide Exhange Only</FieldTitle>
+              </FieldContent>
+              <Switch
+                id="switch-exchange-mode"
+                checked={hideExchangeOnly}
+                onClick={() => onChangeHideExchangeOnly(!hideExchangeOnly)}
+              />
+            </Field>
+          </FieldLabel>
+          <div className="overflow-hidden rounded-md border">
+            <Table>
+              <TableHeader className="bg-muted">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} width={cell.column.columnDef.size}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
       ) : (
         <Card className="mb-6 max-md:hidden">
           <CardHeader>

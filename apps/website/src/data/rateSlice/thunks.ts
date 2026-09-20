@@ -28,6 +28,7 @@ export const fetchRates = async (userId?: number) => {
       enabled: rate.enabled,
       stopping: false,
       groups: rate.groups ?? [],
+      preferExchange: rate.preferExchange ?? false,
       filters: rate.filter,
       filter: rate.filter ? getFilterDescription(rate) : undefined,
     };
@@ -37,11 +38,13 @@ export const fetchRates = async (userId?: number) => {
 };
 
 export const postSaveRate = async (rate: RateItem) => {
+  console.log(rate);
   const { id, description, stopping, stopDate, filter, ...rest } = rate;
   const payload = {
     type: rest.type,
     amount: rest.rate,
     enabled: rest.enabled,
+    preferExchange: rest.preferExchange,
     groups: rest.groups && rest.groups.length > 0 ? rest.groups : null,
     filter: rest.filters && Object.keys(rest.filters).length > 0 ? rest.filters : null,
   };
@@ -55,6 +58,7 @@ export const postSaveRate = async (rate: RateItem) => {
     type: result.type ?? rest.type,
     rate: result.amount ?? rest.rate,
     enabled: result.enabled ?? rest.enabled,
+    preferExchange: result.preferExchange ?? rest.preferExchange,
     filter: result.filter ? getFilterDescription(result) : undefined,
     filters: result.filter ?? rest.filters,
     groups: result.groups ?? rest.groups ?? [],

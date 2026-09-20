@@ -47,7 +47,8 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
 
   if (type === "unsent") {
-    const promise = GetQuests.getQuests(userId);
+    const promise =
+      userId == 11698196 ? getUserSentQuestsDate(userId, new Date("2026-06-05")) : GetQuests.getQuests(userId);
 
     const unsent = await promise.then((r) => {
       return r.map((quest) => ({

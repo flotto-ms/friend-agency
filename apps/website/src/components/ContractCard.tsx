@@ -29,6 +29,7 @@ type ContractCardProps = {
     type: number;
     price: number;
     startedAt: string;
+    preferExchange?: boolean;
     filter?: Record<string, unknown>;
     contractor?: {
       id?: number;
@@ -80,7 +81,16 @@ export default function ContractCard({ contract, href }: ContractCardProps) {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Price</span>
-            <span className="font-medium">{contract.price}</span>
+            <span className="font-medium">
+              {contract.preferExchange && (
+                <span
+                  className={`inline-flex mr-2 items-center rounded-full px-2 py-1 text-[10px] font-medium bg-emerald-100 text-yellow-500 dark:bg-yellow-950 dark:text-yellow-200`}
+                >
+                  Exchange Only
+                </span>
+              )}
+              {contract.price}
+            </span>
           </div>
         </CardContent>
       </Card>

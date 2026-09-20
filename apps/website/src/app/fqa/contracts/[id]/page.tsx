@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
 import { loadContractorsAction, selectContractors, selectContractorsStatus } from "@/data/contractorsSlice";
@@ -17,6 +17,7 @@ import {
 import { getFilterDescription } from "@/lib/FilterDesc";
 import { getQuestDescription } from "@/components/QuestTypeSelect";
 import UserLink from "@/components/UserLink";
+import ExchangeBadge from "@/components/badges/ExchangeBadge";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -151,8 +152,11 @@ export default function ContractHistoryPage() {
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Price</span>
-                <span className="font-medium">{selectedContract.price}</span>
+                <span className="text-muted-foreground">Rate</span>
+                <span className="font-medium">
+                  {selectedContract.preferExchange && <ExchangeBadge className="mr-2" />}
+                  {selectedContract.price}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Created</span>
@@ -178,7 +182,7 @@ export default function ContractHistoryPage() {
           <Table>
             <TableHeader className="bg-muted">
               <TableRow>
-                <TableHead>Price</TableHead>
+                <TableHead>Rate</TableHead>
                 <TableHead>Filter</TableHead>
                 <TableHead>Created At</TableHead>
                 <TableHead>Ended At</TableHead>
@@ -196,7 +200,10 @@ export default function ContractHistoryPage() {
                     className={isSelected ? "bg-muted/50" : "cursor-pointer hover:bg-muted/50"}
                     onClick={() => setSelectedId(row.startedAt)}
                   >
-                    <TableCell>{row.price}</TableCell>
+                    <TableCell>
+                      {row.price}
+                      {row.preferExchange && <ExchangeBadge className="ml-2" />}
+                    </TableCell>
                     <TableCell>{filterText}</TableCell>
                     <TableCell>{formatDate(row.startedAt)}</TableCell>
                     <TableCell>

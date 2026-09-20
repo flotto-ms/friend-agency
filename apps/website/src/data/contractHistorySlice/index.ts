@@ -9,6 +9,7 @@ export type ContractHistoryItem = {
   price: number;
   startedAt: string;
   endedAt?: string;
+  preferExchange?: boolean;
   filter?: Record<string, unknown>;
 };
 

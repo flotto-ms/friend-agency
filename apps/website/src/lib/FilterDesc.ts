@@ -59,5 +59,5 @@ const getTypeDesc = (rate: Rate) => {
     return "gems";
   }
 
-  return "wins";
+  return "games";
 };

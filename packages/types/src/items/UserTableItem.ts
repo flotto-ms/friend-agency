@@ -26,6 +26,7 @@ export type Rate = {
   type: FlottoQuestId;
   amount: number;
   enabled: boolean;
+  preferExchange?: boolean;
   filter?: RateFilter;
   groups?: string[];
 };

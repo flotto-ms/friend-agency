@@ -9,5 +9,6 @@ export type ContractTableItem = {
   price: number;
   startedAt: string;
   endedAt: string;
+  preferExchange?: boolean;
   filter?: RateFilter;
 };
