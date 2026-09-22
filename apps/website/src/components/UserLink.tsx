@@ -52,7 +52,7 @@ const CopyButton: React.FC<{ id: number; username: string }> = ({ id, username }
         e.preventDefault();
         navigator.clipboard.writeText(id.toString()).then(() => {
           toast.info(
-            `${username}'s ID coppied to clipboard, paste this into user search when sending the quest or creating an exchange.`,
+            `${username}'s ID copied to clipboard, paste this into user search when sending the quest or creating an exchange.`,
           );
         });
       }}

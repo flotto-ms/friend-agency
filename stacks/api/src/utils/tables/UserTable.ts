@@ -37,7 +37,7 @@ const updateDetails = async (id: number, username?: string, country?: string) =>
     Key: { id },
     TableName: process.env.USER_TABLE!,
     Attrs: Object.fromEntries(Object.entries({ username, country }).filter(([, value]) => value !== undefined)),
-    Upsert: false,
+    Upsert: true,
   });
 };
 

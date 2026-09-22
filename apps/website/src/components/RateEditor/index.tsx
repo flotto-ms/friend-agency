@@ -52,7 +52,9 @@ const RateEditor: React.FC = () => {
   }, [slice, selectedGroup]);
 
   const selectedRateIds = useMemo(() => {
-    return Object.keys(selectedRows).map((key) => rates[parseInt(key)].id);
+    return Object.keys(selectedRows)
+      .map((key) => rates[parseInt(key)]?.id)
+      .filter((id) => typeof id !== "undefined");
   }, [rates, selectedRows]);
 
   const onGroupEnable = (enabled: boolean) => {

@@ -64,7 +64,9 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
   const [amount, setAmount] = useState(rate?.rate ?? 150);
   const [enabled, setEnabled] = useState(rate?.enabled ?? false);
   const [preferExchange, setpreferExchange] = useState(rate?.preferExchange ?? false);
-  const [groups, setGroups] = useState(rate?.groups ?? (selectedGroup ? [selectedGroup] : []));
+  const [groups, setGroups] = useState(
+    rate?.groups ?? (selectedGroup && selectedGroup !== "all" ? [selectedGroup] : []),
+  );
   const [filters, setFilters] = useState<RateFilter>(rate?.filters ?? {});
 
   useEffect(() => {

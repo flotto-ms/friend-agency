@@ -27,7 +27,7 @@ export const fetchRates = async (userId?: number) => {
       rate: rate.amount,
       enabled: rate.enabled,
       stopping: false,
-      groups: rate.groups ?? [],
+      groups: rate.groups?.filter((g: string) => g !== "all") ?? [],
       preferExchange: rate.preferExchange ?? false,
       filters: rate.filter,
       filter: rate.filter ? getFilterDescription(rate) : undefined,
@@ -38,7 +38,6 @@ export const fetchRates = async (userId?: number) => {
 };
 
 export const postSaveRate = async (rate: RateItem) => {
-  console.log(rate);
   const { id, description, stopping, stopDate, filter, ...rest } = rate;
   const payload = {
     type: rest.type,

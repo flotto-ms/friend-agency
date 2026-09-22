@@ -33,53 +33,61 @@ const QuestSearchTable: React.FC<{
   };
 
   return (
-    <div className="w-full">
-      <h1 className="text-3xl font-semibold text-center mb-6">Available Quests</h1>
-      {table.getRowModel().rows?.length ? (
-        <>
-          <FieldLabel htmlFor="switch-exchange-mode" className="mb-6 inline-block max-w-fit">
-            <Field orientation="horizontal" className="max-w-sm">
-              <FieldContent>
-                <FieldTitle>Hide Exhange Only</FieldTitle>
-              </FieldContent>
-              <Switch
-                id="switch-exchange-mode"
-                checked={hideExchangeOnly}
-                onClick={() => onChangeHideExchangeOnly(!hideExchangeOnly)}
-              />
-            </Field>
-          </FieldLabel>
-          <div className="overflow-hidden rounded-md border">
-            <Table>
-              <TableHeader className="bg-muted">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <TableHead key={header.id}>
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(header.column.columnDef.header, header.getContext())}
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} width={cell.column.columnDef.size}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+    <div className="w-full max-w-300">
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold">Available Quests</h1>
+          <p className="text-sm text-muted-foreground mt-2">Match your quests with available contractors.</p>
+        </div>
+        <div className="flex max-w-sm items-end  gap-2">
+          <div className="flex-1 min-w-[250px]">
+            {table.getRowModel().rows?.length && (
+              <FieldLabel htmlFor="switch-exchange-mode">
+                <Field orientation="horizontal" className="max-w-sm">
+                  <FieldContent>
+                    <FieldTitle>Hide Exhange Only</FieldTitle>
+                  </FieldContent>
+                  <Switch
+                    id="switch-exchange-mode"
+                    checked={hideExchangeOnly}
+                    onClick={() => onChangeHideExchangeOnly(!hideExchangeOnly)}
+                  />
+                </Field>
+              </FieldLabel>
+            )}
           </div>
-        </>
+        </div>
+      </div>
+
+      {table.getRowModel().rows?.length ? (
+        <div className="overflow-hidden rounded-md border">
+          <Table>
+            <TableHeader className="bg-muted">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} width={cell.column.columnDef.size}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       ) : (
         <Card className="mb-6 max-md:hidden">
           <CardHeader>

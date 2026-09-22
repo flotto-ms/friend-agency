@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ContractCard from "@/components/ContractCard";
 import api from "@/lib/api";
@@ -16,6 +14,7 @@ import {
 import AvailableBadge from "@/components/badges/AvailableBadge";
 import UserLink from "@/components/UserLink";
 import { getType } from "@/data/authSlice";
+import ContractList from "@/components/lists/ContractList";
 
 type UserSummary = {
   id: number;
@@ -28,6 +27,7 @@ type UserSummary = {
 
 export default function ParticipantPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const id = Number(params?.id);
   const dispatch = useAppDispatch();
 
@@ -92,11 +92,11 @@ export default function ParticipantPage() {
 
   return (
     <Centered>
-      <div className="w-full max-w-6xl space-y-8">
+      <div className="w-full max-w-300 space-y-8">
         <div className="mb-6">
-          <Link href="/fqa/participants" className="text-sm text-muted-foreground hover:text-foreground">
+          <button onClick={() => router.back()} className="text-sm text-muted-foreground hover:text-foreground">
             ← Back to participants
-          </Link>
+          </button>
         </div>
 
         <Card>
@@ -121,19 +121,7 @@ export default function ParticipantPage() {
         {user.access === "contractor" && activeStatus === "loaded" && (
           <div>
             <h2 className="text-2xl font-semibold tracking-tight mb-4">Active Contracts</h2>
-            {userContracts.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center text-sm text-muted-foreground">
-                  No active contracts for this user.
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {userContracts.map((card) => (
-                  <ContractCard key={card.id} contract={card} href={`/fqa/contracts/${encodeURIComponent(card.id)}`} />
-                ))}
-              </div>
-            )}
+            <ContractList cards={userContracts} empty="No active contracts for this user." />
           </div>
         )}
       </div>
@@ -143,8 +131,8 @@ export default function ParticipantPage() {
 
 const Centered: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
-    <div className="flex min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black py-8">
-      <main className="flex min-h-screen w-full max-w-[1200px] flex-col items-center px-8 bg-white dark:bg-black">
+    <div className="flex min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black">
+      <main className="flex min-h-screen w-full flex-col items-center py-12 px-8 bg-white dark:bg-black">
         {children}
       </main>
     </div>

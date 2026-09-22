@@ -45,6 +45,8 @@ export const updateRate = async (
     current.preferExchange !== next.preferExchange ||
     JSON.stringify(current.filter ?? null) !== JSON.stringify(next.filter ?? null);
 
+  const updateObj = next.groups ? { ...next, groups: new Set(next.groups) } : next;
+
   const command = new UpdateCommand({
     TableName: process.env.USER_TABLE!,
     Key: { id: user.id },
@@ -54,7 +56,7 @@ export const updateRate = async (
       "#rateId": rateId,
     },
     ExpressionAttributeValues: {
-      ":rate": next,
+      ":rate": updateObj,
     },
   });
   console.log(command.input);

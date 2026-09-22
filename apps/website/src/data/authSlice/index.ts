@@ -1,5 +1,6 @@
 import { createAppSlice } from "../createAppSlice";
 import api from "../../lib/api";
+import { tokenDecode } from "@/lib/jwtdecode";
 
 export interface AuthSliceState {
   status: "unauthorized" | "loading" | "authorized";
@@ -43,6 +44,7 @@ export const authSlice = createAppSlice({
           state.country = action.payload.country;
           state.access = action.payload.access;
           state.type = getType(action.payload.access);
+          state.isAdmin = tokenDecode(action.meta.arg)?.admin ?? false;
         },
       },
     ),

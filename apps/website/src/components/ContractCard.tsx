@@ -23,7 +23,7 @@ const formatDate = (value?: string) => {
   }).format(date);
 };
 
-type ContractCardProps = {
+export type ContractCardProps = {
   contract: {
     id: string;
     userId: number;

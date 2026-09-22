@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
@@ -40,6 +39,7 @@ const formatDate = (value?: string) => {
 
 export default function ContractHistoryPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const id = decodeURIComponent(String(params?.id ?? ""));
   const dispatch = useAppDispatch();
   const history = useAppSelector(selectContractHistory);
@@ -111,11 +111,11 @@ export default function ContractHistoryPage() {
 
   return (
     <Centered>
-      <div className="w-full max-w-6xl">
+      <div className="w-full max-w-300">
         <div className="mb-6">
-          <Link href="/fqa/contracts" className="text-sm text-muted-foreground hover:text-foreground">
+          <button onClick={() => router.back()} className="text-sm text-muted-foreground hover:text-foreground">
             ← Back to active contracts
-          </Link>
+          </button>
         </div>
 
         {selectedContract && (
@@ -222,8 +222,8 @@ export default function ContractHistoryPage() {
 
 const Centered: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
-    <div className="flex min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black py-8">
-      <main className="flex min-h-screen w-full max-w-[1200px] flex-col items-center justify-between py-16 px-8 bg-white dark:bg-black">
+    <div className="flex min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black">
+      <main className="flex min-h-screen w-full flex-col items-center justify-between py-12 px-8 bg-white dark:bg-black">
         {children}
       </main>
     </div>

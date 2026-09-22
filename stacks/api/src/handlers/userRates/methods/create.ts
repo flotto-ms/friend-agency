@@ -12,7 +12,7 @@ export const createRate = async (user: UserTableItem, rate: Rate) => {
 
   const obj = {
     ...rate,
-    groups: rate.groups ? [...new Set(rate.groups)] : undefined,
+    groups: rate.groups ? new Set(rate.groups) : undefined,
   };
 
   if (!rate.groups || rate.groups.length === 0) {

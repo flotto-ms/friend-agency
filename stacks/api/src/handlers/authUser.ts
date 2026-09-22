@@ -63,13 +63,19 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
     const token = (
       await Promise.all([
-        JwtUtils.create(data.userId, false),
+        UserTable.getUser(data.userId).then((u) => {
+          return u ? JwtUtils.create(u.id, u.admin ?? false) : undefined;
+        }),
         DynamoDbUtils.deleteItem({
           Key: { userId: data.userId },
           TableName: process.env.AUTH_TABLE!,
         }),
       ])
     )[0];
+
+    if (!token) {
+      return Response.error();
+    }
 
     return {
       statusCode: 200,

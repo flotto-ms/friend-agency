@@ -13,6 +13,7 @@ import {
   selectActiveContractsStatus,
 } from "@/data/activeContractsSlice";
 import { loadContractorsAction, selectContractors, selectContractorsStatus } from "@/data/contractorsSlice";
+import ContractList from "@/components/lists/ContractList";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -52,8 +53,6 @@ function ContractsPageContent() {
     const type = Number(searchParams.get("type") ?? "0");
     return Number.isFinite(type) && type > 0 ? type : 0;
   });
-  const [page, setPage] = useState(0);
-  const pageSize = 12;
   const dispatch = useAppDispatch();
   const activeContracts = useAppSelector(selectActiveContracts);
   const contractors = useAppSelector(selectContractors);
@@ -104,9 +103,6 @@ function ContractsPageContent() {
       });
   }, [activeContracts, contractors, questTypeFilter]);
 
-  const totalPages = Math.ceil(cards.length / pageSize);
-  const paginatedCards = cards.slice(page * pageSize, (page + 1) * pageSize);
-
   if (activeStatus !== "loaded" || contractorsStatus !== "loaded") {
     return (
       <Centered>
@@ -117,7 +113,7 @@ function ContractsPageContent() {
 
   return (
     <Centered>
-      <div className="w-full max-w-6xl">
+      <div className="w-full max-w-300">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">Active Contracts</h1>
@@ -125,60 +121,12 @@ function ContractsPageContent() {
           </div>
           <div className="flex max-w-sm items-end gap-2">
             <div className="flex-1 min-w-[250px]">
-              <QuestTypeSelect
-                allowAll
-                value={questTypeFilter}
-                onChange={(v) => {
-                  setQuestTypeFilter(v);
-                  setPage(0);
-                }}
-              />
+              <QuestTypeSelect allowAll value={questTypeFilter} onChange={(v) => setQuestTypeFilter(v)} />
             </div>
           </div>
         </div>
 
-        {cards.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center text-sm text-muted-foreground">
-              No active contracts right now.
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="flex flex-col gap-6 w-full">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {paginatedCards.map((card) => (
-                <ContractCard key={card.id} contract={card} href={`/fqa/contracts/${encodeURIComponent(card.id)}`} />
-              ))}
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Showing {page * pageSize + 1} to {Math.min((page + 1) * pageSize, cards.length)} of {cards.length}{" "}
-                  contracts
-                </p>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.max(0, p - 1))}
-                    disabled={page === 0}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                    disabled={page >= totalPages - 1}
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        <ContractList cards={cards} />
       </div>
     </Centered>
   );
@@ -186,8 +134,8 @@ function ContractsPageContent() {
 
 const Centered: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
-    <div className="flex min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black py-8">
-      <main className="flex min-h-screen w-full max-w-[1200px] flex-col items-center justify-between px-8 bg-white dark:bg-black">
+    <div className="flex min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black">
+      <main className="flex min-h-screen w-full flex-col items-center justify-between py-12 px-8 bg-white dark:bg-black">
         {children}
       </main>
     </div>

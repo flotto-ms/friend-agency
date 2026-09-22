@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import ContractCard from "@/components/ContractCard";
@@ -16,6 +15,7 @@ import { loadContractorsAction, selectContractors, selectContractorsStatus } fro
 import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searchSlice";
 import { getMatchingContract } from "@/lib/ContractFilter";
 import { selectAuth } from "@/data/authSlice";
+import ContractList from "@/components/lists/ContractList";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -37,6 +37,7 @@ const formatDate = (value?: string) => {
 
 export default function SearchQuestPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const questId = Number(params.id);
   const dispatch = useAppDispatch();
   const activeContracts = useAppSelector(selectActiveContracts);
@@ -94,22 +95,23 @@ export default function SearchQuestPage() {
   }
 
   return (
-    <div className="flex min-h-screen justify-center bg-zinc-50 px-4 py-8 font-sans dark:bg-black">
-      <main className="w-full max-w-6xl">
+    <div className="flex min-h-screen justify-center bg-zinc-50 px-8 py-12 font-sans dark:bg-black">
+      <main className="w-full max-w-300">
+        <div className="mb-6">
+          <button onClick={() => router.back()} className="text-sm text-muted-foreground hover:text-foreground">
+            ← Back to search
+          </button>
+        </div>
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm text-muted-foreground">Quest search</p>
             <h1 className="text-3xl font-semibold">
               {selectedQuest
                 ? `L${selectedQuest.level}${selectedQuest.elite ? "E" : ""} ${selectedQuest.description}`
                 : "Quest"}
             </h1>
+            <p className="text-sm text-muted-foreground">Available contracts that match this quest</p>
           </div>
-          <Link href="/fqa/search" className="text-sm text-primary underline-offset-4 hover:underline">
-            Back to search
-          </Link>
         </div>
-
         {cards.length === 0 ? (
           <Card>
             <CardHeader>
@@ -118,11 +120,7 @@ export default function SearchQuestPage() {
             </CardHeader>
           </Card>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {cards.map((card) => (
-              <ContractCard key={card.id} contract={card} href={`/fqa/contracts/${encodeURIComponent(card.id)}`} />
-            ))}
-          </div>
+          <ContractList cards={cards} />
         )}
       </main>
     </div>
