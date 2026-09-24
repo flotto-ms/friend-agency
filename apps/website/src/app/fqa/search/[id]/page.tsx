@@ -116,7 +116,7 @@ export default function SearchQuestPage() {
           <Card>
             <CardHeader>
               <CardTitle>No matches</CardTitle>
-              <CardDescription>There are no active contracts for this quest right now.</CardDescription>
+              <CardDescription>There are no available offsers for this quest right now.</CardDescription>
             </CardHeader>
           </Card>
         ) : (

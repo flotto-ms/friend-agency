@@ -37,7 +37,7 @@ export const createRate = async (user: UserTableItem, rate: Rate) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ id: rateId, ...obj }),
+      body: JSON.stringify({ id: rateId, ...obj, groups: obj.groups ? [...obj.groups] : [] }),
     };
   }
 
@@ -65,6 +65,6 @@ export const createRate = async (user: UserTableItem, rate: Rate) => {
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ id: rateId, ...obj }),
+    body: JSON.stringify({ id: rateId, ...obj, groups: obj.groups ? [...obj.groups] : [] }),
   };
 };

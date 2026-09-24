@@ -94,7 +94,7 @@ export default function ContractHistoryPage() {
   if (historyStatus !== "loaded" || contractorsStatus !== "loaded") {
     return (
       <Centered>
-        <div>Loading contract history...</div>
+        <div>Loading history...</div>
       </Centered>
     );
   }
@@ -103,7 +103,7 @@ export default function ContractHistoryPage() {
     return (
       <Centered>
         <div className="w-full max-w-4xl rounded-lg border bg-card p-12 text-center text-muted-foreground">
-          No contract history found for this rate.
+          No history found for this offer.
         </div>
       </Centered>
     );
@@ -114,7 +114,7 @@ export default function ContractHistoryPage() {
       <div className="w-full max-w-300">
         <div className="mb-6">
           <button onClick={() => router.back()} className="text-sm text-muted-foreground hover:text-foreground">
-            ← Back to active contracts
+            ← Back to offers
           </button>
         </div>
 
@@ -131,9 +131,7 @@ export default function ContractHistoryPage() {
                 />
                 <AvailableBadge available={contractor?.available} />
               </div>
-              <CardDescription>
-                Contract history for {getQuestDescription(String(selectedContract.type))}
-              </CardDescription>
+              <CardDescription>History for {getQuestDescription(String(selectedContract.type))}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex items-center justify-between gap-2">

@@ -38,7 +38,7 @@ export default function ContractsPage() {
     <Suspense
       fallback={
         <Centered>
-          <div>Loading active contracts...</div>
+          <div>Loading offers...</div>
         </Centered>
       }
     >
@@ -106,7 +106,7 @@ function ContractsPageContent() {
   if (activeStatus !== "loaded" || contractorsStatus !== "loaded") {
     return (
       <Centered>
-        <div>Loading active contracts...</div>
+        <div>Loading current offers...</div>
       </Centered>
     );
   }
@@ -116,8 +116,8 @@ function ContractsPageContent() {
       <div className="w-full max-w-300">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold">Active Contracts</h1>
-            <p className="text-sm text-muted-foreground mt-2">Live rates currently in force for contractors.</p>
+            <h1 className="text-3xl font-semibold">Current Offers</h1>
+            <p className="text-sm text-muted-foreground mt-2">Current offers available by our contractors.</p>
           </div>
           <div className="flex max-w-sm items-end gap-2">
             <div className="flex-1 min-w-[250px]">

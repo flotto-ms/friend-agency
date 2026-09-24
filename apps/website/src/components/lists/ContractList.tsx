@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 
 const ContractList: React.FC<{ cards: ContractCardProps["contract"][]; empty?: string }> = ({
   cards,
-  empty = "No active contracts right now.",
+  empty = "No offers right now.",
 }) => {
   const [page, setPage] = useState(0);
   useEffect(() => setPage(0), [cards]);

@@ -106,7 +106,7 @@ export const generateColumns = (onRateDelete?: (id: string) => void) => {
                 Edit Rate
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/fqa/contracts/${encodeURIComponent(contractKey)}`}>Contract History</Link>
+                <Link href={`/fqa/contracts/${encodeURIComponent(contractKey)}`}>Offer History</Link>
               </DropdownMenuItem>
               <Separator />
               {onRateDelete && (

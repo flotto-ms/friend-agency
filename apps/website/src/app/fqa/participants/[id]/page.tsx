@@ -149,8 +149,8 @@ export default function ParticipantPage() {
 
         {user.access === "contractor" && activeStatus === "loaded" && (
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight mb-4">Active Contracts</h2>
-            <ContractList cards={userContracts} empty="No active contracts for this user." />
+            <h2 className="text-2xl font-semibold tracking-tight mb-4">Current Offers</h2>
+            <ContractList cards={userContracts} empty="No offers are currently available for this contractor." />
           </div>
         )}
       </div>

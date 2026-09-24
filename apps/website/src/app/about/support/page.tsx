@@ -6,6 +6,6 @@ export const metadata: Metadata = {
 };
 
 const Page: React.FC = () => {
-  return <div className=" mx-auto max-w-[500px] p-6">Suport Page</div>;
+  return <div className=" mx-auto max-w-[500px] p-6">Support Page</div>;
 };
 export default Page;

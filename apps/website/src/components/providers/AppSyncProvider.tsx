@@ -3,7 +3,7 @@
 import { addContractAction, removeContractAction, selectActiveContractsStatus } from "@/data/activeContractsSlice";
 import { type PropsWithChildren, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
-import { updateContractor } from "@/data/contractorsSlice";
+import { selectContractorsStatus, updateContractor } from "@/data/contractorsSlice";
 
 const contractEventsChannel = "contracts/updates";
 
@@ -15,11 +15,13 @@ const getBase64URLEncoded = (authorization: any) => {
 };
 
 export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const status = useAppSelector(selectActiveContractsStatus);
+  const contractStatus = useAppSelector(selectActiveContractsStatus);
+  const contractorStatus = useAppSelector(selectContractorsStatus);
+  const listenForChanges = contractStatus !== "init" || contractorStatus !== "init";
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (typeof window === "undefined" || status !== "loaded") {
+    if (typeof window === "undefined" || !listenForChanges) {
       return;
     }
 
@@ -97,7 +99,7 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
     return () => {
       socket?.close();
     };
-  }, [dispatch, status]);
+  }, [dispatch, listenForChanges]);
 
   return <>{children}</>;
 };
