@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import JwtUtils from "./JwtUtils";
+import { JwtPayload } from "jsonwebtoken";
 
 const getUserId = async (event: APIGatewayProxyEvent): Promise<number | undefined> => {
   const id = event.pathParameters?.id;
@@ -28,6 +29,22 @@ const getUserId = async (event: APIGatewayProxyEvent): Promise<number | undefine
   throw new Error("Invalid Token");
 };
 
+const isAdmin = async (event: APIGatewayProxyEvent) => {
+  const header = event.headers["Authorization"];
+  if (!header) {
+    return false;
+  }
+
+  const token = header.replace("Bearer ", "");
+  const claims = await JwtUtils.verify(token);
+  if (!claims) {
+    return false;
+  }
+
+  return Boolean((claims as JwtPayload).admin) ?? false;
+};
+
 export default {
   getUserId,
+  isAdmin,
 };

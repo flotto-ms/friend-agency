@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import ContractCard from "@/components/ContractCard";
 import api from "@/lib/api";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
 import {
@@ -13,8 +12,9 @@ import {
 } from "@/data/activeContractsSlice";
 import AvailableBadge from "@/components/badges/AvailableBadge";
 import UserLink from "@/components/UserLink";
-import { getType } from "@/data/authSlice";
+import { getType, selectAuth } from "@/data/authSlice";
 import ContractList from "@/components/lists/ContractList";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type UserSummary = {
   id: number;
@@ -30,6 +30,7 @@ export default function ParticipantPage() {
   const router = useRouter();
   const id = Number(params?.id);
   const dispatch = useAppDispatch();
+  const auth = useAppSelector(selectAuth);
 
   const [user, setUser] = useState<UserSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,6 +73,23 @@ export default function ParticipantPage() {
       }));
   }, [activeContracts, id, user]);
 
+  const handleAvailabilityChange = (value: string) => {
+    const isAvailable = value === "available";
+    // Optimistically update the UI to feel responsive
+    setUser((prev) => (prev ? { ...prev, available: isAvailable } : null));
+
+    api.user
+      .update({ available: isAvailable }, String(id))
+      .then((updatedUser) => {
+        setUser((prev) => (prev ? { ...prev, available: updatedUser.available } : null));
+      })
+      .catch((err) => {
+        console.error("Failed to update user availability", err);
+        // Revert on error
+        setUser((prev) => (prev ? { ...prev, available: !isAvailable } : null));
+      });
+  };
+
   if (loading) {
     return (
       <Centered>
@@ -111,10 +129,21 @@ export default function ParticipantPage() {
                     href={`https://minesweeper.online/player/${user.id}`}
                   />
                 </CardTitle>
-                <AvailableBadge available={user.available} />
+
+                {user.access === "contractor" &&
+                  (auth.isAdmin ? (
+                    <Tabs value={user.available ? "available" : "busy"} onValueChange={handleAvailabilityChange}>
+                      <TabsList>
+                        <TabsTrigger value="available">Available</TabsTrigger>
+                        <TabsTrigger value="busy">Busy</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  ) : (
+                    <AvailableBadge available={user.available} />
+                  ))}
               </div>
             </div>
-            <CardDescription>{getType(user.access)}</CardDescription>
+            <CardDescription>{getType(user.access ?? "member")}</CardDescription>
           </CardHeader>
         </Card>
 

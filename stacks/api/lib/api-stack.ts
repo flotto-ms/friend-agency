@@ -217,10 +217,6 @@ export class ApiStack extends Stack {
       },
     });
 
-    contractEventsApi.grantPublish(postUserAvailabilityLambda);
-    contractEventsApi.grantPublish(postUserRatesLambda);
-    contractEventsApi.grantPublish(userRatesLambda);
-
     const postUserQuestsLambda = new NodejsFunction(this, "PostUserQuestsLambda", {
       entry: "src/handlers/postUserQuests.ts",
       bundling: { bundleAwsSDK: true },
@@ -270,6 +266,7 @@ export class ApiStack extends Stack {
       environment: {
         USER_TABLE: userTable.tableName,
         CONFIG_BUCKET: configBucket.bucketName,
+        APPSYNC_CONTRACT_EVENTS_URL: `https://${contractEventsApi.httpDns}`,
       },
     });
 
@@ -337,6 +334,11 @@ export class ApiStack extends Stack {
     configBucket.grantReadWrite(userGroupsLambda);
     configBucket.grantReadWrite(userRatesLambda);
     configBucket.grantReadWrite(getUserTransactionsLambda);
+
+    contractEventsApi.grantPublish(getUsersLambda);
+    contractEventsApi.grantPublish(postUserAvailabilityLambda);
+    contractEventsApi.grantPublish(postUserRatesLambda);
+    contractEventsApi.grantPublish(userRatesLambda);
 
     /**
      * API Gayteway

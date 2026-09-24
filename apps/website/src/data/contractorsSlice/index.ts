@@ -1,3 +1,4 @@
+import { PayloadAction } from "@reduxjs/toolkit";
 import { createAppSlice } from "../createAppSlice";
 import api from "@/lib/api";
 
@@ -5,7 +6,6 @@ export type ContractorUser = {
   id: number;
   username: string;
   country: string;
-  contractor: boolean;
   slots?: number;
   available?: boolean;
 };
@@ -41,6 +41,9 @@ export const contractorsSlice = createAppSlice({
         state.status = "failed";
       },
     }),
+    updateContractor: create.reducer((state, action: PayloadAction<ContractorUser>) => {
+      state.contractors = [...state.contractors.filter((u) => u.id !== action.payload.id), action.payload];
+    }),
   }),
   selectors: {
     selectContractors: (state) => state.contractors,
@@ -48,5 +51,5 @@ export const contractorsSlice = createAppSlice({
   },
 });
 
-export const { loadContractors: loadContractorsAction } = contractorsSlice.actions;
+export const { loadContractors: loadContractorsAction, updateContractor } = contractorsSlice.actions;
 export const { selectContractors, selectContractorsStatus } = contractorsSlice.selectors;

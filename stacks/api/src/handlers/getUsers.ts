@@ -3,6 +3,7 @@ import { getItems } from "../utils/DynamoDbUtils";
 import { SeasonAccess, UserTableItem } from "@flotto/types";
 import UserTable from "../utils/tables/UserTable";
 import RequestUtils from "../utils/RequestUtils";
+import ResponseUtils from "../utils/ResponseUtils";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const id = await RequestUtils.getUserId(event).catch((ex) => {
@@ -24,16 +25,31 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         body: JSON.stringify({ message: "A current user is required" }),
       };
     }
-
     const data = JSON.parse(event.body ?? "{}");
-    if (data.access !== "supplier" && data.access !== "contractor") {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "Invalid access" }),
-      };
+    let user: UserTableItem | undefined = undefined;
+
+    if (data.access) {
+      if (data.access !== "supplier" && data.access !== "contractor") {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ message: "Invalid access" }),
+        };
+      }
+
+      user = await UserTable.updateAccess(id, data.access);
     }
 
-    const user = await UserTable.updateAccess(id, data.access);
+    if (typeof data.available === "boolean") {
+      const isAdmin = await RequestUtils.isAdmin(event);
+      if (isAdmin) {
+        user = await UserTable.updateAvailability(id, data.available);
+      }
+    }
+
+    if (!user) {
+      return ResponseUtils.noContent();
+    }
+
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },

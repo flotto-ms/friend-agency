@@ -75,7 +75,7 @@ export const createUpdateCommand = (Key: Record<string, any>, TableName: string,
     .map(([key]) => key);
 
   const toUpdate = Object.entries(attrs)
-    .filter(([_, val]) => val !== null)
+    .filter(([_, val]) => val !== null && typeof val !== "undefined")
     .map(([key, value]) => ({ key, value }));
 
   let conditionExpression: string = "";

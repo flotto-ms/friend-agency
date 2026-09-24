@@ -3,6 +3,7 @@
 import { addContractAction, removeContractAction, selectActiveContractsStatus } from "@/data/activeContractsSlice";
 import { type PropsWithChildren, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/data/hooks";
+import { updateContractor } from "@/data/contractorsSlice";
 
 const contractEventsChannel = "contracts/updates";
 
@@ -76,10 +77,17 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
           return;
         }
 
-        if (contractEvent.eventType === "contract_ended") {
-          dispatch(removeContractAction(contractEvent.contract));
-        } else if (contractEvent.eventType === "contract_started") {
-          dispatch(addContractAction(contractEvent.contract));
+        switch (contractEvent.eventType) {
+          case "contract_started":
+            dispatch(addContractAction(contractEvent.contract));
+            break;
+          case "contract_ended":
+            dispatch(removeContractAction(contractEvent.contract));
+            break;
+          case "contractor_updated":
+          case "contractor_created":
+            dispatch(updateContractor(contractEvent.contractor));
+            break;
         }
       } catch {
         // Ignore non-JSON or malformed payloads.

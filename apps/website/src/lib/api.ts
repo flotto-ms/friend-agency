@@ -37,9 +37,9 @@ const getUser = async (id: string = "current") => {
   return fetch(`/api/users/${id}`, withAuth()).then((r) => r.json());
 };
 
-const updateUser = async (user: Record<string, unknown>) => {
+const updateUser = async (user: Record<string, unknown>, id: string = "current") => {
   return fetch(
-    `/api/users/current`,
+    `/api/users/${id}`,
     withAuth({
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
