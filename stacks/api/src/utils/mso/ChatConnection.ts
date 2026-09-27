@@ -52,7 +52,8 @@ export const createConnection = async (type: TokenType) => {
         const obj = JSON.parse(m.data.substring(2));
         const processQueue = () => {
           const item = queue[0];
-          socket.send(`42["request",["CreateChannelWS",${JSON.stringify({ widhtUserId: item.userId })},0,${build}]]`);
+          const msg = `42["request",["CreateChannelWS",${JSON.stringify({ withUserId: item.userId })},0,${build}]]`;
+          socket.send(msg);
         };
 
         const controller: ChatConnection = {
@@ -79,7 +80,18 @@ export const createConnection = async (type: TokenType) => {
         } else if (obj[1][1] === "NewChannelEvent") {
           const response = obj[1][2] as any[];
           const item = queue[0];
-          if (response.length > 0 && (response[0].user1Id == item.userId || response[0].user2Id == item.userId)) {
+          if (response.length > 0 && response[0] === null) {
+            const item = queue[0];
+            item.sendError(new Error("User not found"));
+            queue.shift();
+            if (queue.length > 0) {
+              user = undefined;
+              processQueue();
+            }
+          } else if (
+            response.length > 0 &&
+            (response[0].user1Id == item.userId || response[0].user2Id == item.userId)
+          ) {
             const channel = response[0];
             if (channel.user1Id == item.userId) {
               user = {
@@ -100,21 +112,23 @@ export const createConnection = async (type: TokenType) => {
 
             socket.send(`42["request",["SendMessageWS",${sendPayload},0,${build}]]`);
             socket.send(`42["request",["CloseChannelWS",${closePayload},0,${build}]]`);
-          } else if (obj[1][1] === "NewMessageEvent") {
-            const response = obj[1][2] as any[];
-            const item = queue[0];
-            item.sent({
-              user: user!,
-              message: response[0],
-            });
-            queue.shift();
-            if (queue.length > 0) {
-              user = undefined;
-              processQueue();
-            }
-          } else {
-            console.log("response", response);
           }
+        } else if (obj[1][1] === "NewMessageEvent") {
+          const response = obj[1][2] as any[];
+          const item = queue[0];
+          const message = response[0];
+
+          item.sent({
+            user: user!,
+            message,
+          });
+          queue.shift();
+          if (queue.length > 0) {
+            user = undefined;
+            processQueue();
+          }
+        } else {
+          console.log("response", obj);
         }
       }
     };
