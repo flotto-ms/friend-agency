@@ -15,6 +15,7 @@ import UserLink from "@/components/UserLink";
 import { getType, selectAuth } from "@/data/authSlice";
 import ContractList from "@/components/lists/ContractList";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useViewSelector } from "@/components/tabs/ContractView";
 
 type UserSummary = {
   id: number;
@@ -90,6 +91,8 @@ export default function ParticipantPage() {
       });
   };
 
+  const { view, component: viewSelector } = useViewSelector();
+
   if (loading) {
     return (
       <Centered>
@@ -149,8 +152,15 @@ export default function ParticipantPage() {
 
         {user.access === "contractor" && activeStatus === "loaded" && (
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight mb-4">Current Offers</h2>
-            <ContractList cards={userContracts} empty="No offers are currently available for this contractor." />
+            <div className="flex flex-row">
+              <h2 className="text-2xl flex-1 font-semibold tracking-tight mb-4">Current Offers</h2>
+              {viewSelector}
+            </div>
+            <ContractList
+              view={view}
+              cards={userContracts}
+              empty="No offers are currently available for this contractor."
+            />
           </div>
         )}
       </div>

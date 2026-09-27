@@ -1,6 +1,7 @@
 import { Rate, SeasonAccess, UserTableItem } from "@flotto/types";
 import DynamoDbUtils, { createClient, getItem } from "../DynamoDbUtils";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { AppSyncUtility } from "../AppSyncUtility";
 
 const getUser = (id: number) => {
   return getItem<UserTableItem>({
@@ -48,12 +49,32 @@ const updateAccess = async (id: number, access: string) => {
     return user;
   }
 
-  return DynamoDbUtils.updateItem({
+  const updatedUser = await DynamoDbUtils.updateItem<UserTableItem>({
     Key: { id },
     TableName: process.env.USER_TABLE!,
     Attrs: { access },
     Upsert: false,
   });
+
+  if (updatedUser) {
+    await AppSyncUtility.publishContractorEvent("contractor_created", updatedUser);
+  }
+
+  return updatedUser;
+};
+
+const updateAvailability = async (id: number, available: boolean, slots?: number) => {
+  const user = await DynamoDbUtils.updateItem<UserTableItem>({
+    Key: { id },
+    TableName: process.env.USER_TABLE!,
+    Attrs: { available, slots },
+    Upsert: false,
+  });
+
+  if (user) {
+    await AppSyncUtility.publishContractorEvent("contractor_updated", user);
+  }
+  return user;
 };
 
 const updateRates = async (userId: number, rates: [string, Rate][]) => {
@@ -107,5 +128,6 @@ export default {
   getUsers,
   updateDetails,
   updateAccess,
+  updateAvailability,
   updateRates,
 };

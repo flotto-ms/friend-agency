@@ -16,6 +16,7 @@ import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searc
 import { getMatchingContract } from "@/lib/ContractFilter";
 import { selectAuth } from "@/data/authSlice";
 import ContractList from "@/components/lists/ContractList";
+import { useViewSelector } from "@/components/tabs/ContractView";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -86,6 +87,8 @@ export default function SearchQuestPage() {
       });
   }, [activeContracts, contractors, questId, selectedQuest]);
 
+  const { view, component: viewSelector } = useViewSelector();
+
   if (activeStatus !== "loaded" || contractorsStatus !== "loaded" || searchStatus !== "loaded") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
@@ -102,15 +105,16 @@ export default function SearchQuestPage() {
             ← Back to search
           </button>
         </div>
-        <div className="mb-6 flex items-center justify-between gap-3">
+        <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">
               {selectedQuest
                 ? `L${selectedQuest.level}${selectedQuest.elite ? "E" : ""} ${selectedQuest.description}`
                 : "Quest"}
             </h1>
-            <p className="text-sm text-muted-foreground">Available contracts that match this quest</p>
+            <p className="text-sm text-muted-foreground mt-2">Current offers that match this quest.</p>
           </div>
+          <div className="flex max-w-sm items-end gap-2">{viewSelector}</div>
         </div>
         {cards.length === 0 ? (
           <Card>
@@ -120,7 +124,7 @@ export default function SearchQuestPage() {
             </CardHeader>
           </Card>
         ) : (
-          <ContractList cards={cards} />
+          <ContractList view={view} cards={cards} />
         )}
       </main>
     </div>

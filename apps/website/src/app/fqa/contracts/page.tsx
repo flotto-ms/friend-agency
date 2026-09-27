@@ -14,6 +14,7 @@ import {
 } from "@/data/activeContractsSlice";
 import { loadContractorsAction, selectContractors, selectContractorsStatus } from "@/data/contractorsSlice";
 import ContractList from "@/components/lists/ContractList";
+import { useViewSelector } from "@/components/tabs/ContractView";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -103,6 +104,8 @@ function ContractsPageContent() {
       });
   }, [activeContracts, contractors, questTypeFilter]);
 
+  const { view, component: viewSelector } = useViewSelector();
+
   if (activeStatus !== "loaded" || contractorsStatus !== "loaded") {
     return (
       <Centered>
@@ -123,10 +126,11 @@ function ContractsPageContent() {
             <div className="flex-1 min-w-[250px]">
               <QuestTypeSelect allowAll value={questTypeFilter} onChange={(v) => setQuestTypeFilter(v)} />
             </div>
+            {viewSelector}
           </div>
         </div>
 
-        <ContractList cards={cards} />
+        <ContractList view={view} cards={cards} />
       </div>
     </Centered>
   );

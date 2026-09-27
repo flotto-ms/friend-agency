@@ -82,7 +82,7 @@ const data = {
           url: "/fqa/auctions",
         },*/
         {
-          title: "Avalilable Offers",
+          title: "Current Offers",
           url: "/fqa/contracts",
         },
         {

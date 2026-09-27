@@ -3,6 +3,7 @@ import TokenUtils, { TokenType } from "../TokenUtils";
 export type MainConnection = {
   getQuests: () => Promise<any>;
   getSendQuestData: (userId: number) => Promise<any>;
+  getNewExchangeData: (buyerId: number) => Promise<any>;
   close: () => void;
 };
 
@@ -45,6 +46,7 @@ export const createConnection = async (type: TokenType) => {
       const controller: MainConnection = {
         getQuests: () => queueRequest("GetQuestsWS"),
         getSendQuestData: (userId: number) => queueRequest("GetSendQuestDataWS", { userId }),
+        getNewExchangeData: (buyerId: number) => queueRequest("GetNewExchangeDataWS", { buyerId }),
         close: () => socket.close(),
       };
       return controller;
