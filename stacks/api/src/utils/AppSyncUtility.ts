@@ -7,9 +7,12 @@ import { Sha256 } from "@aws-crypto/sha256-js";
 export type AppSyncContractEventType = "contract_started" | "contract_ended";
 export type AppSyncUserEventType = "contractor_created" | "contractor_updated";
 
-const apiUrl = process.env.APPSYNC_CONTRACT_EVENTS_URL!;
-
 const publishEvent = async (payload: object) => {
+  const apiUrl = process.env.APPSYNC_CONTRACT_EVENTS_URL!;
+  if (!apiUrl) {
+    return { ok: false, status: 500, text: async () => "Invalid API Url" };
+  }
+
   const url = new URL(`${apiUrl.replace(/\/$/, "")}/event`);
 
   const request = new HttpRequest({
@@ -37,7 +40,7 @@ const publishEvent = async (payload: object) => {
     headers: signedRequest.headers,
     body: signedRequest.body as any,
   };
-  console.debug(options);
+  console.debug("Update Socket");
 
   return fetch(url.toString(), options as any);
 };
@@ -46,10 +49,6 @@ export class AppSyncUtility {
   private static readonly channel = "contracts/updates";
 
   static async publishContractEvent(eventType: AppSyncContractEventType, contract: ContractTableItem) {
-    if (!apiUrl) {
-      return;
-    }
-
     const payload = {
       channel: this.channel,
       events: [JSON.stringify({ eventType, contract, timestamp: new Date().toISOString() })],
@@ -68,10 +67,6 @@ export class AppSyncUtility {
   }
 
   static async publishContractorEvent(eventType: AppSyncUserEventType, user: UserTableItem) {
-    if (!apiUrl) {
-      return;
-    }
-
     const contractor = {
       id: user.id,
       country: user.country,

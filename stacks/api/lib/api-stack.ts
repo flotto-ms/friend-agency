@@ -5,6 +5,8 @@ import { AttributeType, BillingMode, ProjectionType, Table } from "aws-cdk-lib/a
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Bucket } from "aws-cdk-lib/aws-s3";
+import { Rule, Schedule } from "aws-cdk-lib/aws-events";
+import { LambdaFunction } from "aws-cdk-lib/aws-events-targets";
 import { Construct } from "constructs";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
@@ -243,6 +245,23 @@ export class ApiStack extends Stack {
       },
     });
 
+    const checkUserAvailableLambda = new NodejsFunction(this, "CheckUserAvailableLambda", {
+      entry: "src/handlers/checkUserAvailable.ts",
+      bundling: { bundleAwsSDK: true },
+      handler: "handler",
+      runtime: Runtime.NODEJS_22_X,
+      timeout: Duration.minutes(1),
+      environment: {
+        USER_TABLE: userTable.tableName,
+        CONFIG_BUCKET: configBucket.bucketName,
+      },
+    });
+
+    new Rule(this, "CheckUserAvailableRule", {
+      schedule: Schedule.rate(Duration.minutes(1)),
+      targets: [new LambdaFunction(checkUserAvailableLambda)],
+    });
+
     const getUserQuestsLambda = new NodejsFunction(this, "GetUserQuestsLambda", {
       entry: "src/handlers/getUserQuests.ts",
       bundling: { bundleAwsSDK: true },
@@ -308,6 +327,7 @@ export class ApiStack extends Stack {
     userTable.grantReadWriteData(userGroupsLambda);
     userTable.grantReadWriteData(userRatesLambda);
     userTable.grantReadWriteData(postUserAvailabilityLambda);
+    userTable.grantReadWriteData(checkUserAvailableLambda);
 
     contractTable.grantReadData(postUserQuestsLambda);
     contractTable.grantReadData(getContractsLambda);
@@ -334,11 +354,13 @@ export class ApiStack extends Stack {
     configBucket.grantReadWrite(userGroupsLambda);
     configBucket.grantReadWrite(userRatesLambda);
     configBucket.grantReadWrite(getUserTransactionsLambda);
+    configBucket.grantRead(checkUserAvailableLambda);
 
     contractEventsApi.grantPublish(getUsersLambda);
     contractEventsApi.grantPublish(postUserAvailabilityLambda);
     contractEventsApi.grantPublish(postUserRatesLambda);
     contractEventsApi.grantPublish(userRatesLambda);
+    contractEventsApi.grantPublish(checkUserAvailableLambda);
 
     /**
      * API Gayteway

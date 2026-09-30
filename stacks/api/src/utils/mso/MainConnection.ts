@@ -2,7 +2,7 @@ import TokenUtils, { TokenType } from "../TokenUtils";
 
 export type MainConnection = {
   getQuests: () => Promise<any>;
-  getSendQuestData: (userId: number) => Promise<any>;
+  getSendFriendQuestData: (friendId: number) => Promise<any>;
   getNewExchangeData: (buyerId: number) => Promise<any>;
   close: () => void;
 };
@@ -45,7 +45,7 @@ export const createConnection = async (type: TokenType) => {
     const createController = () => {
       const controller: MainConnection = {
         getQuests: () => queueRequest("GetQuestsWS"),
-        getSendQuestData: (userId: number) => queueRequest("GetSendQuestDataWS", { userId }),
+        getSendFriendQuestData: (friendId: number) => queueRequest("GetSendFriendQuestDataWS", { friendId }),
         getNewExchangeData: (buyerId: number) => queueRequest("GetNewExchangeDataWS", { buyerId }),
         close: () => socket.close(),
       };
@@ -65,6 +65,7 @@ export const createConnection = async (type: TokenType) => {
             accept(createController());
           });
         } else if (obj[0] === "server_error") {
+          console.error("Server Error");
           reject(new Error("Server Error"));
         } else if (obj[0] === "response") {
           const requestId = obj[1][0];
@@ -80,7 +81,7 @@ export const createConnection = async (type: TokenType) => {
             request.accept(response.length === 1 ? response[0] : response);
           } else {
             delete requests[requestId];
-            request.reject(eventType);
+            request.reject(new Error(eventType));
           }
         }
       }

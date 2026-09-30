@@ -17,6 +17,8 @@ export type UserTableItem = {
   groups?: Record<string, Group>;
   season?: Record<string, SeasonAccess>;
   access?: SeasonAccess;
+  isFree?: boolean;
+  allowFriendQuests?: boolean;
 };
 
 export type BanReason = "inactive" | "abusive";

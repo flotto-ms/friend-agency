@@ -77,6 +77,25 @@ const updateAvailability = async (id: number, available: boolean, slots?: number
   return user;
 };
 
+const updateQqs = async (id: number, allowFriendQuests: boolean, isFree: boolean) => {
+  const user = await DynamoDbUtils.updateItem<UserTableItem>({
+    Key: { id },
+    TableName: process.env.USER_TABLE!,
+    Attrs: {
+      allowFriendQuests,
+      isFree,
+      available: allowFriendQuests && isFree,
+    },
+    Upsert: false,
+  });
+
+  if (user) {
+    await AppSyncUtility.publishContractorEvent("contractor_updated", user);
+  }
+
+  return user;
+};
+
 const updateRates = async (userId: number, rates: [string, Rate][]) => {
   const attributeKeys: Record<string, string> = {};
   const attributeValues: Record<string, any> = {};
@@ -129,5 +148,6 @@ export default {
   updateDetails,
   updateAccess,
   updateAvailability,
+  updateQqs,
   updateRates,
 };
