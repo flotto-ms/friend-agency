@@ -64,17 +64,17 @@ const CopyButton: React.FC<{ id: number; username: string }> = ({ id, username }
 
 const ExchangeButton: React.FC<{ id: number }> = ({ id }) => {
   return (
-    <Button
-      variant="ghost"
-      size="icon"
+    <a
+      href={`https://minesweeper.online/exchange/new/${id}`}
       onClick={(e) => {
         e.stopPropagation();
-        e.preventDefault();
-        window.open(`https://minesweeper.online/exchange/new/${id}`, "_blank");
       }}
+      target="_blank"
     >
-      <ExternalLink />
-    </Button>
+      <Button variant="ghost" size="icon">
+        <ExternalLink />
+      </Button>
+    </a>
   );
 };
 

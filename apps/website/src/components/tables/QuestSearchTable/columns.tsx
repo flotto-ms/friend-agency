@@ -67,7 +67,7 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
         <UserLink
           country={row.original.country}
           username={row.original.username}
-          id={row.original.id}
+          id={row.original.userId}
           href={`/fqa/participants/${row.original.userId}`}
           copyId
           openExchange={row.original.preferExchange}

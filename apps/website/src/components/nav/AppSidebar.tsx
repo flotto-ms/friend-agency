@@ -172,6 +172,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {auth.status === "authorized" && (
           <NavUser
             user={{
+              id: auth.userId,
               avatar: data.user.avatar,
               name: auth.username,
               email: auth.type,
