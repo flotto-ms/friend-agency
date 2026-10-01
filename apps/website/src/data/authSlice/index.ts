@@ -26,6 +26,7 @@ export const authSlice = createAppSlice({
   initialState,
   reducers: (create) => ({
     signOut: create.reducer((state) => {
+      localStorage.removeItem("token");
       state.status = "unauthorized";
     }),
     setToken: create.asyncThunk(
@@ -45,6 +46,10 @@ export const authSlice = createAppSlice({
           state.access = action.payload.access;
           state.type = getType(action.payload.access);
           state.isAdmin = tokenDecode(action.meta.arg)?.admin ?? false;
+        },
+        rejected: (state) => {
+          localStorage.removeItem("token");
+          state.status = "unauthorized";
         },
       },
     ),

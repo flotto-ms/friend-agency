@@ -162,6 +162,7 @@ export class ApiStack extends Stack {
       timeout: Duration.minutes(1),
       environment: {
         USER_TABLE: userTable.tableName,
+        APPSYNC_CONTRACT_EVENTS_URL: `https://${contractEventsApi.httpDns}`,
       },
     });
 
@@ -362,6 +363,7 @@ export class ApiStack extends Stack {
     contractEventsApi.grantPublish(postUserRatesLambda);
     contractEventsApi.grantPublish(userRatesLambda);
     contractEventsApi.grantPublish(checkUserAvailableLambda);
+    contractEventsApi.grantPublish(postUserSlotsLambda);
 
     /**
      * API Gayteway

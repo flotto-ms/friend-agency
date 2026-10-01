@@ -13,7 +13,7 @@ const getHeaders = (r: NextRequest) => {
     "Access-Control-Max-Age": "86400",
   };
 
-  if (origin && allowedOrigins.includes(origin)) {
+  if (origin && (origin.startsWith("chrome-extension://") || allowedOrigins.includes(origin))) {
     headers["Access-Control-Allow-Origin"] = origin;
   }
   return headers;

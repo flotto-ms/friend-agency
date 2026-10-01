@@ -15,6 +15,8 @@ import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searc
 import { getBestMatchingContract } from "@/lib/ContractFilter";
 import { useEffect, useMemo, useState } from "react";
 
+const DAY_MS = 86_400_000;
+
 export default function Home() {
   const auth = useAppSelector(selectAuth);
   const searchStatus = useAppSelector(selectSearchStatus);
@@ -38,6 +40,16 @@ export default function Home() {
     }
     if (contractStatus === "init") {
       dispatch(loadActiveContractsAction());
+    }
+
+    if (searchStatus === "loaded") {
+      const date = Date.now();
+      const msNextDay = Math.ceil(date / DAY_MS) * DAY_MS;
+      const delay = msNextDay - date + 1_000;
+      var timer = setTimeout(() => dispatch(initSearch()), delay);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [auth.status, searchStatus, contractorStatus, contractStatus, dispatch]);
 

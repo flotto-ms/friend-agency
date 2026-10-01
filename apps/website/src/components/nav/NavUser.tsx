@@ -30,7 +30,6 @@ export function NavUser({
   const dispatch = useAppDispatch();
 
   const onSignOut = () => {
-    localStorage.removeItem("token");
     dispatch(signOut());
   };
 

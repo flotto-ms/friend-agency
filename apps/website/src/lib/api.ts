@@ -20,21 +20,28 @@ const withAuth = (init: RequestInit = {}): RequestInit => {
   };
 };
 
+const handleResponse = (r: Response) => {
+  if (r.ok) {
+    return r.json();
+  }
+  return r.json().then((d) => Promise.reject(new Error(d.message)));
+};
+
 const listUsers = async (filter?: { type: "contractor" | "supplier" }) => {
   const search = filter ? `?access=${filter.type}` : "";
-  return fetch(`/api/users${search}`, withAuth()).then((r) => r.json());
+  return fetch(`/api/users${search}`, withAuth()).then(handleResponse);
 };
 
 const listContracts = async () => {
-  return fetch(`/api/contracts`, withAuth()).then((r) => r.json());
+  return fetch(`/api/contracts`, withAuth()).then(handleResponse);
 };
 
 const getContract = async (id: string) => {
-  return fetch(`/api/contracts/${id}`, withAuth()).then((r) => r.json());
+  return fetch(`/api/contracts/${id}`, withAuth()).then(handleResponse);
 };
 
 const getUser = async (id: string = "current") => {
-  return fetch(`/api/users/${id}`, withAuth()).then((r) => r.json());
+  return fetch(`/api/users/${id}`, withAuth()).then(handleResponse);
 };
 
 const updateUser = async (user: Record<string, unknown>, id: string = "current") => {
@@ -45,21 +52,21 @@ const updateUser = async (user: Record<string, unknown>, id: string = "current")
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(user),
     }),
-  ).then((r) => r.json());
+  ).then(handleResponse);
 };
 
 const getUnsentQuests = async () => {
-  return fetch(`/api/users/current/quests/unsent`, withAuth()).then((r) => r.json());
+  return fetch(`/api/users/current/quests/unsent`, withAuth()).then(handleResponse);
 };
 
 const getUserTransactions = async (userId?: string | number) => {
   const path = userId === undefined ? "/api/users/current/transactions" : `/api/users/${userId}/transactions`;
-  return fetch(path, withAuth()).then((r) => r.json());
+  return fetch(path, withAuth()).then(handleResponse);
 };
 
 const listRates = async (userId?: string | number) => {
   const path = userId === undefined ? "/api/users/current/rates" : `/api/users/${userId}/rates`;
-  return fetch(path, withAuth()).then((r) => r.json());
+  return fetch(path, withAuth()).then(handleResponse);
 };
 
 const createRate = async (rate: Record<string, unknown>) => {
@@ -70,7 +77,7 @@ const createRate = async (rate: Record<string, unknown>) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rate),
     }),
-  ).then((r) => r.json());
+  ).then(handleResponse);
 };
 
 const updateRate = async (id: string, rate: Record<string, unknown>) => {
@@ -81,11 +88,11 @@ const updateRate = async (id: string, rate: Record<string, unknown>) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rate),
     }),
-  ).then((r) => r.json());
+  ).then(handleResponse);
 };
 
 const deleteRate = async (id: string) => {
-  return fetch(`/api/users/current/rates/${id}`, withAuth({ method: "DELETE" })).then((r) => r.json());
+  return fetch(`/api/users/current/rates/${id}`, withAuth({ method: "DELETE" })).then(handleResponse);
 };
 
 const createGroup = async (label: string, rates: string[] = []) => {
@@ -96,11 +103,11 @@ const createGroup = async (label: string, rates: string[] = []) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ label, rates }),
     }),
-  ).then((r) => r.json());
+  ).then(handleResponse);
 };
 
 const deleteGroup = async (id: string) => {
-  return fetch(`/api/users/current/groups/${id}`, withAuth({ method: "DELETE" })).then((r) => r.json());
+  return fetch(`/api/users/current/groups/${id}`, withAuth({ method: "DELETE" })).then(handleResponse);
 };
 
 const api = {

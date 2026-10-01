@@ -12,30 +12,20 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   });
 
   if (id === 0) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({ message: "Invalid Token" }),
-    };
+    return ResponseUtils.unauthorised("Invalid Token");
   }
 
   if (event.httpMethod === "PATCH") {
     if (!id) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "A current user is required" }),
-      };
+      return ResponseUtils.badRequest("A current user is required");
     }
     const data = JSON.parse(event.body ?? "{}");
     let user: UserTableItem | undefined = undefined;
 
     if (data.access) {
       if (data.access !== "supplier" && data.access !== "contractor") {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({ message: "Invalid access" }),
-        };
+        return ResponseUtils.badRequest("Invalid access");
       }
-
       user = await UserTable.updateAccess(id, data.access);
     }
 
@@ -50,11 +40,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       return ResponseUtils.noContent();
     }
 
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(user),
-    };
+    return ResponseUtils.json(user);
   }
 
   if (!id) {
@@ -70,17 +56,14 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       }));
     });
 
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ users }),
-    };
+    return ResponseUtils.json({ users });
   }
 
   const user = await UserTable.getUser(id);
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(user),
-  };
+
+  if (!user) {
+    return ResponseUtils.notFound("Unknown User");
+  }
+
+  return ResponseUtils.json(user);
 };

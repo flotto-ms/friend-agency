@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
-import { updateItem } from "../utils/DynamoDbUtils";
 import { SaveSlotsRequest } from "@flotto/types";
+import UserTable from "../utils/tables/UserTable";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const id = event.pathParameters?.id;
@@ -13,15 +13,10 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
 
   const data = JSON.parse(event.body ?? "{}") as SaveSlotsRequest;
-
-  await updateItem({
-    Key: { id: parseInt(id) },
-    TableName: process.env.USER_TABLE!,
-    Attrs: {
-      slots: data.slots,
-    },
-    Upsert: true,
-  });
+  const user = await UserTable.getUser(parseInt(id));
+  if (user) {
+    await UserTable.updateAvailability(parseInt(id), (user.allowFriendQuests ?? true) && data.slots < 10, data.slots);
+  }
 
   return {
     statusCode: 200,
