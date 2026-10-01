@@ -77,14 +77,14 @@ const updateAvailability = async (id: number, available: boolean, slots?: number
   return user;
 };
 
-const updateQqs = async (id: number, allowFriendQuests: boolean, isFree: boolean) => {
+const updateQqs = async (id: number, allowFriendQuests: boolean, isFull: boolean) => {
   const user = await DynamoDbUtils.updateItem<UserTableItem>({
     Key: { id },
     TableName: process.env.USER_TABLE!,
     Attrs: {
       allowFriendQuests,
-      isFree,
-      available: allowFriendQuests && isFree,
+      isFull,
+      available: allowFriendQuests && !isFull,
     },
     Upsert: false,
   });

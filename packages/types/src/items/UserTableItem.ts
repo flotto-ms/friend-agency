@@ -17,7 +17,7 @@ export type UserTableItem = {
   groups?: Record<string, Group>;
   season?: Record<string, SeasonAccess>;
   access?: SeasonAccess;
-  isFree?: boolean;
+  isFull?: boolean;
   allowFriendQuests?: boolean;
 };
 

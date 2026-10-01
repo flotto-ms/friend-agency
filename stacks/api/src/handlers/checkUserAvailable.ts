@@ -20,33 +20,55 @@ export const handler: ScheduledHandler = async () => {
   const month = new Date().getUTCMonth();
 
   if (!VALID_MONTHS.includes(month)) {
-    console.log(`${month} is not a valid month`);
+    console.log(`${month} is not a friend quest month`);
     return;
   }
 
   if (lastUserLoad < Date.now() - USER_LOAD_INTERVAL) {
     users = await UserTable.getUsers("contractor");
+    if (Object.keys(cache).length === 0) {
+      users.forEach((u) => {
+        cache[u.id.toString()] = {
+          isFull: u.isFull ?? false,
+          allowFriendQuests: u.allowFriendQuests ?? true,
+        };
+      });
+    }
     lastUserLoad = Date.now();
   }
 
   if (users.length > 0) {
-    await MainConnection.createConnection("bot").then(async (connection) => {
-      for (const user of users) {
-        let success = false;
-        let attempts = 0;
-        do {
-          success = await processUser(connection, user);
-          attempts++;
-        } while (!success && attempts < 4);
+    await MainConnection.createConnection("qqs").then(async (connection) => {
+      const batches = chunkArray(users);
+      for (const batch of batches) {
+        const tasks = batch.map((user) =>
+          (async () => {
+            let success = false;
+            let attempts = 0;
+            do {
+              success = await processUser(connection, user, ++attempts >= 4);
+            } while (!success && attempts < 4);
+          })(),
+        );
+        await Promise.all(tasks);
       }
+
       connection.close();
     });
   }
+};
+const chunkArray = <T>(arr: Array<T>, size = 2) => {
+  const chunks: Array<Array<T>> = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
 };
 
 const processUser = async (
   connection: Awaited<ReturnType<typeof MainConnection.createConnection>>,
   user: UserTableItem,
+  debug: boolean,
 ) => {
   return connection
     .getSendFriendQuestData(user.id)
@@ -64,11 +86,12 @@ const processUser = async (
         console.log(`${result.friendData.username} Changed`, current);
         await UserTable.updateQqs(user.id, current.allowFriendQuests, current.isFull);
       }
-
       return true;
     })
     .catch(async (e: Error) => {
-      console.error(`${user.username} Error`, e.message);
+      if (debug) {
+        console.error(`${user.username} Error`, e.message);
+      }
       if (e.message === "TooManyRequestsEvent") {
         await delay(RATE_LIMIT_TIMEOUT);
         return false;

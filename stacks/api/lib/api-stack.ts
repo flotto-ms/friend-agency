@@ -254,6 +254,7 @@ export class ApiStack extends Stack {
       environment: {
         USER_TABLE: userTable.tableName,
         CONFIG_BUCKET: configBucket.bucketName,
+        APPSYNC_CONTRACT_EVENTS_URL: `https://${contractEventsApi.httpDns}`,
       },
     });
 
