@@ -1,6 +1,5 @@
 import { getAreaType, getFlottoQuestType } from "@flotto/utils";
 import { FlottoApi } from "./flotto/api";
-import { updateQqs } from "./flotto/UpdateQQS";
 import { connect, getQuests, getUserId, getUserQQS } from "./minesweeper/api";
 import { loadContracts } from "./utils/ContractData";
 import { syncPrices } from "./utils/PriceData";
@@ -62,7 +61,6 @@ const startServer = (session: string, build: number) => {
             (quest) => quest.completed === 0 && !quest.expired && quest.required !== quest.progress,
           ).length;
           const userId = getUserId();
-          updateQqs({ pID: userId, QQS: qqs });
 
           FlottoApi.postSlots(userId, qqs);
           FlottoApi.postQuests(userId, {
@@ -95,10 +93,6 @@ const getContracts = async () => {
           .filter((c) => c.type === type && c.userId !== quest.initiatorId)
           .sort((a, b) => b.price - a.price);
 
-        if (quest.id === 29409344) {
-          console.log(questContracts);
-        }
-
         return {
           id: quest.id,
           contracts: questContracts.filter((c) => {
@@ -107,9 +101,6 @@ const getContracts = async () => {
             }
 
             if (!c.filter) {
-              if (c.userId === 6798490) {
-                console.log(c);
-              }
               //userIds.add(c.userId);
               return true;
             }

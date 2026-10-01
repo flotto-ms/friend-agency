@@ -98,7 +98,7 @@ const injectPrices = () => {
 
     if (received) injectPricesIntoTable(prices.received, quests.received, received);
     if (sent) injectPricesIntoTable(prices.sent, quests.sent, sent, "+");
-    if (unsent && quests.sent && quests.sent[0].initiatorId === 11698196) injectPricesIntoUnsent(unsent);
+    if (unsent && quests.sent) injectPricesIntoUnsent(unsent);
 
     if (!header) {
       injectSummary(prices);

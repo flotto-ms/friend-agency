@@ -25,7 +25,7 @@ const processResponse = (data: Response<any>) => {
   }
 
   if (data[0] === "response") {
-    cb.accept(data[1][2]);
+    cb.accept(data[1][2][0]);
   } else {
     cb.reject(data[1][2]);
   }
@@ -94,7 +94,7 @@ const openSocket = async () => {
   });
 };
 
-const sendRequest = ({ action, cb, args }: { action: string; cb?: Callback; args?: any[] }) => {
+const sendRequest = ({ action, cb, args }: { action: string; cb?: Callback; args?: object }) => {
   if (!socket || socket.readyState !== socket.OPEN) {
     cb?.reject(new Error("Socket not Open"));
     return;
@@ -103,7 +103,7 @@ const sendRequest = ({ action, cb, args }: { action: string; cb?: Callback; args
   if (cb) {
     callbacks[id] = cb;
   }
-  const request = ["request", [action, args ?? [], id, currentBuild]];
+  const request = ["request", [action, args ?? null, id, currentBuild]];
   socket.send(`42${JSON.stringify(request)}`);
 };
 
@@ -146,7 +146,7 @@ export const getQuests = async () => {
 
   return new Promise<ReturnType<typeof parseQuests>>((accept, reject) => {
     sendRequest({
-      action: "QuestsController.getQuestsWsAction",
+      action: "GetQuestsWS",
       cb: {
         accept: (data: QuestResponse) => accept(parseQuests(data)),
         reject,
@@ -162,8 +162,8 @@ export const getUserQQS = async (userId: number) => {
 
   return new Promise<UserStatus>((accept, reject) => {
     sendRequest({
-      action: "FriendQuestsController.getSendQuestDataWsAction",
-      args: [userId],
+      action: "GetSendFriendQuestDataWS",
+      args: { friendId: userId },
       cb: {
         accept: (data: any[]) => {
           if (!data[0]) {

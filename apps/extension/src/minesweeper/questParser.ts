@@ -1,17 +1,18 @@
 import type { MsoQuest } from "@flotto/types";
 
 export type QuestData = [string[], any[]];
-export type QuestResponse = Array<QuestData>;
+export type QuestResponse = {
+  newFriendQuests: QuestData;
+  receivedFriendQuests: QuestData;
+  sentFriendQuests: QuestData;
+  allowFriendQuests: boolean;
+};
 
 export const parseQuests = (data: QuestResponse) => {
-  const unsent = arrayToObj(data[7]) as MsoQuest[];
-  const received = arrayToObj(data[8]) as MsoQuest[];
-  const sent = arrayToObj(data[9]) as MsoQuest[];
-
   return {
-    unsent,
-    received,
-    sent,
+    unsent: arrayToObj(data.newFriendQuests),
+    received: arrayToObj(data.receivedFriendQuests),
+    sent: arrayToObj(data.sentFriendQuests),
   };
 };
 
@@ -27,6 +28,6 @@ const arrayToObj = (array: QuestData) => {
     Object.keys(obj)
       .sort((a, b) => a.localeCompare(b))
       .forEach((key) => (ret[key] = obj[key]));
-    return ret;
+    return ret as MsoQuest;
   });
 };
