@@ -218,7 +218,7 @@ export const UserSearch: React.FC = () => {
               type="text"
               inputMode="text"
               pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
-              onChange={setPassword}
+              onChange={(val) => setPassword(val.toUpperCase())}
               pasteTransformer={(pasted) => pasted.trim().replaceAll("-", "")}
             >
               <InputOTPGroup>

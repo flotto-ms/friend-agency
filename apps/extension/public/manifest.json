@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Flotto FQA",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "An extension that updates your quest list to flotto.",
   "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": [
     "https://minesweeper.online/*",
-    "https://script.google.com/macros/s/*",
+    "https://flotto.vercel.app/api/*",
     "https://hls6ldikcd.execute-api.us-east-1.amazonaws.com/prod/*"
   ],
   "icons": {

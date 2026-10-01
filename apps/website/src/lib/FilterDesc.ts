@@ -26,10 +26,6 @@ export const getFilterDescription = (rate: Rate) => {
     return `${formatNumber(rate.filter.required.min)} to ${formatNumber(rate.filter.required.max)} ${getTypeDesc(rate)}`;
   }
 
-  if (rate.filter.level) {
-    return `L${rate.filter.level.min} to L${rate.filter.level.max}`;
-  }
-
   if (rate.filter.efficiency) {
     return `${rate.filter.efficiency.min}% to ${rate.filter.efficiency.max}% Efficiency`;
   }
@@ -39,7 +35,17 @@ export const getFilterDescription = (rate: Rate) => {
   }
 
   if (rate.filter.density) {
-    return `${rate.filter.density.min}% to ${rate.filter.density.max}% Density`;
+    return `${rate.filter.level?.min === 66 ? "L💀 " : ""}${rate.filter.density.min}% to ${rate.filter.density.max}% Density`;
+  }
+
+  if (rate.filter.level) {
+    if (rate.filter.level.min === rate.filter.level.max) {
+      if (rate.type === 3 && rate.filter.level.max === 66) {
+        return `L💀`;
+      }
+      return `L${rate.filter.level.min}`;
+    }
+    return `L${rate.filter.level.min} to L${rate.filter.level.max}`;
   }
 
   return undefined;

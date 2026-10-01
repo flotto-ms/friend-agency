@@ -86,7 +86,9 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
 
       return (
         <div className="flex flex-row items-center gap-2">
-          <span className={`inline-block rounded-sm w-4 h-4 ${row.original.color}`} />
+          <span
+            className={`inline-block  dark:border-gray-900 border-gray-300 shadow-sm  border-2 rounded-sm w-4 h-4 ${row.original.color}`}
+          />
           <span>{rate}</span>
           {row.original.preferExchange && <ExchangeBadge className="m-0" />}
         </div>

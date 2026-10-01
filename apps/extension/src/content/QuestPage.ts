@@ -12,7 +12,7 @@ const _observer = new MutationObserver((_) => injectPrices());
 const _modalObserver = new MutationObserver((_) => injectContractors());
 
 const headerTemplate = `
-  <div data-flotto="header"><table><tbody><tr><td style="width: 100%;"><h2 class="">Flotto Wallet (Estimate)</h2></td><td><h2 class="events-title"><span class="season help gray" title="" data-original-title="Flotto Season S7">[S7]</span></h2></td></tr></tbody></table><hr class="event-hr"></div>
+  <div data-flotto="header"><table><tbody><tr><td style="width: 100%;"><h2 class="">Flotto Wallet</h2></td><td><h2 class="events-title"><span class="season help gray" title="" data-original-title="Flotto Season S8">[S8]</span></h2></td></tr></tbody></table><hr class="event-hr"></div>
   <table class="table table-bordered" data-flotto="set"><thead><tr><th class="text-nowrap quest-column">Description</th><th class="text-nowrap">Amount</th></tr></thead><tbody>
     <tr><td>Quests Sold</td><td class="text-nowrap" id="flotto-sold"></td></tr>
     <tr><td>Quests Purchased</td><td class="text-nowrap" id="flotto-purchased"></td></tr>
@@ -77,7 +77,6 @@ const injectContractors = () => {
 const injectPrices = () => {
   const questBlock = document.getElementById("QuestsBlock");
   const tables = [...questBlock!.querySelectorAll<HTMLTableElement>(".table")];
-
   const [received, sent] = tables.filter((tbl) => {
     const thead = tbl.querySelector<HTMLTableElement>("thead tr")!;
     return thead.childNodes.length > 5;
@@ -90,10 +89,7 @@ const injectPrices = () => {
 
   const header = questBlock?.querySelector('[data-flotto="header"]');
 
-  getPrices().then(async (prices) => {
-    if (!prices) {
-      return;
-    }
+  getPrices().then(async (prices = { received: [], sent: [] }) => {
     const quests = (await chrome.storage.local.get(["quests"])).quests as any;
 
     if (received) injectPricesIntoTable(prices.received, quests.received, received);
@@ -116,10 +112,6 @@ const injectSummary = (prices: SaveQuestsResponse) => {
   const purchased = prices.received.reduce((a, c) => a + (c?.flotto?.price ?? 0), 0);
   const fees = Math.round(purchased * 0.05);
   const total = sold - purchased - fees;
-
-  if (purchased === 0 && sold === 0) {
-    return;
-  }
 
   const questBlock = document.getElementById("QuestsBlock");
   const div = document.createElement("div");

@@ -96,7 +96,7 @@ const RateEditor: React.FC = () => {
           <CardTitle>Tip</CardTitle>
           <CardDescription>
             <p>
-              Group rates by seelcting rows and clicking the + button from the group selector below...{" "}
+              Group rates by selecting rows and clicking the + button from the group selector below...{" "}
               {Object.keys(slice.groups).length === 0 && `(currently only shows 'all' as you have not created any yet)`}
             </p>
           </CardDescription>

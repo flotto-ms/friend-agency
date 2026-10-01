@@ -214,6 +214,18 @@ const Contents: React.FC<RateDrawProps & { onClose: () => void }> = ({ rate, sel
         />,
       );
     }
+    if (config.level) {
+      components.push(
+        <MinMaxSlider
+          key={`${type}_level`}
+          label="Level"
+          min={config.level.min}
+          max={config.level.max}
+          initialValue={filters?.level ? [filters.level.min, filters.level.max] : undefined}
+          onChange={(range) => setFilter("level", range)}
+        />,
+      );
+    }
 
     return components;
   }, [type]);

@@ -51,11 +51,21 @@ const sendMessage = async (userId: number, message: string) => {
         } else if (obj[1][1] === "NewChannelEvent") {
           const channel = obj[1][2][0];
           channelId = channel.id;
-          user = {
-            id: channel.user1Id,
-            username: channel.username1,
-            country: channel.country1,
-          };
+
+          if (channel.user1Id === userId) {
+            user = {
+              id: channel.user1Id,
+              username: channel.username1,
+              country: channel.country1,
+            };
+          } else {
+            user = {
+              id: channel.user2Id,
+              username: channel.username2,
+              country: channel.country2,
+            };
+          }
+
           const cmd1 = `42["request",["SendMessageWS",${JSON.stringify({ channelId, text: message })},0,${build}]]`;
           socket.send(cmd1);
           const cmd2 = `42["request",["CloseChannelWS", ${JSON.stringify({ channelId })},0,${build}]]`;

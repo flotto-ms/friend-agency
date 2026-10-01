@@ -62,6 +62,10 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
         return;
       }
 
+      if (!lastDisconnect) {
+        lastDisconnect = Date.now();
+      }
+
       const data = {
         host: httpDomain,
         "x-api-key": apiKey,
@@ -75,7 +79,6 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
       try {
         currentSocket = new WebSocket(url, proto);
         socket = currentSocket;
-        (window as any).appSyncSocket = currentSocket;
       } catch {
         scheduleReconnect();
         return;
@@ -147,7 +150,6 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
       });
 
       currentSocket.addEventListener("close", () => {
-        lastDisconnect = Date.now();
         if (socket === currentSocket) {
           socket = null;
         }
