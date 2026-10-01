@@ -43,23 +43,21 @@ export default function Home() {
 
   const data = useMemo(() => {
     const availableContractors = contractors.filter((c) => c.id !== auth.userId && c.available);
-    const availableContracts = contracts.filter(
-      (c) =>
-        (!hideExchangeOnly && c.preferExchange && c.userId !== auth.userId) ||
-        (!c.preferExchange && availableContractors.some((con) => con.id == c.userId)),
-    );
+    const availableContracts = contracts.filter((c) => c.userId !== auth.userId);
 
     return quests.map((q) => {
       const { country, username, rate, ...quest } = q;
-      const contract = getBestMatchingContract(q, availableContracts);
-      if (contract) {
-        const contractor = contractors.find((c) => c.id === contract.userId);
+      const data = getBestMatchingContract(q, availableContracts, availableContractors, hideExchangeOnly);
+      if (data) {
+        const contractor = contractors.find((c) => c.id === data.contract.userId);
         return {
           ...quest,
-          rate: contract.price,
-          preferExchange: contract.preferExchange,
+          rate: data.contract.price,
+          preferExchange: data.contract.preferExchange,
+          userId: contractor?.id,
           username: contractor?.username,
           country: contractor?.country ?? "xx",
+          color: data.color,
         };
       }
       return quest;

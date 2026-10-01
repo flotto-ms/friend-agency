@@ -47,7 +47,10 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
     cell: ({ row }) => {
       const quest = row.original;
       return (
-        <Link className="hover:underline" href={`/fqa/search/${encodeURIComponent(String(quest.id))}`}>
+        <Link
+          className="inline-block leading-[37px] hover:underline"
+          href={`/fqa/search/${encodeURIComponent(String(quest.id))}`}
+        >
           {quest.description}
         </Link>
       );
@@ -65,6 +68,7 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
           country={row.original.country}
           username={row.original.username}
           id={row.original.id}
+          href={`/fqa/participants/${row.original.userId}`}
           copyId
           openExchange={row.original.preferExchange}
         />
@@ -75,20 +79,17 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
     accessorKey: "rate",
     header: "Rate",
     cell: ({ getValue, row }) => {
-      const rate = getValue();
+      const rate = getValue<string | undefined>();
       if (!rate) {
         return "-";
       }
 
-      if (!row.original.preferExchange) {
-        return rate;
-      }
-
       return (
-        <>
-          {rate}
-          <ExchangeBadge className="ml-2" />
-        </>
+        <div className="flex flex-row items-center gap-2">
+          <span className={`inline-block rounded-sm w-4 h-4 ${row.original.color}`} />
+          <span>{rate}</span>
+          {row.original.preferExchange && <ExchangeBadge className="m-0" />}
+        </div>
       );
 
       return (
@@ -101,6 +102,7 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
       );
     },
   },
+  /*
   {
     id: "actions",
     cell: ({ row }) => {
@@ -114,4 +116,5 @@ export const columns: ColumnDef<QuestSearchItem>[] = [
       );
     },
   },
+  */
 ];

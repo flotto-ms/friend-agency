@@ -1,5 +1,34 @@
 import { QuestSearchItem } from "@/components/tables/QuestSearchTable/types";
 import { ActiveContractItem } from "@/data/activeContractsSlice";
+import { ContractorUser } from "@/data/contractorsSlice";
+import rateConfig from "../../public/rateconfig.json";
+
+const bestColor = "bg-red-500";
+const closeColor = "bg-purple-500";
+
+const colors = [
+  "bg-[#0ea5e9]",
+  "bg-[#3ca9e9]",
+  "bg-[#51ade9]",
+  "bg-[#61b1e9]",
+  "bg-[#6fb5e9]",
+  "bg-[#7ab8ea]",
+  "bg-[#85bcea]",
+  "bg-[#8ebfea]",
+  "bg-[#97c3ea]",
+  "bg-[#9fc6ea]",
+  "bg-[#a7c9ea]",
+  "bg-[#afccea]",
+  "bg-[#b6d0ea]",
+  "bg-[#bcd3ea]",
+  "bg-[#c3d6ea]",
+  "bg-[#c9d9eb]",
+  "bg-[#cfdceb]",
+  "bg-[#d5dfeb]",
+  "bg-[#dae1eb]",
+  "bg-[#e0e4eb]",
+  "bg-[#e5e7eb]",
+];
 
 type Filter = {
   min: number;
@@ -16,7 +45,7 @@ export const getAreaType = (quest: QuestSearchItem) => {
   };
 };
 
-export const getMatchingContract = (quest: QuestSearchItem, contracts: ActiveContractItem[]) => {
+export const getMatchingContracts = (quest: QuestSearchItem, contracts: ActiveContractItem[]) => {
   return contracts.filter((contract) => {
     if (contract.type !== quest.type) {
       return false;
@@ -76,12 +105,52 @@ export const getMatchingContract = (quest: QuestSearchItem, contracts: ActiveCon
 export const getBestMatchingContract = (
   quest: QuestSearchItem,
   contracts: ActiveContractItem[],
-): ActiveContractItem | undefined => {
-  const sorted = getMatchingContract(quest, contracts).sort((a, b) => b.price - a.price);
-  if (sorted.length === 0) {
+  contractors: ContractorUser[],
+  hideExchangeOnly: boolean,
+): { contract: ActiveContractItem; color: string } | undefined => {
+  const matched = getMatchingContracts(quest, contracts).sort((a, b) => b.price - a.price);
+  if (matched.length === 0) {
     return undefined;
   }
 
-  const bestPrice = sorted[0].price;
-  return sorted.filter((q) => q.price === bestPrice).sort(() => Math.random() - 0.5)[0];
+  const available = matched
+    .filter(
+      (c) =>
+        (!hideExchangeOnly && c.preferExchange) || (!c.preferExchange && contractors.some((u) => c.userId === u.id)),
+    )
+    .sort((a, b) => b.price - a.price);
+
+  if (available.length === 0) {
+    return undefined;
+  }
+
+  const maxPrice = matched[0].price;
+  const minPrice = rateConfig[quest.type.toString()]?.minAmount ?? 0;
+  const bestPrice = available[0].price;
+  const color = getQuestColor(bestPrice, maxPrice, minPrice);
+  const contract = available.filter((q) => q.price === bestPrice).sort(() => Math.random() - 0.5)[0];
+
+  const data = {
+    contract,
+    color,
+  };
+
+  return data;
+};
+
+const getQuestColor = (price: number, max: number, min: number) => {
+  if (price === max) {
+    return bestColor;
+  }
+
+  if (price / max > 0.95) {
+    return closeColor;
+  }
+
+  const ceil = max * 0.95 - min;
+  const val = price - min;
+  const percent = val / ceil;
+  const colIndex = Math.round(colors.length * percent);
+
+  return colors[colIndex];
 };

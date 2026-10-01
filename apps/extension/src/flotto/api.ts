@@ -90,8 +90,21 @@ const getChanges = async (quests: SaveQuestsRequest) => {
 };
 
 chrome.storage.local.get(["quests"]).then((result) => {
-  if ((result.quests as any)?.version !== 2) {
-    console.log("Reset Store");
-    chrome.storage.local.set({ quests: { version: 2, received: [], sent: [] } });
+  try {
+    const data = result.quests as any;
+    let reset = data.version !== 2;
+    if (data?.received?.length > 0) {
+      const quest = data.received[0];
+      const oldData = new Date(quest.createdAt).getUTCMonth() !== new Date().getUTCDate();
+      if (oldData) {
+        reset = true;
+      }
+    }
+    if (reset) {
+      console.log("Reset Store");
+      chrome.storage.local.set({ quests: { version: 2, received: [], sent: [] } });
+    }
+  } catch (ex) {
+    console.error(ex);
   }
 });

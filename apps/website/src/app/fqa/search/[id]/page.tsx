@@ -13,7 +13,7 @@ import {
 } from "@/data/activeContractsSlice";
 import { loadContractorsAction, selectContractors, selectContractorsStatus } from "@/data/contractorsSlice";
 import { initSearch, selectSearchQuests, selectSearchStatus } from "@/data/searchSlice";
-import { getMatchingContract } from "@/lib/ContractFilter";
+import { getMatchingContracts } from "@/lib/ContractFilter";
 import { selectAuth } from "@/data/authSlice";
 import ContractList from "@/components/lists/ContractList";
 import { useViewSelector } from "@/components/tabs/ContractView";
@@ -73,7 +73,7 @@ export default function SearchQuestPage() {
     const byUserId = new Map(contractors.map((contractor) => [contractor.id, contractor]));
     const contracts = activeContracts.filter((c) => c.userId !== auth.userId);
 
-    return getMatchingContract(selectedQuest, contracts)
+    return getMatchingContracts(selectedQuest, contracts)
       .map((contract) => ({
         ...contract,
         contractor: byUserId.get(contract.userId),

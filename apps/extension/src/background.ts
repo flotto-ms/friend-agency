@@ -111,10 +111,6 @@ const getContracts = async () => {
               const filter = c.filter.level;
               const level = quest.level * (quest.isElite ? 3 : 1);
               valid = filter.min <= level && level <= filter.max;
-
-              if (c.userId === 6798490) {
-                console.log(valid, c, level, filter);
-              }
             }
 
             if (c.filter.arenaLevel && arena) {

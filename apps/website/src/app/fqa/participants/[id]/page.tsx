@@ -24,6 +24,8 @@ type UserSummary = {
   available?: boolean;
   access?: string;
   slots?: number;
+  isFull?: boolean;
+  allowFriendQuests?: boolean;
 };
 
 export default function ParticipantPage() {
@@ -146,7 +148,12 @@ export default function ParticipantPage() {
                   ))}
               </div>
             </div>
-            <CardDescription>{getType(user.access ?? "member")}</CardDescription>
+            <CardDescription>
+              {getType(user.access ?? "member")}
+              {user.access === "contractor" && !user.allowFriendQuests && (
+                <p className="py-4">Not accepting "Sent Quests" at this time, please use exchange.</p>
+              )}
+            </CardDescription>
           </CardHeader>
         </Card>
 

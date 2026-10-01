@@ -2,6 +2,7 @@ import { RateFilter } from "@/lib/FilterDesc";
 import { createAppSlice } from "../createAppSlice";
 import api from "../../lib/api";
 import { QuestSearchItem } from "@/components/tables/QuestSearchTable/types";
+import { PayloadAction } from "@reduxjs/toolkit";
 
 type Contractor = {
   id: number;
@@ -62,6 +63,9 @@ export const searchSlice = createAppSlice({
         state.status = "failed";
       },
     }),
+    deleteQuests: create.reducer((state, action: PayloadAction<number[]>) => {
+      state.quests = state.quests.filter((q) => !action.payload.some((id) => q.id === id));
+    }),
   }),
   selectors: {
     selectSearchStatus: (state) => state.status,
@@ -71,6 +75,6 @@ export const searchSlice = createAppSlice({
   },
 });
 
-export const { initSearch } = searchSlice.actions;
+export const { initSearch, deleteQuests } = searchSlice.actions;
 export const { selectSearchStatus, selectSearchQuests, selectSearchContractors, selectSearchContracts } =
   searchSlice.selectors;
