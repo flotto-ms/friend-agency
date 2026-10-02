@@ -33,9 +33,10 @@ const getFlottoDetails = async (quest: ReceivedQuestTableItem | SentQuestTableIt
   if (contract) {
     const levels = quest.level * (quest.isElite ? 3 : 1);
     details.price = levels * contract.price;
-    details.status = "Active";
+    details.contract = contract.key;
+    details.status = "Contracted";
   } else {
-    details.status = "Inactive";
+    details.status = "NoContract";
   }
   return details;
 };

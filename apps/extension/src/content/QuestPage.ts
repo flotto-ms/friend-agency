@@ -266,6 +266,12 @@ const injectPricesIntoTable = (
 
     if (!price?.flotto) {
       td.innerHTML = loadingHtml;
+    } else if (price.flotto.status === "Auctioned") {
+      td.innerText = "Auctioned";
+    } else if (price.flotto.status === "Exchanged") {
+      td.innerText = "Private Exchange";
+    } else if (price.flotto.status === "NoContract") {
+      td.innerText = "No Contract";
     } else if ((price.flotto.price ?? 0) > 0 && quest) {
       const amount = price!.flotto.price!;
       const levels = quest!.level * (quest!.isElite ? 3 : 1);
@@ -276,8 +282,6 @@ const injectPricesIntoTable = (
           content: `<div class="text-nowrap"><p>This quest was contracted on flotto<br />at the following rate: </p><p> ${createMcElement(amount / levels).innerHTML} &nbsp; per level</p></div>`,
         }),
       );
-    } else if (price.flotto.status === "Inactive") {
-      td.innerText = "No Contract";
     } else {
       td.innerText = "—";
     }

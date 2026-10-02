@@ -2,18 +2,14 @@ import {
   ContractTableItem,
   MsoQuest,
   MsoQuestCustomOptions,
-  MsoQuestEfficiency,
   MsoQuestEfficiencyOptions,
-  MSOQuestLevel,
-  MSOQuestType,
-  RateFilter,
   RateFilterRange,
 } from "@flotto/types";
 import QuestUtility from "./QuestUtility";
 import ContractTable from "./tables/ContractTable";
 import { getAreaType, getFlottoQuestType } from "@flotto/utils";
 
-const contractMatchesQuest = (contract: ContractTableItem, quest: MsoQuest) => {
+export const contractMatchesQuest = (contract: ContractTableItem, quest: MsoQuest) => {
   if (contract.type !== quest.type) {
     return false;
   }

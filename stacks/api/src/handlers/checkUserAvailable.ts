@@ -4,7 +4,7 @@ import MainConnection from "../utils/mso/MainConnection";
 import { UserTableItem } from "@flotto/types";
 import TokenUtils from "../utils/TokenUtils";
 
-const RATE_LIMIT_TIMEOUT = 100;
+const RATE_LIMIT_TIMEOUT = 300;
 const USER_LOAD_INTERVAL = 600_000; // 10 mins;
 const VALID_MONTHS = [1, 5, 9];
 

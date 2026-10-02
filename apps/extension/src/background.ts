@@ -1,10 +1,10 @@
 import { getAreaType, getFlottoQuestType } from "@flotto/utils";
 import { FlottoApi } from "./flotto/api";
-import { connect, getQuests, getUserId, getUserQQS } from "./minesweeper/api";
+import { connect, getQuests, getUserId } from "./minesweeper/api";
 import { loadContracts } from "./utils/ContractData";
 import { syncPrices } from "./utils/PriceData";
 import { getUserStatus } from "./utils/QqsData";
-import { FlottoQuestType, MSOQuestType } from "@flotto/types";
+import { type GetContractsResponse, type MsoQuest, type MsoQuestCustomOptions } from "@flotto/types";
 
 let pollInterval: ReturnType<typeof setInterval>;
 
@@ -81,13 +81,68 @@ const startServer = (session: string, build: number) => {
   });
 };
 
+const contractMatchesQuest = (contract: GetContractsResponse["contracts"][number], quest: MsoQuest) => {
+  if (contract.type !== getFlottoQuestType(quest)) {
+    return false;
+  }
+
+  if (!contract.filter) {
+    return true;
+  }
+
+  if (contract.filter.level) {
+    const filter = contract.filter.level;
+    const level = quest.level * (quest.isElite ? 3 : 1);
+    if (!(filter.min <= level && level <= filter.max)) {
+      return false;
+    }
+  }
+
+  if (contract.filter.required) {
+    const filter = contract.filter.required;
+    const required = quest.required;
+    if (!(filter.min <= required && required <= filter.max)) {
+      return false;
+    }
+  }
+
+  if (contract.filter.arenaLevel && quest.options) {
+    const arena = getAreaType(quest);
+    const filter = contract.filter.arenaLevel;
+    if (!(filter.min <= arena.level && arena.level <= filter.max)) {
+      return false;
+    }
+  }
+
+  if (contract.filter.efficiency && quest.options) {
+    const filter = contract.filter.efficiency;
+    const eff = quest.options.eff as number;
+    if (!(filter.min <= eff && eff <= filter.max)) {
+      return false;
+    }
+  }
+
+  if (contract.filter.density && quest.options) {
+    const options: MsoQuestCustomOptions = quest.options as any;
+    const width = options.sizeX;
+    const height = options.sizeY;
+    const mines = options.mines;
+
+    const percent = (mines / (width * height)) * 100;
+    const filter = contract.filter.density;
+    if (!(filter.min <= percent && percent <= filter.max)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 const getContracts = async () => {
   return Promise.all([getQuests().then((r) => r?.unsent ?? []), loadContracts()]).then(
     async ([unsent, contracts = []]) => {
       const unsentContracts = unsent.map((quest) => {
         const type = getFlottoQuestType(quest);
-        let arena = quest.type === MSOQuestType.Arena ? getAreaType(quest) : undefined;
-        const userIds = new Set<number>();
 
         const questContracts = contracts
           .filter((c) => c.type === type && c.userId !== quest.initiatorId)
@@ -95,35 +150,7 @@ const getContracts = async () => {
 
         return {
           id: quest.id,
-          contracts: questContracts.filter((c) => {
-            if (userIds.has(c.userId)) {
-              return false;
-            }
-
-            if (!c.filter) {
-              //userIds.add(c.userId);
-              return true;
-            }
-
-            let valid = false;
-
-            if (c.filter.level) {
-              const filter = c.filter.level;
-              const level = quest.level * (quest.isElite ? 3 : 1);
-              valid = filter.min <= level && level <= filter.max;
-            }
-
-            if (c.filter.arenaLevel && arena) {
-              const filter = c.filter.arenaLevel;
-              valid = filter.min <= arena.level && arena.level <= filter.max;
-            }
-
-            if (valid) {
-              //userIds.add(c.userId);
-            }
-
-            return valid;
-          }),
+          contracts: questContracts.filter((c) => contractMatchesQuest(c, quest)),
           bestPrice: 0,
         };
       });
