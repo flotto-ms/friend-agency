@@ -46,13 +46,14 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   if (!id) {
     const filter = event.queryStringParameters?.access as SeasonAccess | undefined;
     const users = await UserTable.getUsers(filter).then((r) => {
-      return r.map(({ id, username, slots, country, available, access }) => ({
+      return r.map(({ id, username, slots, country, available, access, hasExtension }) => ({
         id,
-        username,
+        username: username ?? `Anonymous${id}`,
         access: access ?? "member",
         slots,
         country,
         available,
+        hasExtension,
       }));
     });
 

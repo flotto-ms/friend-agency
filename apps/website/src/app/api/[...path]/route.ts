@@ -8,12 +8,17 @@ const getHeaders = (r: NextRequest) => {
   const allowedOrigins = ["https://minesweeper.online"];
 
   const headers: Record<string, string> = {
-    "Access-Control-Allow-Methods": "POST, GET, PATCH, OPTIONS",
+    "Access-Control-Allow-Methods": "POST, PUT, GET, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "86400",
   };
 
-  if (origin && (origin.startsWith("chrome-extension://") || allowedOrigins.includes(origin))) {
+  if (
+    origin &&
+    (origin.startsWith("chrome-extension://") ||
+      origin.startsWith("moz-extension://") ||
+      allowedOrigins.includes(origin))
+  ) {
     headers["Access-Control-Allow-Origin"] = origin;
   }
   return headers;

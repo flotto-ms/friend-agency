@@ -56,22 +56,22 @@ const updateAccess = async (id: number, access: string) => {
     Upsert: false,
   });
 
-  if (updatedUser) {
+  if (updatedUser?.access === "contractor") {
     await AppSyncUtility.publishContractorEvent("contractor_created", updatedUser);
   }
 
   return updatedUser;
 };
 
-const updateAvailability = async (id: number, available: boolean, slots?: number) => {
+const updateAvailability = async (id: number, available: boolean, slots?: number, hasExtension?: boolean) => {
   const user = await DynamoDbUtils.updateItem<UserTableItem>({
     Key: { id },
     TableName: process.env.USER_TABLE!,
-    Attrs: { available, slots },
+    Attrs: { available, slots, hasExtension },
     Upsert: false,
   });
 
-  if (user) {
+  if (user?.access === "contractor") {
     await AppSyncUtility.publishContractorEvent("contractor_updated", user);
   }
   return user;
@@ -89,7 +89,7 @@ const updateQqs = async (id: number, allowFriendQuests: boolean, isFull: boolean
     Upsert: false,
   });
 
-  if (user) {
+  if (user?.access === "contractor") {
     await AppSyncUtility.publishContractorEvent("contractor_updated", user);
   }
 

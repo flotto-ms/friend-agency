@@ -11,7 +11,7 @@ import { columns } from "./columns";
 const ParticipantsTable: React.FC<{ data: ParticipantItem[]; contractors?: boolean }> = ({ data, contractors }) => {
   const table = useReactTable({
     data,
-    columns: contractors ? columns : [columns[0]],
+    columns: contractors ? columns : [columns[0], columns[1]],
     getCoreRowModel: getCoreRowModel(),
   });
 

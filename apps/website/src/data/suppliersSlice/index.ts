@@ -8,6 +8,7 @@ export type SupplierUser = {
   supplier: boolean;
   slots?: number;
   available?: boolean;
+  hasExtension?: boolean;
 };
 
 export interface SuppliersSliceState {

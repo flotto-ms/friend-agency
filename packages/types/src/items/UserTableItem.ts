@@ -19,6 +19,7 @@ export type UserTableItem = {
   access?: SeasonAccess;
   isFull?: boolean;
   allowFriendQuests?: boolean;
+  hasExtension?: boolean;
 };
 
 export type BanReason = "inactive" | "abusive";

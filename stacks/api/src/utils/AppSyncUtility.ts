@@ -73,6 +73,7 @@ export class AppSyncUtility {
       username: user.username,
       available: user.available ?? false,
       slots: user.slots ?? 0,
+      hasExtension: user.hasExtension ?? false,
     };
 
     const payload = {

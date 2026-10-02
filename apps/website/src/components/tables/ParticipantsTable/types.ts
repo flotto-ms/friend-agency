@@ -4,4 +4,5 @@ export type ParticipantItem = {
   country: string;
   available?: boolean;
   slots?: number;
+  hasExtension?: boolean;
 };

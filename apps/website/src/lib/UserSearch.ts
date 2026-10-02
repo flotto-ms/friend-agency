@@ -29,7 +29,12 @@ const processResponse = (data: Response<CallbackArgs>) => {
 
   if (data[0] === "response") {
     if (data[1][1] === "ApiEvent") {
-      const result = data[1][2][0].result;
+      const result = data[1][2][0].result.map((u: any) => {
+        if (u.username) {
+          return u;
+        }
+        return { ...u, username: `Anonymous${u.id}` };
+      });
       cb.accept(cb.build, result);
     } else {
       cb.accept(cb.build);

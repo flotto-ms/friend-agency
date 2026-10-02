@@ -130,7 +130,7 @@ export default function ParticipantPage() {
                   <UserLink
                     id={user.id}
                     country={user.country}
-                    username={user.username}
+                    username={user.username ?? `Anonymous${user.id}`}
                     href={`https://minesweeper.online/player/${user.id}`}
                   />
                 </CardTitle>

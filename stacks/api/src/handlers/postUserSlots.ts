@@ -15,7 +15,12 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   const data = JSON.parse(event.body ?? "{}") as SaveSlotsRequest;
   const user = await UserTable.getUser(parseInt(id));
   if (user) {
-    await UserTable.updateAvailability(parseInt(id), (user.allowFriendQuests ?? true) && data.slots < 10, data.slots);
+    await UserTable.updateAvailability(
+      parseInt(id),
+      (user.allowFriendQuests ?? true) && data.slots < 10,
+      data.slots,
+      true,
+    );
   }
 
   return {

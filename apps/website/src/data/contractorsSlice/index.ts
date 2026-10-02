@@ -8,6 +8,7 @@ export type ContractorUser = {
   country: string;
   slots?: number;
   available?: boolean;
+  hasExtension?: boolean;
 };
 
 export interface ContractorsSliceState {
