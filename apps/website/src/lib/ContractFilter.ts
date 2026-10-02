@@ -45,70 +45,72 @@ export const getAreaType = (quest: QuestSearchItem) => {
   };
 };
 
-export const getMatchingContracts = (quest: QuestSearchItem, contracts: ActiveContractItem[]) => {
-  return contracts.filter((contract) => {
-    if (contract.type !== quest.type) {
+const contractMatchesQuest = (contract: ActiveContractItem, quest: QuestSearchItem) => {
+  if (contract.type !== quest.type) {
+    return false;
+  }
+
+  if (!contract.filter) {
+    return true;
+  }
+
+  if (contract.filter.level) {
+    const filter = contract.filter.level as Filter;
+    const level = quest.level * (quest.elite ? 3 : 1);
+    if (!(filter.min <= level && level <= filter.max)) {
       return false;
     }
+  }
 
-    if (!contract.filter) {
-      return true;
+  if (contract.filter.required) {
+    const filter = contract.filter.required as Filter;
+    const required = quest.required;
+    if (!(filter.min <= required && required <= filter.max)) {
+      return false;
     }
+  }
 
-    if (contract.filter.level) {
-      const filter = contract.filter.level as Filter;
-      const level = quest.level * (quest.elite ? 3 : 1);
-      if (!(filter.min <= level && level <= filter.max)) {
-        return false;
-      }
+  if (contract.filter.arenaLevel && quest.options) {
+    const arena = getAreaType(quest);
+    const filter = contract.filter.arenaLevel as Filter;
+    if (!(filter.min <= arena.level && arena.level <= filter.max)) {
+      return false;
     }
+  }
 
-    if (contract.filter.required) {
-      const filter = contract.filter.required as Filter;
-      const required = quest.required;
-      if (!(filter.min <= required && required <= filter.max)) {
-        return false;
-      }
+  if (contract.filter.efficiency && quest.options) {
+    const filter = contract.filter.efficiency as Filter;
+    const eff = quest.options.eff as number;
+    if (!(filter.min <= eff && eff <= filter.max)) {
+      return false;
     }
+  }
 
-    if (contract.filter.arenaLevel && quest.options) {
-      const arena = getAreaType(quest);
-      const filter = contract.filter.arenaLevel as Filter;
-      if (!(filter.min <= arena.level && arena.level <= filter.max)) {
-        return false;
-      }
+  if (contract.filter.density && quest.options) {
+    const width = quest.options.sizeX as number;
+    const height = quest.options.sizeY as number;
+    const mines = quest.options.mines as number;
+
+    const percent = (mines / (width * height)) * 100;
+    const filter = contract.filter.density as Filter;
+    if (!(filter.min <= percent && percent <= filter.max)) {
+      return false;
     }
+  }
 
-    if (contract.filter.efficiency && quest.options) {
-      const filter = contract.filter.efficiency as Filter;
-      const eff = quest.options.eff as number;
-      if (!(filter.min <= eff && eff <= filter.max)) {
-        return false;
-      }
-    }
-
-    if (contract.filter.density && quest.options) {
-      const width = quest.options.sizeX as number;
-      const height = quest.options.sizeY as number;
-      const mines = quest.options.mines as number;
-
-      const percent = (mines / (width * height)) * 100;
-      const filter = contract.filter.density as Filter;
-      if (!(filter.min <= percent && percent <= filter.max)) {
-        return false;
-      }
-    }
-
-    return true;
-  });
+  return true;
 };
+
 export const getBestMatchingContract = (
   quest: QuestSearchItem,
   contracts: ActiveContractItem[],
   contractors: ContractorUser[],
   hideExchangeOnly: boolean,
 ): { contract: ActiveContractItem; color: string } | undefined => {
-  const matched = getMatchingContracts(quest, contracts).sort((a, b) => b.price - a.price);
+  const matched = contracts
+    .filter((contract) => contractMatchesQuest(contract, quest))
+    .sort((a, b) => b.price - a.price);
+
   if (matched.length === 0) {
     return undefined;
   }

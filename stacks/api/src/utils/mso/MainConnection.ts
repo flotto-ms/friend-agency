@@ -1,13 +1,64 @@
-import TokenUtils, { TokenType } from "../TokenUtils";
+import { MsoQuest } from "@flotto/types";
 
 export type MainConnection = {
   getQuests: () => Promise<any>;
-  getSendFriendQuestData: (friendId: number) => Promise<any>;
-  getNewExchangeData: (buyerId: number) => Promise<any>;
+  getSendFriendQuestData: (friendId: number) => Promise<GetSendFriendQuestDataResponse>;
+  getNewExchangeData: (buyerId: number) => Promise<GetNewExchangeDataResponse>;
   close: () => void;
 };
 
-type GetSendQuestDataResponse = {};
+export type GetSendFriendQuestDataResponse = {
+  friendData?: {
+    id: number;
+    username: string;
+    country: string;
+    allowFriendQuests: boolean;
+  };
+  isFull: boolean;
+  favoriteContacts: { userId: number; username: string; country: string }[];
+  isIncognito: boolean;
+};
+
+export type ExchangeUserInfo = {
+  coins: number;
+  items: Record<string, number> | null;
+  eq: Record<string, number> | null;
+  boosts: Record<string, number> | null;
+  username: string;
+  country: string;
+  rep: number;
+  ct: null;
+  tokensUsed: Record<string, any>;
+};
+
+export type GetNewExchangeDataResponse = {
+  isNotActive: boolean;
+  isAccessDenied: boolean;
+  exchange: {
+    sellerId: number;
+    buyerId: number;
+    sellerCoins: number;
+    sellerItems: Record<string, any> | null;
+    buyerCoins: null;
+    buyerItems: Record<string, any> | null;
+  };
+  sellerInfo: ExchangeUserInfo;
+  buyerInfo: ExchangeUserInfo;
+  sameIp: boolean;
+  customTalentData: Record<
+    string,
+    {
+      id: number;
+      type: string;
+      rarity: number;
+      affixes: [number, number][];
+      quality: number;
+      reqs: number;
+      exist: boolean;
+    }
+  > | null;
+  friendQuestData: Record<string, MsoQuest>;
+};
 
 type Request = {
   method: string;
@@ -16,10 +67,21 @@ type Request = {
   reject: (val: any) => void;
 };
 
-export const createConnection = async (type: TokenType) => {
-  const token = await TokenUtils.getToken(type);
+export type ConnectProps = {
+  authKey: string;
+  session: string;
+  userId: number;
+  build: number;
+};
+
+let build = 1033;
+
+export const createConnection = async (token: ConnectProps) => {
+  if (token.build > build) {
+    build = token.build;
+  }
+
   const server = "main" + (1 + (token.userId % 10));
-  let build = token.build;
   let requestCount = 1000;
 
   return new Promise<MainConnection>((accept, reject) => {
@@ -45,7 +107,9 @@ export const createConnection = async (type: TokenType) => {
     const createController = () => {
       const controller: MainConnection = {
         getQuests: () => queueRequest("GetQuestsWS"),
-        getSendFriendQuestData: (friendId: number) => queueRequest("GetSendFriendQuestDataWS", { friendId }),
+        getSendFriendQuestData: (friendId: number) => {
+          return queueRequest("GetSendFriendQuestDataWS", { friendId }).then(cleanFriendQuestData);
+        },
         getNewExchangeData: (buyerId: number) => queueRequest("GetNewExchangeDataWS", { buyerId }),
         close: () => socket.close(),
       };
@@ -88,6 +152,29 @@ export const createConnection = async (type: TokenType) => {
     };
   });
 };
+
+const cleanFriendQuestData = (r: GetSendFriendQuestDataResponse) => {
+  if (r.friendData) {
+    r.friendData.username = getUsername(r.friendData.id, r.friendData.username);
+    r.friendData.country = getCountry(r.friendData.country);
+  }
+  if (r.favoriteContacts) {
+    r.favoriteContacts.forEach((u) => {
+      u.username = getUsername(u.userId, u.username);
+      u.country = getCountry(u.country);
+    });
+  }
+  return r;
+};
+
+const getUsername = (id: number, username?: string) => {
+  if (username) {
+    return username;
+  }
+  return `Anonymous${id}`;
+};
+
+const getCountry = (country?: string) => country ?? "XX";
 
 export default {
   createConnection,

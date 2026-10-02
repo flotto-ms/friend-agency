@@ -27,7 +27,7 @@ type MsoQuestBase = {
 
 export type MsoQuestNG = MsoQuestBase & { options: MsoQuestLevelOptions };
 export type MsoQuestWinStreak = MsoQuestBase & { options: MsoQuestLevelOptions };
-export type MsoQuestEfficiency = MsoQuestBase & { options: MsoQuestLevelOptions };
+export type MsoQuestEfficiency = MsoQuestBase & { options: MsoQuestEfficiencyOptions };
 export type MsoQuestNoFlag = MsoQuestBase & { options: MsoQuestLevelOptions };
 export type MsoQuestGem = MsoQuestBase & { options: MsoQuestGemOptions };
 export type MsoQuestArena = MsoQuestBase & { options: MsoQuestArenaOptions };
@@ -56,6 +56,9 @@ export type MsoQuestArenaOptions = {
 
 export type MsoQuestLevelOptions = {
   level: MsoQuestLevel;
+};
+export type MsoQuestEfficiencyOptions = MsoQuestLevelOptions & {
+  eff: number;
 };
 
 export type MsoQuestOptions = MsoQuestCustomOptions | MsoQuestGemOptions | MsoQuestArenaOptions | MsoQuestLevelOptions;

@@ -2,6 +2,7 @@ import { ScheduledHandler } from "aws-lambda";
 import UserTable from "../utils/tables/UserTable";
 import MainConnection from "../utils/mso/MainConnection";
 import { UserTableItem } from "@flotto/types";
+import TokenUtils from "../utils/TokenUtils";
 
 const RATE_LIMIT_TIMEOUT = 100;
 const USER_LOAD_INTERVAL = 600_000; // 10 mins;
@@ -38,23 +39,25 @@ export const handler: ScheduledHandler = async () => {
   }
 
   if (users.length > 0) {
-    await MainConnection.createConnection("qqs").then(async (connection) => {
-      const batches = chunkArray(users);
-      for (const batch of batches) {
-        const tasks = batch.map((user) =>
-          (async () => {
-            let success = false;
-            let attempts = 0;
-            do {
-              success = await processUser(connection, user, ++attempts >= 4);
-            } while (!success && attempts < 4);
-          })(),
-        );
-        await Promise.all(tasks);
-      }
+    await TokenUtils.getToken("qqs")
+      .then(MainConnection.createConnection)
+      .then(async (connection) => {
+        const batches = chunkArray(users);
+        for (const batch of batches) {
+          const tasks = batch.map((user) =>
+            (async () => {
+              let success = false;
+              let attempts = 0;
+              do {
+                success = await processUser(connection, user, ++attempts >= 4);
+              } while (!success && attempts < 4);
+            })(),
+          );
+          await Promise.all(tasks);
+        }
 
-      connection.close();
-    });
+        connection.close();
+      });
   }
 };
 const chunkArray = <T>(arr: Array<T>, size = 2) => {
@@ -83,7 +86,7 @@ const processUser = async (
       cache[key] = current;
 
       if (!old || old.allowFriendQuests !== current.allowFriendQuests || old.isFull !== current.isFull) {
-        console.log(`${result.friendData.username} Changed`, current);
+        console.log(`${result.friendData?.username} Changed`, current);
         await UserTable.updateQqs(user.id, current.allowFriendQuests, current.isFull);
       }
       return true;

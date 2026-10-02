@@ -1,11 +1,11 @@
 import type { APIGatewayProxyEvent } from "aws-lambda";
-import { getItem, queryItems } from "../utils/DynamoDbUtils";
-import { MsoQuest, UserTableItem } from "@flotto/types";
+import { getItem } from "../utils/DynamoDbUtils";
+import { UserTableItem } from "@flotto/types";
 import { createCSV, getFlottoQuestType, getQuestDescription } from "@flotto/utils";
 import { getUserQuestPrices } from "./getUserQuests/getPrices";
-import { getUserReceivedQuests, getUserSentQuests, getUserSentQuestsDate } from "./getUserQuests/getQuests";
+import { getUserReceivedQuests, getUserSentQuests } from "./getUserQuests/getQuests";
 import RequestUtils from "../utils/RequestUtils";
-import GetQuests from "../utils/mso/GetQuests";
+import FriendQuests from "../utils/mso/FriendQuests";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   const id = event.pathParameters?.id;
@@ -47,7 +47,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
 
   if (type === "unsent") {
-    const promise = GetQuests.getQuests(userId);
+    const promise = FriendQuests.getQuests(userId);
     const unsent = await promise.then((r) => {
       return r.map((quest) => ({
         ...quest,
