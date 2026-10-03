@@ -40,6 +40,18 @@ const getContract = async (id: string) => {
   return fetch(`/api/contracts/${id}`, withAuth()).then(handleResponse);
 };
 
+const endContract = async (id: string) => {
+  const [userId, rateId] = id.split("_");
+  return fetch(
+    `/api/users/${userId}/rates/${rateId}`,
+    withAuth({
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: false }),
+    }),
+  ).then(handleResponse);
+};
+
 const getUser = async (id: string = "current") => {
   return fetch(`/api/users/${id}`, withAuth()).then(handleResponse);
 };
@@ -113,9 +125,15 @@ const deleteGroup = async (id: string) => {
 const api = {
   getUser,
   getUnsentQuests,
+  admin: {
+    setUserAccess: (id: string, access: "contractor" | "supplier" | "member") => {
+      return updateUser({ access }, id);
+    },
+  },
   contract: {
     list: listContracts,
     get: getContract,
+    end: endContract,
   },
   user: {
     list: listUsers,

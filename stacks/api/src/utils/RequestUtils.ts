@@ -44,7 +44,25 @@ const isAdmin = async (event: APIGatewayProxyEvent) => {
   return Boolean((claims as JwtPayload).admin) ?? false;
 };
 
+const getAuth = async (event: APIGatewayProxyEvent) => {
+  const header = event.headers["Authorization"];
+  if (!header) {
+    return undefined;
+  }
+
+  const token = header.replace("Bearer ", "");
+  const claims = (await JwtUtils.verify(token)) as JwtPayload;
+  if (!claims) {
+    return undefined;
+  }
+  return {
+    userId: parseInt(claims.sub ?? ""),
+    admin: Boolean(claims.admin),
+  };
+};
+
 export default {
   getUserId,
+  getAuth,
   isAdmin,
 };

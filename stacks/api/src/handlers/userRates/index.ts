@@ -11,6 +11,7 @@ import { deleteRate } from "./methods/delete";
 export const handler = async (event: APIGatewayProxyEvent) => {
   console.debug(event);
   try {
+    const auth = await RequestUtils.getAuth(event);
     const id = await RequestUtils.getUserId(event).catch((ex) => {
       console.error(ex);
       return 0;
@@ -24,7 +25,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       return ResponseUtils.unauthorised("Unknown User");
     }
 
-    if (event.pathParameters?.id !== "current" && parseInt(event.pathParameters!.id!) !== id) {
+    if (event.pathParameters?.id !== "current" && id !== auth?.userId && !auth?.admin) {
       return ResponseUtils.unauthorised("You can only manage your own rates");
     }
 
@@ -54,6 +55,9 @@ export const handler = async (event: APIGatewayProxyEvent) => {
         return getRate(user, rateId);
       case "PUT": {
         const body = JSON.parse(event.body ?? "{}");
+        if (user.ratesLocked && body.enabled) {
+          return ResponseUtils.badRequest("Rates are locked");
+        }
         return updateRate(user, rateId, body);
       }
       case "DELETE":

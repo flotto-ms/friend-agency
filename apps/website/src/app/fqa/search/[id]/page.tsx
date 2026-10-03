@@ -51,17 +51,22 @@ export default function SearchQuestPage() {
 
   useEffect(() => {
     if (activeStatus === "init") {
+      console.log(activeStatus);
       dispatch(loadActiveContractsAction());
     }
+  }, [activeStatus, dispatch]);
 
+  useEffect(() => {
     if (contractorsStatus === "init") {
       dispatch(loadContractorsAction());
     }
+  }, [contractorsStatus, dispatch]);
 
+  useEffect(() => {
     if (searchStatus === "init") {
       dispatch(initSearch());
     }
-  }, [activeStatus, contractorsStatus, searchStatus, dispatch]);
+  }, [searchStatus, dispatch]);
 
   const selectedQuest = useMemo(() => quests.find((quest) => quest.id === questId), [quests, questId]);
 

@@ -10,6 +10,7 @@ import UserTable from "../../utils/tables/UserTable";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   console.debug(event);
+  const auth = await RequestUtils.getAuth(event);
   const id = await RequestUtils.getUserId(event).catch((ex) => {
     console.error(ex);
     return 0;
@@ -23,7 +24,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     return ResponseUtils.unauthorised("Unknown User");
   }
 
-  if (event.pathParameters!.id !== "current" && parseInt(event.pathParameters!.id!) !== id) {
+  if (event.pathParameters!.id !== "current" && id !== auth?.userId && !auth?.admin) {
     return ResponseUtils.unauthorised("You can only manage your own groups");
   }
 

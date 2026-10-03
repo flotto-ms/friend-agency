@@ -73,7 +73,7 @@ const RateGroups: React.FC<RateGroupProps> = ({
       allEnabled: false,
     };
 
-    data.allEnabled = data.rates.filter((r) => r.enabled).length === data.rates.length;
+    data.allEnabled = slice.locked || data.rates.filter((r) => r.enabled).length === data.rates.length;
 
     return data;
   }, [slice, selectedGroupId]);
@@ -159,7 +159,7 @@ const RateGroups: React.FC<RateGroupProps> = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => onGroupEnable(true)}>
+              <DropdownMenuItem disabled={slice.locked} onClick={() => onGroupEnable(true)}>
                 <CirclePlus />
                 Enable All
               </DropdownMenuItem>

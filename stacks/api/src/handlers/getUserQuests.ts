@@ -3,7 +3,7 @@ import { getItem } from "../utils/DynamoDbUtils";
 import { UserTableItem } from "@flotto/types";
 import { createCSV, getFlottoQuestType, getQuestDescription } from "@flotto/utils";
 import { getUserQuestPrices } from "./getUserQuests/getPrices";
-import { getUserReceivedQuests, getUserSentQuests } from "./getUserQuests/getQuests";
+import { getUserReceivedQuests, getUserSentQuests, getUserSentQuestsDate } from "./getUserQuests/getQuests";
 import RequestUtils from "../utils/RequestUtils";
 import FriendQuests from "../utils/mso/FriendQuests";
 
@@ -39,6 +39,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
   if (type === "prices") {
     const prices = await getUserQuestPrices(userId);
+
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
@@ -47,8 +48,7 @@ export const handler = async (event: APIGatewayProxyEvent) => {
   }
 
   if (type === "unsent") {
-    const promise = FriendQuests.getQuests(userId);
-    const unsent = await promise.then((r) => {
+    const unsent = await FriendQuests.getQuests(userId).then((r) => {
       return r.map((quest) => ({
         ...quest,
         type: getFlottoQuestType(quest),

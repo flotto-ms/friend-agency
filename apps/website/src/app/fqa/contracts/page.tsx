@@ -130,7 +130,7 @@ function ContractsPageContent() {
           </div>
         </div>
 
-        <ContractList view={view} cards={cards} />
+        <ContractList view={view} cards={cards} resetRef={questTypeFilter} />
       </div>
     </Centered>
   );

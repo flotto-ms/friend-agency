@@ -8,18 +8,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import { generateColumns } from "./columns";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useMemo, useState } from "react";
-import { Pencil } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const RateTable: React.FC<{
   data: RateItem[];
   loading?: boolean;
+  locked?: boolean;
   onRowSelectionChange?: (state: RowSelectionState) => void;
   onRowDelete?: (id: string) => void;
-}> = ({ data, loading = false, onRowSelectionChange, onRowDelete }) => {
+}> = ({ data, loading = false, locked = false, onRowSelectionChange, onRowDelete }) => {
   const [selection, setSelection] = useState({});
   const [isMobile, setIsMobile] = useState(false);
-  const columns = generateColumns(onRowDelete);
+  const columns = generateColumns(onRowDelete, locked);
 
   useEffect(() => {
     setSelection({});

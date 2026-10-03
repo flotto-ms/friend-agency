@@ -14,6 +14,7 @@ import { useStore } from "react-redux";
 const contractEventsChannel = "contracts/updates";
 const initialRetryDelay = 1_000;
 const maxRetryDelay = 30_000;
+const keepAliveDuration = 62_500;
 
 const getBase64URLEncoded = (authorization: any) => {
   return btoa(JSON.stringify(authorization)).replaceAll("+", "-").replaceAll("/", "_").replaceAll(/=+$/g, "");
@@ -41,6 +42,7 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
     let socket: WebSocket | null = null;
     let lastDisconnect: number | undefined = Date.now();
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let kaTimeout: ReturnType<typeof setTimeout> | null = null;
     let retryAttempt = 0;
     let disposed = false;
 
@@ -80,11 +82,13 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
         currentSocket = new WebSocket(url, proto);
         socket = currentSocket;
       } catch {
+        console.log("Error creating socket");
         scheduleReconnect();
         return;
       }
 
       currentSocket.addEventListener("open", () => {
+        console.log("socket opened");
         currentSocket.send(
           JSON.stringify({
             type: "connection_init",
@@ -106,6 +110,7 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
         if (lastDisconnect) {
           const downtime = Date.now() - lastDisconnect;
           if (downtime > 10_000) {
+            console.log("resync data");
             if (selectActiveContractsStatus(store.getState()) === "loaded") {
               dispatch(loadActiveContractsAction());
             }
@@ -122,6 +127,16 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
       currentSocket.addEventListener("message", (event) => {
         try {
           const message = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+          if (message.type === "ka") {
+            if (kaTimeout) {
+              clearTimeout(kaTimeout);
+            }
+            kaTimeout = setTimeout(() => {
+              console.log("socket timeout");
+              currentSocket.close();
+            }, keepAliveDuration);
+            return;
+          }
           const contractEvent = JSON.parse(message.event);
           const channel = (message as Record<string, unknown>)?.channel as string | undefined;
           if (!contractEvent || (channel && channel !== contractEventsChannel)) {
@@ -145,11 +160,16 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
         }
       });
 
-      currentSocket.addEventListener("error", () => {
+      currentSocket.addEventListener("error", (e) => {
+        console.log("socket error", e);
         currentSocket.close();
       });
 
       currentSocket.addEventListener("close", () => {
+        console.log("socket closed");
+        if (kaTimeout) {
+          clearTimeout(kaTimeout);
+        }
         if (socket === currentSocket) {
           socket = null;
         }
@@ -161,8 +181,12 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     return () => {
       disposed = true;
-      if (reconnectTimeout !== null) {
+      console.log("disposed");
+      if (reconnectTimeout) {
         clearTimeout(reconnectTimeout);
+      }
+      if (kaTimeout) {
+        clearTimeout(kaTimeout);
       }
       socket?.close();
     };

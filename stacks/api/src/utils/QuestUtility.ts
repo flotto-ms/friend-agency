@@ -25,7 +25,7 @@ const getFlottoDetails = async (quest: ReceivedQuestTableItem | SentQuestTableIt
     type: getFlottoQuestType(quest),
     status: "Ignored",
   };
-  if (!user) {
+  if (!user?.access) {
     return details;
   }
 

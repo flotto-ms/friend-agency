@@ -42,17 +42,11 @@ const updateDetails = async (id: number, username?: string, country?: string) =>
   });
 };
 
-const updateAccess = async (id: number, access: string) => {
-  const user = await getUser(id);
-
-  if (user?.access === "contractor" || user?.access === access) {
-    return user;
-  }
-
+const updateAccess = async (id: number, access: SeasonAccess | "member") => {
   const updatedUser = await DynamoDbUtils.updateItem<UserTableItem>({
     Key: { id },
     TableName: process.env.USER_TABLE!,
-    Attrs: { access },
+    Attrs: { access: access === "member" ? null : access },
     Upsert: false,
   });
 

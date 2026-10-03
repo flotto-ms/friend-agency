@@ -36,6 +36,7 @@ const initialState: ActiveContractsSliceState = {
 };
 
 const loadActiveContracts = async () => {
+  console.log("load contracts");
   const response = await api.contract.list();
   return response.contracts ?? [];
 };

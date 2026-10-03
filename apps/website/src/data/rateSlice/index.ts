@@ -11,12 +11,14 @@ import api from "@/lib/api";
 
 export interface RateSliceState {
   status: "init" | "loading" | "failed" | "loaded";
+  locked: boolean;
   rates: GetRateResponse["rates"];
   groups: GetRateResponse["groups"];
 }
 
 const initialState: RateSliceState = {
   status: "init",
+  locked: false,
   rates: {},
   groups: {},
 };
@@ -102,6 +104,7 @@ export const rateSlice = createAppSlice({
       },
       fulfilled: (state, action) => {
         state.status = "loaded";
+        state.locked = action.payload.locked;
         state.rates = action.payload.rates;
         state.groups = action.payload.groups;
       },

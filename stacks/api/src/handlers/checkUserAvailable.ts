@@ -30,8 +30,8 @@ export const handler: ScheduledHandler = async () => {
     if (Object.keys(cache).length === 0) {
       users.forEach((u) => {
         cache[u.id.toString()] = {
-          isFull: u.isFull ?? false,
-          allowFriendQuests: u.allowFriendQuests ?? true,
+          isFull: u.isFull ?? true,
+          allowFriendQuests: u.allowFriendQuests ?? false,
         };
       });
     }

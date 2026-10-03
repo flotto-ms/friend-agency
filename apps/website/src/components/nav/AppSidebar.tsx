@@ -100,30 +100,26 @@ const data = {
         },
       ],
     },
-    /*
     {
       title: "Documentation",
-      url: "#",
+      url: "/docs/get-started",
       icon: BookOpen,
       items: [
         {
-          title: "Introduction",
-          url: "#",
-        },
-        {
           title: "Get Started",
-          url: "#",
+          url: "/docs/get-started",
         },
         {
-          title: "Tutorials",
-          url: "#",
+          title: "Sending Quests",
+          url: "/docs/send-quests",
         },
         {
-          title: "Changelog",
-          url: "#",
+          title: "Sending Exchanges",
+          url: "/docs/send-exchanges",
         },
       ],
     },
+    /*
     {
       title: "Settings",
       url: "#",

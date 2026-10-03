@@ -20,6 +20,7 @@ import { deleteGroup, deleteRate, loadInitialRates, resetStopped, selectRates, s
 import { Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import Link from "next/link";
 
 const RateEditor: React.FC = () => {
   const [confirmDelete, setConfirmDelete] = useState<"group" | "rate" | undefined>();
@@ -93,12 +94,26 @@ const RateEditor: React.FC = () => {
       <h1 className="text-3xl font-semibold text-center mb-6">Your Rates</h1>
       <Card className="mb-6 max-md:hidden">
         <CardHeader>
-          <CardTitle>Tip</CardTitle>
+          <CardTitle>{slice.locked ? "Account Restricted" : "Tip"}</CardTitle>
           <CardDescription>
-            <p>
-              Group rates by selecting rows and clicking the + button from the group selector below...{" "}
-              {Object.keys(slice.groups).length === 0 && `(currently only shows 'all' as you have not created any yet)`}
-            </p>
+            {slice.locked ? (
+              <>
+                <p className="mb-2">Your account has been restricted, rates cannot be enabled.</p>
+                <p>
+                  Please speak to one of our moderators on{" "}
+                  <Link className="text-blue-400 hover:underline" href="/about/discord">
+                    Discord
+                  </Link>{" "}
+                  for more information.
+                </p>
+              </>
+            ) : (
+              <p>
+                Group rates by selecting rows and clicking the + button from the group selector below...{" "}
+                {Object.keys(slice.groups).length === 0 &&
+                  `(currently only shows 'all' as you have not created any yet)`}
+              </p>
+            )}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -110,7 +125,13 @@ const RateEditor: React.FC = () => {
         onGroupEnable={onGroupEnable}
       />
 
-      <RateTable data={rates} loading={!loaded} onRowSelectionChange={setSelectedRows} onRowDelete={onRateDelete} />
+      <RateTable
+        data={rates}
+        locked={slice.locked}
+        loading={!loaded}
+        onRowSelectionChange={setSelectedRows}
+        onRowDelete={onRateDelete}
+      />
 
       <AlertDialog open={Boolean(confirmDelete)} onOpenChange={() => setConfirmDelete(undefined)}>
         <AlertDialogContent>

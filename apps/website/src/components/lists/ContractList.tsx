@@ -1,16 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ContractCard, { ContractCardProps } from "../ContractCard";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import ContractTable from "../tables/ContractTable";
 import { View } from "../tabs/ContractView";
 
-const ContractList: React.FC<{ view: View; cards: ContractCardProps["contract"][]; empty?: string }> = ({
-  cards,
-  view = "card",
-  empty = "No offers right now.",
-}) => {
+const ContractList: React.FC<{
+  view: View;
+  cards: ContractCardProps["contract"][];
+  empty?: string;
+  resetRef?: string | number | boolean;
+}> = ({ cards, view = "card", empty = "No offers right now.", resetRef = "" }) => {
   const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    setPage(0);
+  }, [resetRef]);
 
   const pageSize = 12;
 

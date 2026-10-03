@@ -24,7 +24,7 @@ import { useAppDispatch, useAppSelector } from "@/data/hooks";
 import { selectAuth } from "@/data/authSlice";
 import { resetStopped, setRateEnabled } from "@/data/rateSlice";
 
-export const generateColumns = (onRateDelete?: (id: string) => void) => {
+export const generateColumns = (onRateDelete?: (id: string) => void, locked = false) => {
   const columns: ColumnDef<RateItem>[] = [
     {
       id: "select",
@@ -72,7 +72,7 @@ export const generateColumns = (onRateDelete?: (id: string) => void) => {
     {
       id: "enabled",
       header: () => <div className="text-center">Enabled </div>,
-      cell: ({ row }) => <RateSwitcher rate={row.original} />,
+      cell: ({ row }) => <RateSwitcher locked={locked} rate={row.original} />,
     },
     {
       accessorKey: "rate",
@@ -137,7 +137,7 @@ export const generateColumns = (onRateDelete?: (id: string) => void) => {
     return <Badge className="bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">Unsubscribed</Badge>;
   };
 
-  const RateSwitcher: React.FC<{ rate: RateItem }> = ({ rate }) => {
+  const RateSwitcher: React.FC<{ rate: RateItem; locked: boolean }> = ({ rate }) => {
     const dispatch = useAppDispatch();
     const onClick = () => {
       dispatch(setRateEnabled({ id: rate.id, enabled: !rate.enabled }));
@@ -148,7 +148,7 @@ export const generateColumns = (onRateDelete?: (id: string) => void) => {
 
     return (
       <div className="w-[85px] flex items-center justify-center">
-        <Switch checked={rate.enabled} onClick={onClick} />
+        <Switch checked={rate.enabled} disabled={!rate.enabled && locked} onClick={onClick} />
       </div>
     );
   };

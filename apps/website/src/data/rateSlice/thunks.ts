@@ -4,6 +4,7 @@ import { getQuestDescription } from "@/components/QuestTypeSelect";
 import { getFilterDescription } from "@/lib/FilterDesc";
 
 export type GetRateResponse = {
+  locked: boolean;
   rates: Record<string, Omit<RateItem, "id">>;
   groups: Record<string, { label: string }>;
 };
@@ -11,6 +12,7 @@ export type GetRateResponse = {
 export const fetchRates = async (userId?: number) => {
   const user = await api.user.get(userId ? userId.toString() : "current");
   const response: GetRateResponse = {
+    locked: user.ratesLocked ?? false,
     rates: {},
     groups: user.groups ?? {},
   };

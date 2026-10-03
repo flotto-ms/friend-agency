@@ -4,6 +4,7 @@ import { getFilterDescription } from "@/lib/FilterDesc";
 import { getQuestDescription } from "@/components/QuestTypeSelect";
 import UserLink from "./UserLink";
 import AvailableBadge from "./badges/AvailableBadge";
+import ExchangeBadge from "./badges/ExchangeBadge";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -77,13 +78,7 @@ export default function ContractCard({ contract, href }: ContractCardProps) {
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Price</span>
             <span className="font-medium">
-              {contract.preferExchange && (
-                <span
-                  className={`inline-flex mr-2 items-center rounded-full px-2 py-1 text-[10px] font-medium bg-emerald-100 text-yellow-500 dark:bg-yellow-950 dark:text-yellow-200`}
-                >
-                  Exchange Only
-                </span>
-              )}
+              {contract.preferExchange && <ExchangeBadge />}
               {contract.price}
             </span>
           </div>

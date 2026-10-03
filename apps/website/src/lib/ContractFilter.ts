@@ -101,16 +101,17 @@ const contractMatchesQuest = (contract: ActiveContractItem, quest: QuestSearchIt
   return true;
 };
 
+export const getMatchingContracts = (quest: QuestSearchItem, contracts: ActiveContractItem[]) => {
+  return contracts.filter((contract) => contractMatchesQuest(contract, quest));
+};
+
 export const getBestMatchingContract = (
   quest: QuestSearchItem,
   contracts: ActiveContractItem[],
   contractors: ContractorUser[],
   hideExchangeOnly: boolean,
 ): { contract: ActiveContractItem; color: string } | undefined => {
-  const matched = contracts
-    .filter((contract) => contractMatchesQuest(contract, quest))
-    .sort((a, b) => b.price - a.price);
-
+  const matched = getMatchingContracts(quest, contracts).sort((a, b) => b.price - a.price);
   if (matched.length === 0) {
     return undefined;
   }

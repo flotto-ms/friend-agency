@@ -13,6 +13,7 @@ export type UserTableItem = {
   admin?: boolean;
   slots?: number;
   available?: boolean;
+  ratesLocked?: boolean;
   rates?: Record<string, Rate>;
   groups?: Record<string, Group>;
   season?: Record<string, SeasonAccess>;
