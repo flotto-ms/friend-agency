@@ -77,7 +77,7 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
       currentSocket.addEventListener("open", () => {
         sendHandshake(currentSocket);
         const downtime = Date.now() - lastKa;
-        if (downtime > 10_000) {
+        if (lastKa && downtime > 10_000) {
           resyncData(store);
         }
         lastKa = 0;
@@ -160,6 +160,7 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 const resyncData = (store: AppStore) => {
+  console.log("resync data");
   if (selectActiveContractsStatus(store.getState()) === "loaded") {
     store.dispatch(loadActiveContractsAction());
   }

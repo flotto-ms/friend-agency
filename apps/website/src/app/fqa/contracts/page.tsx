@@ -64,7 +64,6 @@ function ContractsPageContent() {
     if (activeStatus === "init") {
       dispatch(loadActiveContractsAction());
     }
-
     if (contractorsStatus === "init") {
       dispatch(loadContractorsAction());
     }
