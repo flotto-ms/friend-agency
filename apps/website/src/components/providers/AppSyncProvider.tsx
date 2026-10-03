@@ -7,9 +7,13 @@ import {
   selectActiveContractsStatus,
 } from "@/data/activeContractsSlice";
 import { type PropsWithChildren, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/data/hooks";
+import { useAppSelector, useAppStore } from "@/data/hooks";
 import { loadContractorsAction, selectContractorsStatus, updateContractor } from "@/data/contractorsSlice";
-import { useStore } from "react-redux";
+import { AppStore } from "@/data/store";
+
+const realtimeDomain = process.env.NEXT_PUBLIC_CONTRACT_EVENTS_REALTIME_DOMAIN;
+const httpDomain = process.env.NEXT_PUBLIC_CONTRACT_EVENTS_HTTP_DOMAIN;
+const apiKey = process.env.NEXT_PUBLIC_CONTRACT_EVENTS_API_KEY;
 
 const contractEventsChannel = "contracts/updates";
 const initialRetryDelay = 1_000;
@@ -24,25 +28,21 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const contractStatus = useAppSelector(selectActiveContractsStatus);
   const contractorStatus = useAppSelector(selectContractorsStatus);
   const listenForChanges = contractStatus !== "init" || contractorStatus !== "init";
-  const dispatch = useAppDispatch();
-  const store = useStore<any>();
+  const store = useAppStore();
 
   useEffect(() => {
     if (typeof window === "undefined" || !listenForChanges) {
       return;
     }
 
-    const realtimeDomain = process.env.NEXT_PUBLIC_CONTRACT_EVENTS_REALTIME_DOMAIN;
-    const httpDomain = process.env.NEXT_PUBLIC_CONTRACT_EVENTS_HTTP_DOMAIN;
-    const apiKey = process.env.NEXT_PUBLIC_CONTRACT_EVENTS_API_KEY;
     if (!realtimeDomain || !httpDomain || !apiKey) {
       return;
     }
 
     let socket: WebSocket | null = null;
-    let lastDisconnect: number | undefined = Date.now();
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     let kaTimeout: ReturnType<typeof setTimeout> | null = null;
+    let lastKa: number = 0;
     let retryAttempt = 0;
     let disposed = false;
 
@@ -64,64 +64,24 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
         return;
       }
 
-      if (!lastDisconnect) {
-        lastDisconnect = Date.now();
-      }
-
-      const data = {
-        host: httpDomain,
-        "x-api-key": apiKey,
-        "x-amz-date": new Date().toISOString().replace(/[:-]|\.\d{3}/g, ""),
-      };
-      const header = getBase64URLEncoded(data);
-      const url = `wss://${realtimeDomain}/event/realtime`;
-      const proto = [`header-${header}`, "aws-appsync-event-ws"];
-
       let currentSocket: WebSocket;
+      const parms = createConnectionParams();
       try {
-        currentSocket = new WebSocket(url, proto);
+        currentSocket = new WebSocket(parms.url, parms.proto);
         socket = currentSocket;
       } catch {
-        console.log("Error creating socket");
         scheduleReconnect();
         return;
       }
 
       currentSocket.addEventListener("open", () => {
-        console.log("socket opened");
-        currentSocket.send(
-          JSON.stringify({
-            type: "connection_init",
-            payload: { Authorization: apiKey },
-          }),
-        );
-        currentSocket.send(
-          JSON.stringify({
-            type: "subscribe",
-            channel: contractEventsChannel,
-            id: "contract_updates",
-            authorization: {
-              "x-api-key": apiKey,
-              host: httpDomain,
-            },
-          }),
-        );
-
-        if (lastDisconnect) {
-          const downtime = Date.now() - lastDisconnect;
-          if (downtime > 10_000) {
-            console.log("resync data");
-            if (selectActiveContractsStatus(store.getState()) === "loaded") {
-              dispatch(loadActiveContractsAction());
-            }
-            if (selectContractorsStatus(store.getState()) === "loaded") {
-              dispatch(loadContractorsAction());
-            }
-          }
+        sendHandshake(currentSocket);
+        const downtime = Date.now() - lastKa;
+        if (downtime > 10_000) {
+          resyncData(store);
         }
-
+        lastKa = 0;
         retryAttempt = 0;
-        lastDisconnect = undefined;
       });
 
       currentSocket.addEventListener("message", (event) => {
@@ -131,8 +91,14 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
             if (kaTimeout) {
               clearTimeout(kaTimeout);
             }
+
+            if (lastKa > 0 && Date.now() - lastKa > keepAliveDuration) {
+              currentSocket.close();
+              return;
+            }
+
+            lastKa = Date.now();
             kaTimeout = setTimeout(() => {
-              console.log("socket timeout");
               currentSocket.close();
             }, keepAliveDuration);
             return;
@@ -145,14 +111,14 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
           switch (contractEvent.eventType) {
             case "contract_started":
-              dispatch(addContractAction(contractEvent.contract));
+              store.dispatch(addContractAction(contractEvent.contract));
               break;
             case "contract_ended":
-              dispatch(removeContractAction(contractEvent.contract));
+              store.dispatch(removeContractAction(contractEvent.contract));
               break;
             case "contractor_updated":
             case "contractor_created":
-              dispatch(updateContractor(contractEvent.contractor));
+              store.dispatch(updateContractor(contractEvent.contractor));
               break;
           }
         } catch {
@@ -166,7 +132,6 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
       });
 
       currentSocket.addEventListener("close", () => {
-        console.log("socket closed");
         if (kaTimeout) {
           clearTimeout(kaTimeout);
         }
@@ -181,7 +146,6 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     return () => {
       disposed = true;
-      console.log("disposed");
       if (reconnectTimeout) {
         clearTimeout(reconnectTimeout);
       }
@@ -190,7 +154,52 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
       }
       socket?.close();
     };
-  }, [dispatch, listenForChanges]);
+  }, [store, listenForChanges]);
 
   return <>{children}</>;
+};
+
+const resyncData = (store: AppStore) => {
+  if (selectActiveContractsStatus(store.getState()) === "loaded") {
+    store.dispatch(loadActiveContractsAction());
+  }
+  if (selectContractorsStatus(store.getState()) === "loaded") {
+    store.dispatch(loadContractorsAction());
+  }
+};
+
+const createConnectionParams = () => {
+  const data = {
+    host: httpDomain,
+    "x-api-key": apiKey,
+    "x-amz-date": new Date().toISOString().replace(/[:-]|\.\d{3}/g, ""),
+  };
+  const header = getBase64URLEncoded(data);
+  const url = `wss://${realtimeDomain}/event/realtime`;
+  const proto = [`header-${header}`, "aws-appsync-event-ws"];
+
+  return {
+    url,
+    proto,
+  };
+};
+
+const sendHandshake = (socket: WebSocket) => {
+  socket.send(
+    JSON.stringify({
+      type: "connection_init",
+      payload: { Authorization: apiKey },
+    }),
+  );
+  socket.send(
+    JSON.stringify({
+      type: "subscribe",
+      channel: contractEventsChannel,
+      id: "contract_updates",
+      authorization: {
+        "x-api-key": apiKey,
+        host: httpDomain,
+      },
+    }),
+  );
 };

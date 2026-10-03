@@ -36,7 +36,6 @@ const initialState: ActiveContractsSliceState = {
 };
 
 const loadActiveContracts = async () => {
-  console.log("load contracts");
   const response = await api.contract.list();
   return response.contracts ?? [];
 };
@@ -74,14 +73,18 @@ export const activeContractsSlice = createAppSlice({
     }),
     loadActiveContracts: create.asyncThunk(loadActiveContracts, {
       pending: (state) => {
-        state.status = "loading";
+        if (state.status === "init" || state.status === "failed") {
+          state.status = "loading";
+        }
       },
       fulfilled: (state, action) => {
         state.status = "loaded";
         state.contracts = action.payload;
       },
       rejected: (state) => {
-        state.status = "failed";
+        if (state.status === "loading") {
+          state.status = "failed";
+        }
       },
     }),
   }),

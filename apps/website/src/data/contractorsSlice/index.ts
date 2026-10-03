@@ -32,14 +32,18 @@ export const contractorsSlice = createAppSlice({
   reducers: (create) => ({
     loadContractors: create.asyncThunk(loadContractors, {
       pending: (state) => {
-        state.status = "loading";
+        if (state.status === "init" || state.status === "failed") {
+          state.status = "loading";
+        }
       },
       fulfilled: (state, action) => {
         state.status = "loaded";
         state.contractors = action.payload;
       },
       rejected: (state) => {
-        state.status = "failed";
+        if (state.status === "loading") {
+          state.status = "failed";
+        }
       },
     }),
     updateContractor: create.reducer((state, action: PayloadAction<ContractorUser>) => {
