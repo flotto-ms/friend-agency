@@ -62,14 +62,14 @@ const QuestSearchTable: React.FC<{
 
   return (
     <div className="w-full max-w-300">
-      <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold">Available Quests</h1>
           <p className="text-sm text-muted-foreground mt-2">Match your quests with available contractors.</p>
         </div>
-        <div className="flex max-w-sm items-end  gap-2">
-          <div className="flex-1 min-w-[250px]">
-            {(table.getRowModel().rows?.length ?? 0) > 0 && (
+        {(table.getRowModel().rows?.length ?? 0) > 0 && (
+          <div className="flex max-w-sm items-end  gap-2">
+            <div className="flex-1 min-w-[250px]">
               <FieldLabel htmlFor="switch-exchange-mode">
                 <Field orientation="horizontal" className="max-w-sm">
                   <FieldContent>
@@ -82,9 +82,9 @@ const QuestSearchTable: React.FC<{
                   />
                 </Field>
               </FieldLabel>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {table.getRowModel().rows?.length ? (
@@ -129,7 +129,7 @@ const QuestSearchTable: React.FC<{
           </Button>
         </>
       ) : (
-        <Card className="mb-6 max-md:hidden">
+        <Card className="mb-6">
           <CardHeader>
             <CardTitle>No Quests</CardTitle>
             <CardDescription>

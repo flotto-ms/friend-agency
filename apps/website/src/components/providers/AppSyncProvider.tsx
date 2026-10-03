@@ -160,7 +160,6 @@ export const AppSyncProvider: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 const resyncData = (store: AppStore) => {
-  console.log("resync data");
   if (selectActiveContractsStatus(store.getState()) === "loaded") {
     store.dispatch(loadActiveContractsAction());
   }

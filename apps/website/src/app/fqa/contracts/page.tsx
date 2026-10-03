@@ -116,7 +116,7 @@ function ContractsPageContent() {
   return (
     <Centered>
       <div className="w-full max-w-300">
-        <div className="mb-6 flex items-start justify-between gap-4">
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">Current Offers</h1>
             <p className="text-sm text-muted-foreground mt-2">Current offers available by our contractors.</p>
