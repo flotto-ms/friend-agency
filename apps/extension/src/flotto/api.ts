@@ -4,9 +4,6 @@ import { updatePrices } from "../utils/PriceData";
 const base = "https://flotto.vercel.app/api";
 
 let lastValue = 100;
-let timeout = Date.now();
-
-const MINS_30 = 1_800_000;
 const MAX_QUESTS = 100;
 
 export const FlottoApi = {
@@ -25,12 +22,11 @@ export const FlottoApi = {
       .catch((ex) => console.error(ex));
   },
   postSlots: async (userId: number, slots: number) => {
-    if (Date.now() < timeout && lastValue === slots) {
+    if (lastValue === slots) {
       return;
     }
 
     lastValue = slots;
-    timeout = Date.now() + MINS_30;
     const url = `${base}/users/${userId}/slots`;
 
     return fetch(url, { method: "POST", body: JSON.stringify({ slots }) })

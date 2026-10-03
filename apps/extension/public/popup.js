@@ -1,4 +1,7 @@
-document.addEventListener('DOMContentLoaded', function () {
+let contractors;
+let suppliers;
+
+document.addEventListener("DOMContentLoaded", function () {
   const toggleListBtn = document.getElementById("toggleListBtn");
   const contractorsListDiv = document.getElementById("contractors-list");
   const clientsListDiv = document.getElementById("clients-list");
@@ -40,116 +43,64 @@ document.addEventListener('DOMContentLoaded', function () {
     spinner.style.display = "none";
   }
 
-  // Helper function to fetch and parse CSV data from Google Sheets
-  function fetchSheetData(url, callback) {
+  const getUsers = async (type) => {
     startLoading();
-    fetch(url)
-      .then(response => response.text())
-      .then(data => {
-        const rows = data.split("\n").slice(1); // Skip header
-        const result = rows
-          .map(row => row.split(","))
-          .filter(cols => cols.length >= 2)
-          .map(cols => ({
-            name: cols[0].trim().replace(/^"|"$/g, ""),
-            ID: cols[1].trim().replace(/^"|"$/g, "")
-          }));
-        callback(result);
-      })
-      .catch(error => console.error("Error loading sheet:", error))
+    return fetch(`https://flotto.vercel.app/api/users?access=${type}`)
+      .then((r) => r.json())
+      .then((r) => r.users.sort((a, b) => a.username.localeCompare(b.username)))
       .finally(() => stopLoading());
-  }
+  };
 
   // Fetch and display the Contractors list
-  function showContractorsList() {
+  const showContractorsList = async () => {
     contractorsUl.innerHTML = "";
-    fetchSheetData(
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vT1MzwydHUg80kTDH2Gho73X7lUscSSlvp3-spCqwsuKchPTeXvg-I9seRlU0oMfnae1f6WmIhayXkp/pub?gid=740282782&single=true&output=csv",
-      contractors => {
-        contractors.forEach(contractor => {
-          const listItem = document.createElement("li");
-          const profileLink = document.createElement("a");
-          profileLink.href = `https://minesweeper.online/player/${contractor.ID}`;
-          profileLink.textContent = contractor.name;
-          profileLink.target = "_blank";
-          listItem.appendChild(profileLink);
-          contractorsUl.appendChild(listItem);
-        });
-      }
-    );
-  }
+    if (!contractors) {
+      contractors = await getUsers("contractor");
+    }
+
+    contractors.forEach((contractor) => {
+      const listItem = document.createElement("li");
+      const profileLink = document.createElement("a");
+      profileLink.href = `https://minesweeper.online/player/${contractor.id}`;
+      profileLink.textContent = contractor.username;
+      profileLink.target = "_blank";
+      listItem.appendChild(profileLink);
+      contractorsUl.appendChild(listItem);
+    });
+  };
 
   // Fetch and display the Clients list
-  function showClientsList() {
+  const showClientsList = async () => {
     clientsUl.innerHTML = "";
-    fetchSheetData(
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vT1MzwydHUg80kTDH2Gho73X7lUscSSlvp3-spCqwsuKchPTeXvg-I9seRlU0oMfnae1f6WmIhayXkp/pub?gid=1372317968&single=true&output=csv",
-      clients => {
-        clients.forEach(client => {
-          const listItem = document.createElement("li");
-          const profileLink = document.createElement("a");
-          profileLink.href = `https://minesweeper.online/player/${client.ID}`;
-          profileLink.textContent = client.name;
-          profileLink.target = "_blank";
-          listItem.appendChild(profileLink);
-          clientsUl.appendChild(listItem);
-        });
-      }
-    );
-  }
+    if (!suppliers) {
+      suppliers = await getUsers("supplier");
+    }
+
+    suppliers.forEach((client) => {
+      const listItem = document.createElement("li");
+      const profileLink = document.createElement("a");
+      profileLink.href = `https://minesweeper.online/player/${client.id}`;
+      profileLink.textContent = client.username;
+      profileLink.target = "_blank";
+      listItem.appendChild(profileLink);
+      clientsUl.appendChild(listItem);
+    });
+  };
 
   // Initially show the contractors list when the popup is loaded
   showContractorsList();
 
-  //Apply link dynamically updated
-  fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vT1MzwydHUg80kTDH2Gho73X7lUscSSlvp3-spCqwsuKchPTeXvg-I9seRlU0oMfnae1f6WmIhayXkp/pub?gid=1993011804&single=true&output=csv')
-  .then(response => response.text())
-  .then(text => {
-    const firstLine = text.split('\n')[0];
-    const applyURL = firstLine.trim();
-    const linkEl = document.getElementById('applyLink');
-    if (linkEl && applyURL.startsWith('http')) {
-      linkEl.href = applyURL;
-    }
-  })
-  .catch(console.error);
-  
-  // Set <h3> title from sheet
-  const heading = document.querySelector("h3");
+  fetch("https://flotto.vercel.app/extension.json")
+    .then((r) => r.json())
+    .then((r) => {
+      const heading = document.querySelector("h3");
+      const notice = document.getElementById("notices");
+      const link = document.getElementById("applyLink");
 
-  fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vT1MzwydHUg80kTDH2Gho73X7lUscSSlvp3-spCqwsuKchPTeXvg-I9seRlU0oMfnae1f6WmIhayXkp/pub?gid=1070080889&single=true&output=csv")
-    .then(res => res.text())
-    .then(csv => {
-      const firstCell = csv.split("\n")[0]?.split(",")[0]?.trim();
-      if (firstCell && heading) {
-        heading.textContent = firstCell;
+      if (link) {
+        link.href = r.applyLink;
       }
-    })
-    .catch(err => {
-      console.error("Failed to fetch heading:", err);
+      heading.textContent = r.title;
+      notice.textContent = r.message;
     });
-  
-  //notice from sheet
-  fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vT1MzwydHUg80kTDH2Gho73X7lUscSSlvp3-spCqwsuKchPTeXvg-I9seRlU0oMfnae1f6WmIhayXkp/pub?gid=279342495&single=true&output=csv")
-    .then(res => res.text())
-    .then(csv => {
-      // Match first quoted cell content (allowing multiline inside quotes)
-      const match = csv.match(/^"([\s\S]*?)"/);
-      let firstCell = "";
-      if (match) {
-        firstCell = match[1]; // Extracted text inside the quotes
-      } else {
-        // fallback if no quotes
-        firstCell = csv.split(",")[0].trim();
-      }
-
-      const noticesEl = document.getElementById("notices");
-      if (firstCell && noticesEl) {
-        noticesEl.textContent = firstCell; // Use textContent + white-space: pre-line to preserve newlines
-      }
-    })
-    .catch(err => console.error("Failed to fetch notices:", err));
-
-    
-
 });
